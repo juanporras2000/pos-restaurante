@@ -8,14 +8,17 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('pagos', function (Blueprint $table) {
+        Schema::create('pedido_detalles', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('pedido_id')->constrained()->onDelete('cascade');
+            $table->foreignId('producto_id')->constrained();
 
-            $table->decimal('total', 10, 2);
-            $table->decimal('recibido', 10, 2);
-            $table->decimal('cambio', 10, 2);
+            $table->integer('cantidad');
+            $table->decimal('precio_unitario', 10, 2);
+            $table->decimal('subtotal', 10, 2);
+
+            $table->text('observacion')->nullable();
 
             $table->timestamps();
         });

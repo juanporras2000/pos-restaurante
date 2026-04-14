@@ -6,22 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+        public function up()
     {
         Schema::create('inventarios', function (Blueprint $table) {
             $table->id();
+
+            $table->string('nombre'); // papa, carne, etc
+            $table->decimal('stock', 10, 2);
+
             $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('inventarios');
     }
 };

@@ -9,11 +9,12 @@ class Pago extends Model
     protected $table = 'pagos';
 
     protected $fillable = [
-        'pedido_id',
-        'total',
-        'recibido',
-        'cambio',
-    ];
+    'pedido_id',
+    'total',
+    'recibido',
+    'cambio',
+    'metodo_pago',
+];
 
     // Relación
     public function pedido()

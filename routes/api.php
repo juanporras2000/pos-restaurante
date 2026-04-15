@@ -7,10 +7,11 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\Api\ProductoController;
 
 
-
     Route::post('pagos', [PagoController::class, 'store']);
+    Route::get('pedidos/pendientes', [PedidoController::class, 'pendientes']);
     Route::post('pedidos', [PedidoController::class, 'store']);
     Route::get('/reporte-diario', [ReporteController::class, 'diario']);
     
     Route::get('/productos', [ProductoController::class, 'index']);
     Route::post('/productos', [ProductoController::class, 'store']);
+

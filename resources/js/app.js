@@ -208,7 +208,7 @@ Alpine.data('posManager', () => ({
     },
 
     async eliminarPedido(pedidoId) {
-        if (!confirm('¿Estás seguro de que quieres eliminar este pedido?')) {
+        if (confirmar('¿Estás seguro de eliminar este pedido?')) {
             return
         }
 

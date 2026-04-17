@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use App\Models\Producto;
 use App\Models\Categoria;
+use Illuminate\Validation\ValidationException;
 
 class Productos extends Component
 {
@@ -15,9 +16,10 @@ class Productos extends Component
     protected $paginationTheme = 'tailwind';
 
     public $buscar = '';
-    public $modal = false;
 
     public $producto_id, $nombre, $precio, $categoria_id, $imagen;
+
+    public $confirmarEliminarId = null;
 
     protected $rules = [
         'nombre' => 'required|string|max:255',
@@ -39,13 +41,14 @@ class Productos extends Component
 
         $categorias = Categoria::all();
 
-        return view('livewire.productos', compact('productos', 'categorias'));
-    }
+        if ($categorias->isEmpty()) {
+            Categoria::create(['nombre' => 'Comidas']);
+            Categoria::create(['nombre' => 'Bebidas']);
+            Categoria::create(['nombre' => 'Postres']);
+            $categorias = Categoria::all();
+        }
 
-    public function abrirModal()
-    {
-        $this->reset(['nombre','precio','categoria_id','imagen','producto_id']);
-        $this->modal = true;
+        return view('livewire.productos', compact('productos', 'categorias'));
     }
 
     public function editar($id)
@@ -57,45 +60,67 @@ class Productos extends Component
         $this->precio = $p->precio;
         $this->categoria_id = $p->categoria_id;
 
-        $this->modal = true;
+        $this->dispatch('open-modal');
     }
 
     public function guardar()
     {
-        $this->validate();
-
-        $rutaImagen = null;
-
-        if ($this->imagen) {
-            $rutaImagen = $this->imagen->store('productos', 'public');
+        try {
+            $this->validate();
+        } catch (ValidationException $e) {
+            $errores = collect($e->errors())->flatten()->first();
+            $this->dispatch('alert', ['type' => 'error', 'message' => $errores]);
+            throw $e;
         }
 
-        Producto::updateOrCreate(
-            ['id' => $this->producto_id],
-            [
-                'nombre' => $this->nombre,
-                'precio' => $this->precio,
-                'categoria_id' => $this->categoria_id,
-                'imagen' => $rutaImagen
-            ]
-        );
+        $data = [
+            'nombre' => $this->nombre,
+            'precio' => $this->precio,
+            'categoria_id' => $this->categoria_id,
+        ];
 
-        $this->modal = false;
+        if ($this->imagen) {
+            $data['imagen'] = $this->imagen->store('productos', 'public');
+        }
+
+        if ($this->producto_id) {
+            Producto::findOrFail($this->producto_id)->update($data);
+            $mensaje = 'Producto actualizado correctamente';
+        } else {
+            Producto::create($data);
+            $mensaje = 'Producto creado correctamente';
+        }
+
+        $this->reset(['nombre', 'precio', 'categoria_id', 'imagen', 'producto_id']);
+        $this->dispatch('close-modal');
 
         $this->dispatch('alert', [
             'type' => 'success',
-            'message' => 'Producto guardado'
+            'message' => $mensaje,
         ]);
     }
 
     public function confirmarEliminar($id)
     {
-        $this->dispatch('confirmDelete', id: $id);
+        $this->confirmarEliminarId = $id;
+    }
+
+    public function cerrarModal()
+    {
+        $this->reset(['nombre', 'precio', 'categoria_id', 'imagen', 'producto_id']);
+        $this->resetErrorBag();
+    }
+
+    public function cancelarEliminar()
+    {
+        $this->confirmarEliminarId = null;
     }
 
     public function eliminar($id)
     {
         Producto::findOrFail($id)->delete();
+
+        $this->confirmarEliminarId = null;
 
         $this->dispatch('alert', [
             'type' => 'success',

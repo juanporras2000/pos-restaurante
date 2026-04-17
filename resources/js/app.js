@@ -1,6 +1,4 @@
-import Alpine from 'alpinejs'
-
-window.noti = (tipo = 'info', mensaje = '', tiempo = 2000) => {
+globalThis.noti = (tipo = 'info', mensaje = '', tiempo = 2000) => {
     Swal.fire({
         icon: tipo,              // success, error, warning, info, question
         title: mensaje,
@@ -11,7 +9,7 @@ window.noti = (tipo = 'info', mensaje = '', tiempo = 2000) => {
     })
 }
 
-window.confirmar = async (mensaje = '¿Estás seguro?') => {
+globalThis.confirmar = async (mensaje = '¿Estás seguro?') => {
     return await Swal.fire({
         title: mensaje,
         icon: 'warning',
@@ -20,7 +18,7 @@ window.confirmar = async (mensaje = '¿Estás seguro?') => {
         cancelButtonText: 'Cancelar'
     })
 }
-window.Alpine = Alpine
+document.addEventListener('alpine:init', () => {
 
 Alpine.data('posManager', () => ({
     productos: [],
@@ -34,6 +32,7 @@ Alpine.data('posManager', () => ({
         direccion: '',
         productos: []
     },
+    direccionError: '',
 
     // Pago modal
     mostrarPago: false,
@@ -99,6 +98,10 @@ Alpine.data('posManager', () => ({
         }
     },
 
+    eliminarProductoNuevo(productoId) {
+        this.nuevoPedido.productos = this.nuevoPedido.productos.filter(i => i.id !== productoId)
+    },
+
     getCantidadProductoNuevo(productoId) {
         let item = this.nuevoPedido.productos.find(i => i.id === productoId)
         return item ? item.cantidad : 0
@@ -116,8 +119,23 @@ Alpine.data('posManager', () => ({
 
     async crearPedido() {
         if (!this.puedeCrearPedido()) {
-            alert('Completa todos los campos requeridos')
+            globalThis.noti('warning', 'Completa todos los campos requeridos')
             return
+        }
+
+        // Validaciones adicionales
+        if (this.nuevoPedido.tipo === 'mesa') {
+            const numeroMesa = parseInt(this.nuevoPedido.numero_mesa)
+            if (isNaN(numeroMesa) || numeroMesa <= 0) {
+                globalThis.noti('error', 'El número de mesa debe ser un número positivo mayor a 0')
+                return
+            }
+        } else if (this.nuevoPedido.tipo === 'domicilio') {
+            const direccionRegex = /^(carrera|calle) \d+ #\d+-\d+( .*)?$/i
+            if (!direccionRegex.test(this.nuevoPedido.direccion)) {
+                globalThis.noti('error', 'La dirección debe tener el formato: carrera/calle 23 #11-21 (opcional texto adicional)')
+                return
+            }
         }
 
         try {
@@ -137,15 +155,15 @@ Alpine.data('posManager', () => ({
             })
 
             if (res.ok) {
-                noti('success', 'Pedido creado exitosamente')
+                globalThis.noti('success', 'Pedido creado exitosamente')
                 this.cerrarFormularioNuevo()
                 this.cargarPedidosPendientes() // Recargar la lista
             } else {
-                noti('error', 'Error al crear el pedido')
+                globalThis.noti('error', 'Error al crear el pedido')
             }
         } catch (error) {
             console.error('Error:', error)
-            noti('error', 'Error al crear el pedido')
+            globalThis.noti('error', 'Error al crear el pedido')
         }
     },
 
@@ -156,6 +174,20 @@ Alpine.data('posManager', () => ({
             numero_mesa: '',
             direccion: '',
             productos: []
+        }
+        this.direccionError = ''
+    },
+
+    validarDireccion() {
+        if (this.nuevoPedido.tipo !== 'domicilio') {
+            this.direccionError = ''
+            return
+        }
+        const direccionRegex = /^(carrera|calle) \d+ #\d+-\d+( .*)?$/i
+        if (!direccionRegex.test(this.nuevoPedido.direccion)) {
+            this.direccionError = 'Formato: carrera/calle 23 #11-21 (opcional texto adicional)'
+        } else {
+            this.direccionError = ''
         }
     },
 
@@ -176,7 +208,7 @@ Alpine.data('posManager', () => ({
 
     async confirmarPago() {
         if (this.metodo_pago === 'efectivo' && this.recibido < parseFloat(this.pedidoPago.total)) {
-            alert('El dinero recibido es insuficiente')
+            globalThis.noti('error', 'El dinero recibido es insuficiente')
             return
         }
 
@@ -194,31 +226,40 @@ Alpine.data('posManager', () => ({
             let data = await res.json()
 
             if (this.metodo_pago === 'efectivo') {
-                noti('success', `Pago procesado exitosamente. Cambio: $${data.cambio.toFixed(2)}`)
+                globalThis.noti('success', `Pago procesado exitosamente. Cambio: $${data.cambio.toFixed(2)}`)
             } else {
-                noti('success', 'Pago procesado exitosamente')
+                globalThis.noti('success', 'Pago procesado exitosamente')
             }
 
             this.cerrarPago()
             this.cargarPedidosPendientes() // Recargar la lista
         } catch (error) {
             console.error('Error:', error)
-            noti('error', 'Error al procesar el pago')
+            globalThis.noti('error', 'Error al procesar el pago')
         }
     },
 
     async eliminarPedido(pedidoId) {
-        if (confirmar('¿Estás seguro de eliminar este pedido?')) {
+        const result = await globalThis.confirmar('¿Estás seguro de eliminar este pedido?')
+        if (!result.isConfirmed) {
             return
         }
 
         try {
-            // Nota: Necesitaríamos una ruta DELETE para pedidos, pero por ahora solo recargamos
-            // En una implementación completa, aquí iría la llamada a eliminar el pedido
-            alert('Funcionalidad de eliminación no implementada aún')
-            this.cargarPedidosPendientes()
+            let res = await fetch(`/api/pedidos/${pedidoId}`, {
+                method: 'DELETE'
+            })
+
+            if (res.ok) {
+                globalThis.noti('success', 'Pedido eliminado correctamente')
+                this.cargarPedidosPendientes()
+            } else {
+                let data = await res.json()
+                globalThis.noti('error', data.error || 'Error al eliminar el pedido')
+            }
         } catch (error) {
             console.error('Error:', error)
+            globalThis.noti('error', 'Error al eliminar el pedido')
         }
     },
 
@@ -232,4 +273,5 @@ Alpine.data('posManager', () => ({
         })
     }
 }))
-Alpine.start()
+
+}) // end alpine:init

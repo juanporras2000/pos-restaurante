@@ -61,4 +61,18 @@ class PedidoController extends Controller
             'pedido' => $pedido
         ]);
     }
+
+    public function destroy($id)
+    {
+        $pedido = Pedido::where('user_id', auth()->id())->findOrFail($id);
+
+        if ($pedido->pago) {
+            return response()->json(['error' => 'No se puede eliminar un pedido que ya tiene pago'], 400);
+        }
+
+        $pedido->detalles()->delete();
+        $pedido->delete();
+
+        return response()->json(['mensaje' => 'Pedido eliminado correctamente']);
+    }
 }

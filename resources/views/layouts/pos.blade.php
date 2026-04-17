@@ -64,7 +64,28 @@
                 Reportes
             </a>
 
+            <a href="/insumos" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors duration-200 group">
+                <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M4 3v7a2 2 0 0 0 2 2h1v8"></path>
+                    <path d="M8 3v7"></path>
+                    <path d="M12 3v7"></path>
+                    <path d="M18 3v17"></path>
+                    <path d="M18 3c2 2 2 6 0 8"></path>
+                </svg>
+                Insumos
+            </a>
+
         </nav>
+
+        {{-- Alertas de stock bajo --}}
+        <div id="stock-alertas" class="mx-3 mb-3 hidden">
+            <a href="/insumos" class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700 hover:bg-red-100 transition-colors">
+                <svg class="h-4 w-4 text-red-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+                </svg>
+                <span id="stock-alertas-texto">Stock bajo</span>
+            </a>
+        </div>
 
         <div class="p-4 border-t border-gray-200">
             <form method="POST" action="/logout">
@@ -115,6 +136,31 @@
 
 @livewireScripts
 @stack('scripts')
+
+<script>
+(function () {
+    function cargarAlertas() {
+        fetch('/api/inventario/alertas')
+            .then(function(r){ return r.json(); })
+            .then(function(data) {
+                var caja = document.getElementById('stock-alertas');
+                var texto = document.getElementById('stock-alertas-texto');
+                if (!caja || !texto) return;
+                if (data.length > 0) {
+                    texto.textContent = data.length === 1
+                        ? data[0].nombre + ': stock bajo'
+                        : data.length + ' insumos con stock bajo';
+                    caja.classList.remove('hidden');
+                } else {
+                    caja.classList.add('hidden');
+                }
+            })
+            .catch(function(){});
+    }
+    cargarAlertas();
+    setInterval(cargarAlertas, 60000);
+})();
+</script>
 
 </body>
 </html>

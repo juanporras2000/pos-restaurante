@@ -35,6 +35,10 @@ Route::middleware(['auth'])->group(function () {
         return view('productos');
     });
 
+    Route::get('/insumos', function () {
+        return view('insumos');
+    });
+
 });
 
 require __DIR__.'/auth.php';

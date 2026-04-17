@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import ListaProductos from './ListaProductos';
 import Carrito from './Carrito';
@@ -11,11 +11,36 @@ const PEDIDO_VACIO = {
     direccion: '',
 };
 
-export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerrar }) {
+export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerrar, pedidoEditar = null }) {
+    const esEdicion = Boolean(pedidoEditar);
+
     const [pedido, setPedido] = useState(PEDIDO_VACIO);
     const [carrito, setCarrito] = useState([]);
     const [direccionError, setDireccionError] = useState('');
     const [enviando, setEnviando] = useState(false);
+
+    // Pre-cargar datos cuando se edita
+    useEffect(() => {
+        if (abierto && pedidoEditar) {
+            setPedido({
+                tipo: pedidoEditar.tipo,
+                numero_mesa: pedidoEditar.numero_mesa ?? '',
+                direccion: pedidoEditar.direccion ?? '',
+            });
+            const carritoInicial = (pedidoEditar.detalles ?? []).map((d) => ({
+                id: d.producto_id,
+                nombre: d.producto?.nombre ?? '',
+                precio: parseFloat(d.precio_unitario),
+                cantidad: d.cantidad,
+                subtotal: parseFloat(d.subtotal),
+            }));
+            setCarrito(carritoInicial);
+        } else if (abierto && !pedidoEditar) {
+            setPedido(PEDIDO_VACIO);
+            setCarrito([]);
+        }
+        setDireccionError('');
+    }, [abierto, pedidoEditar]);
 
     const incrementar = (producto) => {
         setCarrito((prev) => {
@@ -71,7 +96,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         onCerrar();
     };
 
-    const crear = async () => {
+    const guardar = async () => {
         if (!puedeCrear()) {
             Swal.fire({ icon: 'warning', title: 'Completa todos los campos requeridos', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
             return;
@@ -88,31 +113,52 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         setEnviando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
+        const body = JSON.stringify({
+            tipo: pedido.tipo,
+            numero_mesa: pedido.numero_mesa || null,
+            direccion: pedido.direccion || null,
+            productos: carrito.map((item) => ({
+                producto_id: item.id,
+                cantidad: item.cantidad,
+                precio: item.precio,
+            })),
+        });
+
+        const url = esEdicion ? `/api/pedidos/${pedidoEditar.id}` : '/api/pedidos';
+        const method = esEdicion ? 'PUT' : 'POST';
+
         try {
-            const res = await fetch('/api/pedidos', {
-                method: 'POST',
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({
-                    tipo: pedido.tipo,
-                    numero_mesa: pedido.numero_mesa || null,
-                    direccion: pedido.direccion || null,
-                    productos: carrito.map((item) => ({
-                        producto_id: item.id,
-                        cantidad: item.cantidad,
-                        precio: item.precio,
-                    })),
-                }),
+                body,
             });
 
             if (res.ok) {
-                Swal.fire({ icon: 'success', title: 'Pedido creado exitosamente', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
+                Swal.fire({
+                    icon: 'success',
+                    title: esEdicion ? 'Pedido actualizado exitosamente' : 'Pedido creado exitosamente',
+                    timer: 1800, showConfirmButton: false, toast: true, position: 'top-end',
+                });
                 cerrar();
                 onCreado();
             } else {
-                Swal.fire({ icon: 'error', title: 'Error al crear el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                const data = await res.json();
+                if (res.status === 422 && data.faltantes?.length) {
+                    // Stock insuficiente — mostrar detalle de insumos faltantes
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Stock insuficiente',
+                        html: `<ul class="text-left text-sm space-y-1 mt-2">${data.faltantes.map((f) => `<li>⚠️ ${f}</li>`).join('')}</ul>`,
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#dc2626',
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: data.error || 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                }
             }
         } catch {
-            Swal.fire({ icon: 'error', title: 'Error al crear el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+            Swal.fire({ icon: 'error', title: 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setEnviando(false);
         }
@@ -133,7 +179,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                             <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 4v16m8-8H4"></path>
                             </svg>
-                            Crear Nuevo Pedido
+                            {esEdicion ? `Editar Pedido #${pedidoEditar.id}` : 'Crear Nuevo Pedido'}
                         </h2>
                         <button type="button" onClick={cerrar} className="text-gray-400 hover:text-gray-600">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -231,11 +277,11 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                         </button>
                         <button
                             type="button"
-                            onClick={crear}
+                            onClick={guardar}
                             disabled={!puedeCrear() || enviando}
                             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
                         >
-                            {enviando ? 'Creando...' : 'Crear Pedido'}
+                            {enviando ? 'Guardando...' : (esEdicion ? 'Guardar Cambios' : 'Crear Pedido')}
                         </button>
                     </div>
                 </div>

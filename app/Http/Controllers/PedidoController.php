@@ -9,10 +9,22 @@ use App\Models\Producto;
 
 class PedidoController extends Controller
 {
+    public function pendientes()
+    {
+        $pedidos = Pedido::where('user_id', auth()->id())
+            ->whereDoesntHave('pago')
+            ->with(['detalles.producto'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($pedidos);
+    }
+
     public function store(Request $request)
     {
         // Crear pedido
         $pedido = Pedido::create([
+            'user_id' => auth()->id(),
             'tipo' => $request->tipo,
             'numero_mesa' => $request->numero_mesa,
             'direccion' => $request->direccion,
@@ -48,5 +60,19 @@ class PedidoController extends Controller
             'mensaje' => 'Pedido creado correctamente',
             'pedido' => $pedido
         ]);
+    }
+
+    public function destroy($id)
+    {
+        $pedido = Pedido::where('user_id', auth()->id())->findOrFail($id);
+
+        if ($pedido->pago) {
+            return response()->json(['error' => 'No se puede eliminar un pedido que ya tiene pago'], 400);
+        }
+
+        $pedido->detalles()->delete();
+        $pedido->delete();
+
+        return response()->json(['mensaje' => 'Pedido eliminado correctamente']);
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Pago;
 class Pedido extends Model
 {
      protected $fillable = [
+        'user_id',
         'tipo',
         'numero_mesa',
         'direccion',

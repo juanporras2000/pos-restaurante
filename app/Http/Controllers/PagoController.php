@@ -14,7 +14,8 @@ class PagoController extends Controller
         // ✅ Validación
         $request->validate([
             'pedido_id' => 'required|integer',
-            'recibido' => 'required|numeric|min:0'
+            'recibido' => 'required|numeric|min:0',
+            'metodo_pago' => 'required|string' // ✅ NUEVO
         ]);
 
         // ✅ Buscar pedido (sin lanzar excepción automática)
@@ -47,10 +48,11 @@ class PagoController extends Controller
 
         // ✅ Crear pago (campos correctos)
         $pago = Pago::create([
-            'pedido_id' => $pedido->id,
-            'total' => $total,
-            'recibido' => $recibido,
-            'cambio' => $cambio,
+        'pedido_id' => $pedido->id,
+        'total' => $total,
+        'recibido' => $recibido,
+        'cambio' => $cambio,
+        'metodo_pago' => $request->metodo_pago, // ✅ CLAVE
         ]);
 
         // ✅ Actualizar estado del pedido

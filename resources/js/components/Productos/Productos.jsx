@@ -11,22 +11,30 @@ const PRODUCTO_VACIO = {
     imagen: null,
 };
 
+const RECETA_VACIA = [];
+
 export default function Productos() {
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [buscar, setBuscar] = useState('');
     const [paginacion, setPaginacion] = useState(null);
     const [paginaActual, setPaginaActual] = useState(1);
+    const [insumos, setInsumos] = useState([]);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [productoActual, setProductoActual] = useState(PRODUCTO_VACIO);
+    const [receta, setReceta] = useState(RECETA_VACIA);
     const [guardando, setGuardando] = useState(false);
     const [cargando, setCargando] = useState(false);
 
-    // Cargar categorías al montar
+    // Cargar categorías e insumos al montar
     useEffect(() => {
         fetch('/api/categorias')
             .then((r) => r.json())
             .then(setCategorias)
+            .catch(() => {});
+        fetch('/api/insumos')
+            .then((r) => r.json())
+            .then(setInsumos)
             .catch(() => {});
     }, []);
 
@@ -62,6 +70,7 @@ export default function Productos() {
     // Abrir modal para crear
     const abrirCrear = () => {
         setProductoActual(PRODUCTO_VACIO);
+        setReceta(RECETA_VACIA);
         setModalAbierto(true);
     };
 
@@ -74,12 +83,21 @@ export default function Productos() {
             categoria_id: producto.categoria_id ?? '',
             imagen: null,
         });
+        setReceta(
+            (producto.insumos ?? []).map((i) => ({
+                insumo_id: i.id,
+                cantidad: parseFloat(i.pivot?.cantidad ?? 0),
+                nombre: i.nombre,
+                unidad_medida: i.unidad_medida,
+            }))
+        );
         setModalAbierto(true);
     };
 
     const cerrarModal = () => {
         setModalAbierto(false);
         setProductoActual(PRODUCTO_VACIO);
+        setReceta(RECETA_VACIA);
     };
 
     const handleCampo = (campo, valor) => {
@@ -110,6 +128,11 @@ export default function Productos() {
         if (productoActual.imagen) {
             formData.append('imagen', productoActual.imagen);
         }
+
+        // Receta como JSON string (FormData no soporta arrays directamente)
+        formData.append('insumos', JSON.stringify(
+            receta.map((r) => ({ insumo_id: r.insumo_id, cantidad: r.cantidad }))
+        ));
 
         const esEdicion = Boolean(productoActual.id);
         const url = esEdicion ? `/api/productos/${productoActual.id}` : '/api/productos';
@@ -172,6 +195,12 @@ export default function Productos() {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' },
             });
+
+            if (res.status === 409) {
+                const data = await res.json();
+                Swal.fire('No se puede eliminar', data.error, 'warning');
+                return;
+            }
 
             if (!res.ok) throw new Error();
 
@@ -282,6 +311,9 @@ export default function Productos() {
                 abierto={modalAbierto}
                 producto={productoActual}
                 categorias={categorias}
+                insumos={insumos}
+                receta={receta}
+                onRecetaChange={setReceta}
                 onChange={handleCampo}
                 onGuardar={guardar}
                 onCerrar={cerrarModal}

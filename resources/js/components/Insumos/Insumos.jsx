@@ -86,7 +86,6 @@ function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     );
 }
 
-/* â”€â”€â”€ Modal historial de movimientos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function ModalHistorial({ abierto, insumo, onCerrar }) {
     const [movimientos, setMovimientos] = useState([]);
     const [cargando, setCargando] = useState(false);
@@ -110,7 +109,7 @@ function ModalHistorial({ abierto, insumo, onCerrar }) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}>
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
                 <div className="p-5 border-b border-gray-200 flex items-center justify-between shrink-0">
-                    <h2 className="text-base font-semibold text-gray-900">Historial â€” {insumo.nombre}</h2>
+                    <h2 className="text-base font-semibold text-gray-900">Historial de {insumo.nombre}</h2>
                     <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -357,7 +356,7 @@ export default function Insumos() {
                             <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"></path>
                             <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
                         </svg>
-                        GestiÃ³n de Insumos
+                        Gestión de Insumos
                     </h1>
                     <p className="text-gray-600 mt-1">Administra la materia prima y su stock</p>
                 </div>

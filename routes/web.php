@@ -27,9 +27,9 @@ Route::middleware(['auth'])->group(function () {
         return view('pagos');
     });
 
-    Route::get('/reporte', function () {
-        return view('reporte');
-    });
+    Route::get('/reportes', function () {
+        return view('reportes');
+    })->name('reportes');
 
      Route::get('/productos', function () {
         return view('productos');

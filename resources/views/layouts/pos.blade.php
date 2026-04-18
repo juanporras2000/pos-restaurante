@@ -54,7 +54,7 @@
                 Productos
             </a>
 
-            <a href="/reporte" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors duration-200 group">
+            <a href="/reportes" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors duration-200 group">
                 <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <path d="M5 19V9"></path>
                     <path d="M12 19V5"></path>

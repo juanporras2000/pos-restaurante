@@ -11,8 +11,7 @@ class PedidoController extends Controller
 {
     public function pendientes()
     {
-        $pedidos = Pedido::where('user_id', auth()->id())
-            ->whereDoesntHave('pago')
+        $pedidos = Pedido::whereDoesntHave('pago')
             ->with(['detalles.producto'])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -64,7 +63,7 @@ class PedidoController extends Controller
 
     public function destroy($id)
     {
-        $pedido = Pedido::where('user_id', auth()->id())->findOrFail($id);
+        $pedido = Pedido::findOrFail($id);
 
         if ($pedido->pago) {
             return response()->json(['error' => 'No se puede eliminar un pedido que ya tiene pago'], 400);

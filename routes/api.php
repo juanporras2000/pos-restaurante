@@ -5,7 +5,10 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\Api\ProductoController;
+use App\Http\Controllers\WhatsAppController;
 
+    Route::post('webhook/whatsapp', [WhatsAppController::class, 'webhook']);
+    Route::get('webhook/whatsapp', [WhatsAppController::class, 'verify']);
 
     Route::post('pagos', [PagoController::class, 'store']);
     Route::get('pedidos/pendientes', [PedidoController::class, 'pendientes']);

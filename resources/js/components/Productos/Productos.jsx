@@ -125,8 +125,8 @@ export default function Productos() {
         formData.append('nombre', productoActual.nombre);
         formData.append('precio', productoActual.precio);
         formData.append('categoria_id', productoActual.categoria_id);
-        if (productoActual.imagen) {
-            formData.append('imagen', productoActual.imagen);
+        if (productoActual.imagen_producto) {
+            formData.append('imagen_producto', productoActual.imagen_producto);
         }
 
         // Receta como JSON string (FormData no soporta arrays directamente)

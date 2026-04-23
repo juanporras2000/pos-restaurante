@@ -13,7 +13,7 @@ class Producto extends Model
         'precio',
         'activo',
         'categoria_id',
-        'imagen'
+        'imagen_producto'
     ];
         public function detalles()
     {

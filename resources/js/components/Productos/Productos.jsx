@@ -76,21 +76,7 @@ export default function Productos() {
 
     // Abrir modal para editar
     const abrirEditar = (producto) => {
-        setProductoActual({
-            id: producto.id,
-            nombre: producto.nombre,
-            precio: producto.precio,
-            categoria_id: producto.categoria_id ?? '',
-            imagen: null,
-        });
-        setReceta(
-            (producto.insumos ?? []).map((i) => ({
-                insumo_id: i.id,
-                cantidad: parseFloat(i.pivot?.cantidad ?? 0),
-                nombre: i.nombre,
-                unidad_medida: i.unidad_medida,
-            }))
-        );
+        setProductoActual(producto);
         setModalAbierto(true);
     };
 
@@ -105,39 +91,27 @@ export default function Productos() {
     };
 
     // Guardar (crear o actualizar)
-    const guardar = async () => {
-        if (!productoActual.nombre.trim()) {
-            Swal.fire('Error', 'El nombre es requerido', 'error');
-            return;
-        }
-        if (productoActual.precio === '' || isNaN(productoActual.precio)) {
-            Swal.fire('Error', 'El precio debe ser un número válido', 'error');
-            return;
-        }
-        if (!productoActual.categoria_id) {
-            Swal.fire('Error', 'Selecciona una categoría', 'error');
-            return;
-        }
-
+    const guardar = async (data) => {
         setGuardando(true);
 
         const formData = new FormData();
-        formData.append('nombre', productoActual.nombre);
-        formData.append('precio', productoActual.precio);
-        formData.append('categoria_id', productoActual.categoria_id);
-        if (productoActual.imagen_producto) {
-            formData.append('imagen_producto', productoActual.imagen_producto);
+        formData.append('nombre', data.nombre);
+        formData.append('precio', data.precio);
+        formData.append('categoria_id', data.categoria_id);
+        
+        // Imagen desde la variable global temporal
+        if (window._tmp_img) {
+            formData.append('imagen_producto', window._tmp_img);
         }
 
-        // Receta como JSON string (FormData no soporta arrays directamente)
-        formData.append('insumos', JSON.stringify(
-            receta.map((r) => ({ insumo_id: r.insumo_id, cantidad: r.cantidad }))
+        // Receta como JSON string para compatibilidad con FormData
+        formData.append('receta', JSON.stringify(
+            (data.receta ?? []).map((r) => ({ insumo_id: r.insumo_id, cantidad: r.cantidad }))
         ));
 
         const esEdicion = Boolean(productoActual.id);
         const url = esEdicion ? `/api/productos/${productoActual.id}` : '/api/productos';
 
-        // Laravel PUT con FormData requiere _method spoofing
         if (esEdicion) {
             formData.append('_method', 'PUT');
         }
@@ -153,11 +127,13 @@ export default function Productos() {
 
             if (!res.ok) {
                 const err = await res.json();
-                const mensaje = err.message ?? 'Error al guardar';
-                Swal.fire('Error de validación', mensaje, 'error');
-                return;
+                if (res.status === 422) {
+                    throw err; // React Hook Form manejará esto
+                }
+                throw new Error(err.message ?? 'Error al guardar');
             }
 
+            delete window._tmp_img;
             cerrarModal();
             cargarProductos();
             Swal.fire({
@@ -165,9 +141,12 @@ export default function Productos() {
                 title: esEdicion ? 'Producto actualizado' : 'Producto creado',
                 timer: 1800,
                 showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
             });
-        } catch {
-            Swal.fire('Error', 'No se pudo guardar el producto', 'error');
+        } catch (err) {
+            if (err.errors) throw err;
+            Swal.fire('Error', err.message ?? 'No se pudo guardar el producto', 'error');
         } finally {
             setGuardando(false);
         }
@@ -312,9 +291,6 @@ export default function Productos() {
                 producto={productoActual}
                 categorias={categorias}
                 insumos={insumos}
-                receta={receta}
-                onRecetaChange={setReceta}
-                onChange={handleCampo}
                 onGuardar={guardar}
                 onCerrar={cerrarModal}
                 guardando={guardando}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Models\Producto;
+use App\Http\Requests\ProductoRequest;
 use Illuminate\Http\Request;
 
 class ProductoController extends Controller
@@ -13,7 +14,7 @@ class ProductoController extends Controller
     // como si viene directamente como array (JSON body).
     private function parseInsumos(Request $request): ?array
     {
-        $raw = $request->input('insumos');
+        $raw = $request->input('receta') ?? $request->input('insumos');
         if (is_null($raw)) return null;
         if (is_string($raw)) return json_decode($raw, true) ?? [];
         return $raw;
@@ -52,22 +53,13 @@ class ProductoController extends Controller
         return response()->json($producto);
     }
 
-    public function store(Request $request)
+    public function store(ProductoRequest $request)
     {
-        $request->validate([
-            'nombre'            => 'required|string|max:255',
-            'precio'            => 'required|numeric|min:0',
-            'categoria_id'      => 'required|exists:categorias,id',
-            'imagen_producto'   => 'nullable|image|max:2048|mimes:jpg,png,jpeg',
-        ]);
-
-        $data = $request->all();
+        $data = $request->except('imagen_producto');
 
         if ($request->hasFile('imagen_producto')) {
-            $rutaImagen = $request->file('imagen_producto')->store('productos', 'public');
+            $data['imagen_producto'] = $request->file('imagen_producto')->store('productos', 'public');
         }
-
-        $data['imagen_producto'] = $rutaImagen;
 
         $producto = Producto::create($data);
         $this->syncInsumos($producto, $this->parseInsumos($request));
@@ -77,18 +69,11 @@ class ProductoController extends Controller
             201);
     }
 
-    public function update(Request $request, $id)
+    public function update(ProductoRequest $request, $id)
     {
         $producto = Producto::findOrFail($id);
 
-        $request->validate([
-            'nombre'                => 'required|string|max:255',
-            'precio'                => 'required|numeric|min:0',
-            'categoria_id'          => 'required|exists:categorias,id',
-            'imagen_producto'       => 'nullable|image|max:1024|mimes:jpg,png,jpeg',
-        ]);
-
-        $data = $request->all();
+        $data = $request->except('imagen_producto');
 
         if ($request->hasFile('imagen_producto')) {
             $data['imagen_producto'] = $request->file('imagen_producto')->store('productos', 'public');

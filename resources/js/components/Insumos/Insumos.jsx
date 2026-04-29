@@ -1,10 +1,23 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import Swal from 'sweetalert2';
 
 const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '' };
-const UNIDADES = ['gr', 'kg', 'ml', 'lt', 'unidad', 'porciÃ³n', 'oz', 'lb'];
+const UNIDADES = ['gr', 'kg', 'ml', 'lt', 'unidad', 'porción', 'oz', 'lb'];
 
-/* â”€â”€â”€ Modal ajuste de stock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Esquema de validación con Zod
+const insumoSchema = z.object({
+    nombre: z.string()
+        .min(1, 'El nombre es requerido')
+        .max(100, 'Máximo 100 caracteres'),
+    unidad_medida: z.string().min(1, 'Selecciona una unidad de medida'),
+    stock_actual: z.preprocess((val) => (val === '' || val === null ? 0 : Number(val)), z.number().min(0, 'No puede ser negativo')),
+    stock_minimo: z.preprocess((val) => (val === '' || val === null ? 0 : Number(val)), z.number().min(0, 'No puede ser negativo')),
+});
+
+/* ─── Modal ajuste de stock ────────────────────────────────── */
 function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     const [tipo, setTipo] = useState('entrada');
     const [cantidad, setCantidad] = useState('');
@@ -35,10 +48,10 @@ function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
                 <div className="p-5 border-b border-gray-200 flex items-center justify-between">
-                    <h2 className="text-base font-semibold text-gray-900">Ajustar stock â€” {insumo.nombre}</h2>
+                    <h2 className="text-base font-semibold text-gray-900">Ajustar stock — {insumo.nombre}</h2>
                     <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -50,7 +63,7 @@ function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
                             {['entrada', 'ajuste'].map((t) => (
                                 <button key={t} type="button" onClick={() => setTipo(t)}
                                     className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${tipo === t ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
-                                    {t === 'entrada' ? '+ Entrada' : 'âš– Ajuste'}
+                                    {t === 'entrada' ? '+ Entrada' : '– Ajuste'}
                                 </button>
                             ))}
                         </div>
@@ -86,7 +99,7 @@ function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     );
 }
 
-/* â”€â”€â”€ Modal historial de movimientos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Modal historial de movimientos */
 function ModalHistorial({ abierto, insumo, onCerrar }) {
     const [movimientos, setMovimientos] = useState([]);
     const [cargando, setCargando] = useState(false);
@@ -104,13 +117,13 @@ function ModalHistorial({ abierto, insumo, onCerrar }) {
     if (!abierto || !insumo) return null;
 
     const TIPO_CLASE = { entrada: 'bg-green-100 text-green-700', salida: 'bg-red-100 text-red-700', ajuste: 'bg-blue-100 text-blue-700' };
-    const TIPO_LABEL = { entrada: '+Entrada', salida: '-Salida', ajuste: 'âš–Ajuste' };
+    const TIPO_LABEL = { entrada: '+Entrada', salida: '-Salida', ajuste: '–Ajuste' };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
                 <div className="p-5 border-b border-gray-200 flex items-center justify-between shrink-0">
-                    <h2 className="text-base font-semibold text-gray-900">Historial â€” {insumo.nombre}</h2>
+                    <h2 className="text-base font-semibold text-gray-900">Historial — {insumo.nombre}</h2>
                     <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -128,7 +141,7 @@ function ModalHistorial({ abierto, insumo, onCerrar }) {
                                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase">Tipo</th>
                                     <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase">Cantidad</th>
                                     <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase">Antes</th>
-                                    <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase">DespuÃ©s</th>
+                                    <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase">Después</th>
                                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase">Motivo</th>
                                 </tr>
                             </thead>
@@ -142,7 +155,7 @@ function ModalHistorial({ abierto, insumo, onCerrar }) {
                                         <td className="px-5 py-3 text-right font-medium text-gray-900">{parseFloat(m.cantidad).toFixed(2)}</td>
                                         <td className="px-5 py-3 text-right text-gray-500">{parseFloat(m.stock_antes).toFixed(2)}</td>
                                         <td className="px-5 py-3 text-right text-gray-700">{parseFloat(m.stock_despues).toFixed(2)}</td>
-                                        <td className="px-5 py-3 text-gray-500 max-w-xs truncate">{m.motivo ?? 'â€”'}</td>
+                                        <td className="px-5 py-3 text-gray-500 max-w-xs truncate">{m.motivo ?? ''}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -157,12 +170,47 @@ function ModalHistorial({ abierto, insumo, onCerrar }) {
     );
 }
 
-function ModalInsumo({ abierto, insumo, onChange, onGuardar, onCerrar, guardando }) {
+function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guardando }) {
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setError,
+        formState: { errors }
+    } = useForm({
+        resolver: zodResolver(insumoSchema),
+        defaultValues: INSUMO_VACIO
+    });
+
+    useEffect(() => {
+        if (abierto) {
+            reset(insumo.id ? {
+                nombre: insumo.nombre,
+                unidad_medida: insumo.unidad_medida,
+                stock_actual: insumo.stock_actual,
+                stock_minimo: insumo.stock_minimo
+            } : INSUMO_VACIO);
+        }
+    }, [abierto, insumo, reset]);
+
     if (!abierto) return null;
+
+    const onSubmit = async (data) => {
+        try {
+            await onGuardar(data);
+        } catch (err) {
+            if (err.errors) {
+                // Mapear errores de Laravel (422) al formulario
+                Object.keys(err.errors).forEach((key) => {
+                    setError(key, { type: 'manual', message: err.errors[key][0] });
+                });
+            }
+        }
+    };
+
     return (
         <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
         >
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
                 {/* Header */}
@@ -182,57 +230,53 @@ function ModalInsumo({ abierto, insumo, onChange, onGuardar, onCerrar, guardando
                 </div>
 
                 {/* Body */}
-                <form id="form-insumo" onSubmit={(e) => { e.preventDefault(); onGuardar(); }} className="p-6 space-y-4">
+                <form id="form-insumo" onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nombre <span className="text-red-500">*</span></label>
                         <input
+                            {...register('nombre')}
                             autoFocus
                             type="text"
-                            required
-                            value={insumo.nombre}
-                            onChange={(e) => onChange('nombre', e.target.value)}
                             placeholder="Ej: Papa criolla"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                         />
+                        {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de medida <span className="text-red-500">*</span></label>
                         <select
-                            required
-                            value={insumo.unidad_medida}
-                            onChange={(e) => onChange('unidad_medida', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            {...register('unidad_medida')}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.unidad_medida ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                         >
                             <option value="">Seleccionar unidad</option>
                             {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                         </select>
+                        {errors.unidad_medida && <p className="mt-1 text-xs text-red-500">{errors.unidad_medida.message}</p>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Stock actual</label>
                             <input
+                                {...register('stock_actual')}
                                 type="number"
                                 step="0.01"
-                                min="0"
-                                value={insumo.stock_actual}
-                                onChange={(e) => onChange('stock_actual', e.target.value)}
                                 placeholder="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.stock_actual ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                             />
+                            {errors.stock_actual && <p className="mt-1 text-xs text-red-500">{errors.stock_actual.message}</p>}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Stock mÃ­nimo</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Stock mínimo</label>
                             <input
+                                {...register('stock_minimo')}
                                 type="number"
                                 step="0.01"
-                                min="0"
-                                value={insumo.stock_minimo}
-                                onChange={(e) => onChange('stock_minimo', e.target.value)}
                                 placeholder="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.stock_minimo ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                             />
+                            {errors.stock_minimo && <p className="mt-1 text-xs text-red-500">{errors.stock_minimo.message}</p>}
                         </div>
                     </div>
                 </form>
@@ -278,12 +322,8 @@ export default function Insumos() {
         setModalAbierto(true);
     };
     const cerrar = () => { setModalAbierto(false); setInsumoActual(INSUMO_VACIO); };
-    const handleCampo = (campo, valor) => setInsumoActual((prev) => ({ ...prev, [campo]: valor }));
 
-    const guardar = async () => {
-        if (!insumoActual.nombre.trim()) { Swal.fire('Error', 'El nombre es requerido', 'error'); return; }
-        if (!insumoActual.unidad_medida) { Swal.fire('Error', 'Selecciona una unidad de medida', 'error'); return; }
-
+    const guardar = async (data) => {
         setGuardando(true);
         const esEdicion = Boolean(insumoActual.id);
         const url = esEdicion ? `/api/insumos/${insumoActual.id}` : '/api/insumos';
@@ -293,25 +333,23 @@ export default function Insumos() {
             const res = await fetch(url, {
                 method: esEdicion ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                body: JSON.stringify({
-                    nombre: insumoActual.nombre,
-                    unidad_medida: insumoActual.unidad_medida,
-                    stock_actual: insumoActual.stock_actual !== '' ? insumoActual.stock_actual : 0,
-                    stock_minimo: insumoActual.stock_minimo !== '' ? insumoActual.stock_minimo : 0,
-                }),
+                body: JSON.stringify(data),
             });
 
             if (!res.ok) {
-                const data = await res.json();
-                Swal.fire('Error de validaciÃ³n', data.message ?? 'Error al guardar', 'error');
-                return;
+                const errorData = await res.json();
+                if (res.status === 422) {
+                    throw errorData; // Devolver errores para que react-hook-form los maneje
+                }
+                throw new Error(errorData.message ?? 'Error al guardar');
             }
 
             cerrar();
             cargar();
             Swal.fire({ icon: 'success', title: esEdicion ? 'Insumo actualizado' : 'Insumo creado', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
-        } catch {
-            Swal.fire('Error', 'No se pudo guardar el insumo', 'error');
+        } catch (err) {
+            if (err.errors) throw err; // Re-lanzar para el formulario
+            Swal.fire('Error', err.message ?? 'No se pudo guardar el insumo', 'error');
         } finally {
             setGuardando(false);
         }
@@ -319,13 +357,13 @@ export default function Insumos() {
 
     const eliminar = async (ins) => {
         const result = await Swal.fire({
-            title: `Â¿Eliminar "${ins.nombre}"?`,
-            text: 'Esta acciÃ³n no se puede deshacer.',
+            title: `Eliminar "${ins.nombre}"?`,
+            text: 'Esta acción no se puede deshacer.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc2626',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'SÃ­, eliminar',
+            confirmButtonText: 'Sí­, eliminar',
             cancelButtonText: 'Cancelar',
         });
         if (!result.isConfirmed) return;
@@ -357,7 +395,7 @@ export default function Insumos() {
                             <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"></path>
                             <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
                         </svg>
-                        GestiÃ³n de Insumos
+                        Gestión de Insumos
                     </h1>
                     <p className="text-gray-600 mt-1">Administra la materia prima y su stock</p>
                 </div>
@@ -392,8 +430,8 @@ export default function Insumos() {
                             <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"></path>
                             <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
                         </svg>
-                        <p className="text-gray-500 font-medium">{buscar ? 'Sin resultados para la bÃºsqueda' : 'No hay insumos registrados'}</p>
-                        {!buscar && <p className="text-gray-400 text-sm mt-1">Crea el primero con el botÃ³n de arriba</p>}
+                        <p className="text-gray-500 font-medium">{buscar ? 'Sin resultados para la busqueda' : 'No hay insumos registrados'}</p>
+                        {!buscar && <p className="text-gray-400 text-sm mt-1">Crea el primero con el botón de arriba</p>}
                     </div>
                 ) : (
                     <table className="w-full text-sm">
@@ -402,7 +440,7 @@ export default function Insumos() {
                                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Nombre</th>
                                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Unidad</th>
                                 <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock actual</th>
-                                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock mÃ­nimo</th>
+                                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock má­nimo</th>
                                 <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Estado</th>
                                 <th className="px-6 py-3"></th>
                             </tr>
@@ -478,7 +516,6 @@ export default function Insumos() {
             <ModalInsumo
                 abierto={modalAbierto}
                 insumo={insumoActual}
-                onChange={handleCampo}
                 onGuardar={guardar}
                 onCerrar={cerrar}
                 guardando={guardando}

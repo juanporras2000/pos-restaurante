@@ -19,10 +19,13 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@hookform/resolvers": "^5.2.2",
         "@vitejs/plugin-react": "^4.7.0",
         "react": "^19.2.5",
         "react-dom": "^19.2.5",
+        "react-hook-form": "^7.74.0",
         "recharts": "^3.8.1",
-        "sweetalert2": "^11.26.24"
+        "sweetalert2": "^11.26.24",
+        "zod": "^4.3.6"
     }
 }

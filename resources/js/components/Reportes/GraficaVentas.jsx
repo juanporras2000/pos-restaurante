@@ -7,8 +7,9 @@ import {
     XAxis, YAxis, CartesianGrid,
     Tooltip, Legend,
 } from 'recharts';
+import { REPORT_CONFIG, CHART_PALETTE } from '../../constants';
 
-const PALETTE = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+const PALETTE = CHART_PALETTE;
 
 const fmtQ = (n) =>
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
@@ -52,7 +53,7 @@ function Empty() {
 }
 
 // ─── GraficaLinea: ventas por fecha ──────────────────────────────────────────
-export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label = 'Total (Q)' }) {
+export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label = 'Total (COP)' }) {
     if (!data.length) return <Empty />;
     return (
         <ResponsiveContainer width="100%" height={260}>
@@ -65,11 +66,13 @@ export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label 
                     tickLine={false}
                 />
                 <YAxis
-                    tickFormatter={(v) => `Q${v}`}
+                    domain={[0, REPORT_CONFIG.VENTAS.LIMITE_SUPERIOR]}
+                    tickCount={REPORT_CONFIG.VENTAS.INTERVALOS}
+                    tickFormatter={(v) => fmtQ(v)}
                     tick={{ fontSize: 11, fill: '#94a3b8' }}
                     axisLine={false}
                     tickLine={false}
-                    width={52}
+                    width={REPORT_CONFIG.VENTAS.ANCHO_EJE_Y}
                 />
                 <Tooltip content={<CustomTooltip currency />} />
                 <Line

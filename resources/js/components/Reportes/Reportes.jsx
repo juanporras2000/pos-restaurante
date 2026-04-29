@@ -127,7 +127,7 @@ export default function Reportes() {
                 <SectionCard title="Ventas por dia" subtitle="Evolucion de ingresos en el periodo seleccionado">
                     {fechas.loading ? <Spinner /> :
                      fechas.error   ? <ErrorCard msg={fechas.error} onRetry={fechas.recargar} /> :
-                     <GraficaLinea data={fechas.data?.serie ?? []} xKey="fecha" yKey="total" label="Ventas (Q)" />}
+                     <GraficaLinea data={fechas.data?.serie ?? []} xKey="fecha" yKey="total" label="Ventas (COP)" />}
                 </SectionCard>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

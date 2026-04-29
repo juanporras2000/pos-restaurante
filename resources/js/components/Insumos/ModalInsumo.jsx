@@ -1,0 +1,125 @@
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '' };
+const UNIDADES = ['gr', 'kg', 'ml', 'lt', 'unidad', 'porción', 'oz', 'lb'];
+
+const insumoSchema = z.object({
+    nombre: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
+    unidad_medida: z.string().min(1, 'Selecciona una unidad de medida'),
+    stock_actual: z.preprocess(
+        (val) => (val === '' || val === null ? 0 : Number(val)),
+        z.number().min(0, 'No puede ser negativo')
+    ),
+    stock_minimo: z.preprocess(
+        (val) => (val === '' || val === null ? 0 : Number(val)),
+        z.number().min(0, 'No puede ser negativo')
+    ),
+});
+
+export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guardando }) {
+    const { register, handleSubmit, reset, setError, formState: { errors } } = useForm({
+        resolver: zodResolver(insumoSchema),
+        defaultValues: INSUMO_VACIO,
+    });
+
+    useEffect(() => {
+        if (abierto) {
+            reset(insumo.id
+                ? { nombre: insumo.nombre, unidad_medida: insumo.unidad_medida, stock_actual: insumo.stock_actual, stock_minimo: insumo.stock_minimo }
+                : INSUMO_VACIO
+            );
+        }
+    }, [abierto, insumo, reset]);
+
+    if (!abierto) return null;
+
+    const onSubmit = async (data) => {
+        try {
+            await onGuardar(data);
+        } catch (err) {
+            if (err.errors) {
+                Object.keys(err.errors).forEach((key) => {
+                    setError(key, { type: 'manual', message: err.errors[key][0] });
+                });
+            }
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+                <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
+                            <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+                        </svg>
+                        {insumo.id ? 'Editar Insumo' : 'Nuevo Insumo'}
+                    </h2>
+                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
+                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="form-insumo" onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre <span className="text-red-500">*</span></label>
+                        <input
+                            {...register('nombre')}
+                            autoFocus type="text" placeholder="Ej: Papa criolla"
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                        />
+                        {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de medida <span className="text-red-500">*</span></label>
+                        <select
+                            {...register('unidad_medida')}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.unidad_medida ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                        >
+                            <option value="">Seleccionar unidad</option>
+                            {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                        {errors.unidad_medida && <p className="mt-1 text-xs text-red-500">{errors.unidad_medida.message}</p>}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Stock actual</label>
+                            <input
+                                {...register('stock_actual')}
+                                type="number" step="0.01" placeholder="0"
+                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.stock_actual ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            />
+                            {errors.stock_actual && <p className="mt-1 text-xs text-red-500">{errors.stock_actual.message}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Stock mínimo</label>
+                            <input
+                                {...register('stock_minimo')}
+                                type="number" step="0.01" placeholder="0"
+                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.stock_minimo ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            />
+                            {errors.stock_minimo && <p className="mt-1 text-xs text-red-500">{errors.stock_minimo.message}</p>}
+                        </div>
+                    </div>
+                </form>
+
+                <div className="px-6 pb-6 flex justify-end gap-3">
+                    <button type="button" onClick={onCerrar} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" form="form-insumo" disabled={guardando} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-sm transition-colors">
+                        {guardando ? 'Guardando...' : (insumo.id ? 'Actualizar' : 'Crear')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}

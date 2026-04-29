@@ -38,23 +38,32 @@ const VARIANTS = {
     },
 };
 
+const ICONS = {
+    coins:   '💰',
+    receipt: '🧾',
+    chart:   '📈',
+    check:   '✅',
+    default: '📊'
+};
+
 /**
  * CardMetric
  * @param {string}  label    - Texto descriptivo
  * @param {string}  value    - Valor principal formateado
  * @param {string}  [sub]    - Subtexto opcional
- * @param {string}  [icon]   - Emoji o texto para el ícono
+ * @param {string}  [icon]   - Key de ICONS (coins, receipt, chart, check) o emoji directo
  * @param {string}  [variant] - blue | green | amber | red | purple
  * @param {number}  [trend]  - Porcentaje de cambio (positivo/negativo)
  */
-export default function CardMetric({ label, value, sub, icon = '📊', variant = 'blue', trend }) {
+export default function CardMetric({ label, value, sub, icon = 'default', variant = 'blue', trend }) {
     const v = VARIANTS[variant] ?? VARIANTS.blue;
     const trendPositive = trend > 0;
+    const iconDisplay = ICONS[icon] ?? icon;
 
     return (
         <div className={`rounded-2xl p-5 shadow-sm flex items-start gap-4 ${v.wrap}`}>
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${v.icon}`}>
-                {icon}
+                {iconDisplay}
             </div>
             <div className="flex-1 min-w-0">
                 <p className={`text-xs font-medium uppercase tracking-wide truncate ${v.label}`}>{label}</p>

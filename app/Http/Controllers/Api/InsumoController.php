@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Insumo;
+use App\Http\Requests\InsumoRequest;
 use Illuminate\Http\Request;
 
 class InsumoController extends Controller
@@ -13,15 +14,8 @@ class InsumoController extends Controller
         return response()->json(Insumo::orderBy('nombre')->get());
     }
 
-    public function store(Request $request)
+    public function store(InsumoRequest $request)
     {
-        $request->validate([
-            'nombre'        => 'required|string|max:255',
-            'unidad_medida' => 'required|string|max:50',
-            'stock_actual'  => 'nullable|numeric|min:0',
-            'stock_minimo'  => 'nullable|numeric|min:0',
-        ]);
-
         $insumo = Insumo::create([
             'nombre'        => $request->nombre,
             'unidad_medida' => $request->unidad_medida,
@@ -32,16 +26,9 @@ class InsumoController extends Controller
         return response()->json($insumo, 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(InsumoRequest $request, $id)
     {
         $insumo = Insumo::findOrFail($id);
-
-        $request->validate([
-            'nombre'        => 'required|string|max:255',
-            'unidad_medida' => 'required|string|max:50',
-            'stock_actual'  => 'nullable|numeric|min:0',
-            'stock_minimo'  => 'nullable|numeric|min:0',
-        ]);
 
         $insumo->update([
             'nombre'        => $request->nombre,

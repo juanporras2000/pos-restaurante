@@ -1,23 +1,62 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
-export default function ModalProducto({ abierto, producto, categorias, insumos = [], receta = [], onRecetaChange, onChange, onGuardar, onCerrar, guardando }) {
+const productoSchema = z.object({
+    nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
+    precio: z.preprocess((val) => Number(val), z.number().min(0.01, 'El precio debe ser mayor a 0')),
+    categoria_id: z.string().min(1, 'Selecciona una categoría'),
+    receta: z.array(z.object({
+        insumo_id: z.number(),
+        nombre: z.string(),
+        unidad_medida: z.string(),
+        cantidad: z.preprocess((val) => Number(val), z.number().min(0.001, 'Min 0.001')),
+    })).min(1, 'La receta debe tener al menos 1 insumo'),
+});
+
+export default function ModalProducto({ abierto, producto, categorias, insumos = [], onGuardar, onCerrar, guardando }) {
     const nombreRef = useRef(null);
     const [filaInsumo, setFilaInsumo] = useState({ insumo_id: '', cantidad: '' });
 
-    useEffect(() => {
-        if (abierto && nombreRef.current) {
-            nombreRef.current.focus();
-        }
-    }, [abierto]);
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        setError,
+        formState: { errors }
+    } = useForm({
+        resolver: zodResolver(productoSchema),
+        defaultValues: { nombre: '', precio: '', categoria_id: '', receta: [] }
+    });
 
-    // Resetear fila al abrir/cerrar
+    const { fields, append, remove, update } = useFieldArray({
+        control,
+        name: 'receta',
+        keyName: 'key' 
+    });
+
     useEffect(() => {
-        if (!abierto) setFilaInsumo({ insumo_id: '', cantidad: '' });
-    }, [abierto]);
+        if (abierto) {
+            reset({
+                nombre: producto.nombre || '',
+                precio: producto.precio || '',
+                categoria_id: producto.categoria_id?.toString() || '',
+                receta: (producto.insumos || []).map(i => ({
+                    insumo_id: i.id,
+                    nombre: i.nombre,
+                    unidad_medida: i.unidad_medida,
+                    cantidad: i.pivot?.cantidad || i.cantidad || 0
+                })) || []
+            });
+            setTimeout(() => nombreRef.current?.focus(), 100);
+        }
+    }, [abierto, producto, reset]);
 
     if (!abierto) return null;
 
-    const insumosSinUsar = insumos.filter((ins) => !receta.some((r) => r.insumo_id === ins.id));
+    const insumosSinUsar = insumos.filter((ins) => !fields.some((f) => f.insumo_id === ins.id));
 
     const agregarInsumo = () => {
         if (!filaInsumo.insumo_id) return;
@@ -25,30 +64,34 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
         if (isNaN(cantidad) || cantidad <= 0) return;
         const insumo = insumos.find((i) => i.id === parseInt(filaInsumo.insumo_id));
         if (!insumo) return;
-        onRecetaChange([
-            ...receta,
-            { insumo_id: insumo.id, cantidad, nombre: insumo.nombre, unidad_medida: insumo.unidad_medida },
-        ]);
+        
+        append({ 
+            insumo_id: insumo.id, 
+            cantidad, 
+            nombre: insumo.nombre, 
+            unidad_medida: insumo.unidad_medida 
+        });
         setFilaInsumo({ insumo_id: '', cantidad: '' });
-    };
-
-    const quitarInsumo = (insumo_id) => {
-        onRecetaChange(receta.filter((r) => r.insumo_id !== insumo_id));
-    };
-
-    const actualizarCantidad = (insumo_id, valor) => {
-        onRecetaChange(receta.map((r) => r.insumo_id === insumo_id ? { ...r, cantidad: valor } : r));
     };
 
     const handleFilaKeyDown = (e) => {
         if (e.key === 'Enter') { e.preventDefault(); agregarInsumo(); }
     };
 
+    const onSubmit = async (data) => {
+        try {
+            await onGuardar(data);
+        } catch (err) {
+            if (err.errors) {
+                Object.keys(err.errors).forEach((key) => {
+                    setError(key, { type: 'manual', message: err.errors[key][0] });
+                });
+            }
+        }
+    };
+
     return (
-        <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
-        >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="p-6 border-b border-gray-200 flex items-center justify-between shrink-0">
@@ -67,49 +110,48 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
 
                 {/* Scrollable body */}
                 <div className="overflow-y-auto flex-1 p-6">
-                    <form id="form-producto" onSubmit={(e) => { e.preventDefault(); onGuardar(); }}>
+                    <form id="form-producto" onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Nombre */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                                 <input
-                                    ref={nombreRef}
+                                    {...register('nombre')}
+                                    ref={(e) => {
+                                        register('nombre').ref(e);
+                                        nombreRef.current = e;
+                                    }}
                                     type="text"
-                                    required
-                                    value={producto.nombre}
-                                    onChange={(e) => onChange('nombre', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                 />
+                                {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
                             </div>
 
                             {/* Precio */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
                                 <input
+                                    {...register('precio')}
                                     type="number"
                                     step="0.01"
-                                    min="0"
-                                    required
-                                    value={producto.precio}
-                                    onChange={(e) => onChange('precio', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.precio ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                 />
+                                {errors.precio && <p className="mt-1 text-xs text-red-500">{errors.precio.message}</p>}
                             </div>
 
                             {/* Categoría */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
                                 <select
-                                    required
-                                    value={producto.categoria_id}
-                                    onChange={(e) => onChange('categoria_id', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    {...register('categoria_id')}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.categoria_id ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                 >
                                     <option value="">Seleccionar categoría</option>
                                     {categorias.map((cat) => (
                                         <option key={cat.id} value={cat.id}>{cat.nombre}</option>
                                     ))}
                                 </select>
+                                {errors.categoria_id && <p className="mt-1 text-xs text-red-500">{errors.categoria_id.message}</p>}
                             </div>
 
                             {/* Imagen */}
@@ -118,7 +160,11 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => onChange('imagen_producto', e.target.files[0] || null)}
+                                    onChange={(e) => {
+                                        // Manejo manual de la imagen ya que react-hook-form no maneja File nativamente bien sin configuración extra
+                                        // Pero como el onGuardar recibe los datos del form, agregaremos la imagen manualmente en el submit del padre
+                                        window._tmp_img = e.target.files[0] || null;
+                                    }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
@@ -150,7 +196,6 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                 <input
                                     type="number"
                                     step="0.01"
-                                    min="0.01"
                                     placeholder="Cantidad"
                                     value={filaInsumo.cantidad}
                                     onChange={(e) => setFilaInsumo((f) => ({ ...f, cantidad: e.target.value }))}
@@ -171,36 +216,34 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                             </div>
 
                             {/* Lista de insumos agregados */}
-                            {receta.length === 0 ? (
-                                <p className="text-xs text-gray-400 text-center py-3 border border-dashed border-gray-200 rounded-lg">
-                                    Sin insumos agregados
-                                </p>
+                            {fields.length === 0 ? (
+                                <div className={`text-xs text-center py-3 border border-dashed rounded-lg ${errors.receta ? 'border-red-400 bg-red-50 text-red-600' : 'border-gray-200 text-gray-400'}`}>
+                                    {errors.receta ? errors.receta.message : 'Sin insumos agregados'}
+                                </div>
                             ) : (
                                 <div className="border border-gray-200 rounded-lg overflow-hidden">
-                                    {/* Encabezado */}
                                     <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wide">
                                         <span>Insumo</span>
                                         <span className="text-right w-28">Cantidad</span>
                                         <span className="w-8"></span>
                                     </div>
-                                    {/* Filas */}
-                                    {receta.map((fila) => (
-                                        <div key={fila.insumo_id} className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 border-t border-gray-100 items-center">
+                                    {fields.map((fila, index) => (
+                                        <div key={fila.key} className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 border-t border-gray-100 items-center">
                                             <span className="text-sm text-gray-800">
                                                 {fila.nombre}
                                                 <span className="text-gray-400 ml-1 text-xs">({fila.unidad_medida})</span>
                                             </span>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0.01"
-                                                value={fila.cantidad}
-                                                onChange={(e) => actualizarCantidad(fila.insumo_id, e.target.value)}
-                                                className="w-28 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-1 focus:ring-orange-400 focus:border-orange-400"
-                                            />
+                                            <div className="flex flex-col">
+                                                <input
+                                                    {...register(`receta.${index}.cantidad`)}
+                                                    type="number"
+                                                    step="0.001"
+                                                    className={`w-28 px-2 py-1 border rounded text-sm text-right focus:ring-1 focus:ring-orange-400 focus:border-orange-400 ${errors.receta?.[index]?.cantidad ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                                />
+                                            </div>
                                             <button
                                                 type="button"
-                                                onClick={() => quitarInsumo(fila.insumo_id)}
+                                                onClick={() => remove(index)}
                                                 className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                                 title="Quitar insumo"
                                             >
@@ -212,6 +255,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                     ))}
                                 </div>
                             )}
+                            {errors.receta && <p className="mt-2 text-xs text-red-500">{errors.receta.message}</p>}
                         </div>
                     </form>
                 </div>

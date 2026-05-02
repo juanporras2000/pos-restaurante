@@ -17,10 +17,11 @@ class InsumoController extends Controller
     public function store(InsumoRequest $request)
     {
         $insumo = Insumo::create([
-            'nombre'        => $request->nombre,
-            'unidad_medida' => $request->unidad_medida,
-            'stock_actual'  => $request->stock_actual ?? 0,
-            'stock_minimo'  => $request->stock_minimo ?? 0,
+            'nombre'         => $request->nombre,
+            'unidad_medida'  => $request->unidad_medida,
+            'stock_actual'   => $request->stock_actual  ?? 0,
+            'stock_minimo'   => $request->stock_minimo  ?? 0,
+            'costo_unitario' => $request->costo_unitario ?? 0,
         ]);
 
         return response()->json($insumo, 201);
@@ -31,10 +32,13 @@ class InsumoController extends Controller
         $insumo = Insumo::findOrFail($id);
 
         $insumo->update([
-            'nombre'        => $request->nombre,
-            'unidad_medida' => $request->unidad_medida,
-            'stock_actual'  => $request->stock_actual ?? $insumo->stock_actual,
-            'stock_minimo'  => $request->stock_minimo ?? $insumo->stock_minimo,
+            'nombre'         => $request->nombre,
+            'unidad_medida'  => $request->unidad_medida,
+            'stock_actual'   => $request->stock_actual  ?? $insumo->stock_actual,
+            'stock_minimo'   => $request->stock_minimo  ?? $insumo->stock_minimo,
+            'costo_unitario' => $request->has('costo_unitario')
+                                    ? $request->costo_unitario
+                                    : $insumo->costo_unitario,
         ]);
 
         return response()->json($insumo);
@@ -44,8 +48,11 @@ class InsumoController extends Controller
     {
         $insumo = Insumo::findOrFail($id);
 
-        // Verificar que no esté en uso en ninguna receta
-        if ($insumo->productos()->exists()) {
+        // Verificar uso en producto_insumo (legacy) Y en receta_detalles (nuevo)
+        $enUso = $insumo->productos()->exists()
+              || $insumo->recetaDetalles()->exists();
+
+        if ($enUso) {
             return response()->json([
                 'error' => 'No se puede eliminar: el insumo está en uso en una o más recetas de productos.',
             ], 409);

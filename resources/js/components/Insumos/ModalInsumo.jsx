@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '' };
+const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '', costo_unitario: '' };
 const UNIDADES = ['gr', 'kg', 'ml', 'lt', 'unidad', 'porción', 'oz', 'lb'];
 
 const insumoSchema = z.object({
@@ -14,6 +14,10 @@ const insumoSchema = z.object({
         z.number().min(0, 'No puede ser negativo')
     ),
     stock_minimo: z.preprocess(
+        (val) => (val === '' || val === null ? 0 : Number(val)),
+        z.number().min(0, 'No puede ser negativo')
+    ),
+    costo_unitario: z.preprocess(
         (val) => (val === '' || val === null ? 0 : Number(val)),
         z.number().min(0, 'No puede ser negativo')
     ),
@@ -28,7 +32,13 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
     useEffect(() => {
         if (abierto) {
             reset(insumo.id
-                ? { nombre: insumo.nombre, unidad_medida: insumo.unidad_medida, stock_actual: insumo.stock_actual, stock_minimo: insumo.stock_minimo }
+                ? {
+                    nombre: insumo.nombre,
+                    unidad_medida: insumo.unidad_medida,
+                    stock_actual: insumo.stock_actual,
+                    stock_minimo: insumo.stock_minimo,
+                    costo_unitario: insumo.costo_unitario ?? 0,
+                  }
                 : INSUMO_VACIO
             );
         }
@@ -108,6 +118,23 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                             />
                             {errors.stock_minimo && <p className="mt-1 text-xs text-red-500">{errors.stock_minimo.message}</p>}
                         </div>
+                    </div>
+
+                    {/* Costo unitario */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Costo unitario <span className="text-gray-400 font-normal">(por {'{unidad}'})</span>
+                        </label>
+                        <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm">$</span>
+                            <input
+                                {...register('costo_unitario')}
+                                type="number" step="0.0001" placeholder="0.00"
+                                className={`w-full pl-7 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.costo_unitario ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            />
+                        </div>
+                        {errors.costo_unitario && <p className="mt-1 text-xs text-red-500">{errors.costo_unitario.message}</p>}
+                        <p className="mt-1 text-xs text-gray-400">Costo por unidad de medida. Afecta el costo de todos los productos que usen este insumo.</p>
                     </div>
                 </form>
 

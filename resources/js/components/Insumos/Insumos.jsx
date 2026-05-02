@@ -4,7 +4,7 @@ import ModalInsumo from './ModalInsumo';
 import ModalAjuste from './ModalAjuste';
 import ModalHistorial from './ModalHistorial';
 
-const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '' };
+const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '', costo_unitario: '' };
 
 
 export default function Insumos() {
@@ -30,7 +30,14 @@ export default function Insumos() {
 
     const abrirCrear = () => { setInsumoActual(INSUMO_VACIO); setModalAbierto(true); };
     const abrirEditar = (ins) => {
-        setInsumoActual({ id: ins.id, nombre: ins.nombre, unidad_medida: ins.unidad_medida, stock_actual: ins.stock_actual, stock_minimo: ins.stock_minimo });
+        setInsumoActual({
+            id: ins.id,
+            nombre: ins.nombre,
+            unidad_medida: ins.unidad_medida,
+            stock_actual: ins.stock_actual,
+            stock_minimo: ins.stock_minimo,
+            costo_unitario: ins.costo_unitario ?? 0,
+        });
         setModalAbierto(true);
     };
     const cerrar = () => { setModalAbierto(false); setInsumoActual(INSUMO_VACIO); };

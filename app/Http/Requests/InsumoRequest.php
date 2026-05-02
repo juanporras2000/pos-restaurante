@@ -22,21 +22,26 @@ class InsumoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => 'required|string|max:100',
-            'unidad_medida' => 'required|string|in:gr,kg,ml,lt,unidad,porción,oz,lb',
-            'stock_actual' => 'nullable|numeric|min:0',
-            'stock_minimo' => 'nullable|numeric|min:0',
+            'nombre'         => 'required|string|max:100',
+            'unidad_medida'  => 'required|string|in:gr,kg,ml,lt,unidad,porción,oz,lb',
+            'stock_actual'   => 'nullable|numeric|min:0',
+            'stock_minimo'   => 'nullable|numeric|min:0',
+            // Costo por unidad de medida. Debe ser >= 0.
+            // Un costo de 0 es válido (insumos propios / sin costear aún).
+            'costo_unitario' => 'nullable|numeric|min:0',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'nombre.required' => 'El nombre del insumo es obligatorio.',
+            'nombre.required'        => 'El nombre del insumo es obligatorio.',
             'unidad_medida.required' => 'La unidad de medida es obligatoria.',
-            'unidad_medida.in' => 'La unidad seleccionada no es válida.',
-            'stock_actual.numeric' => 'El stock actual debe ser un número.',
-            'stock_minimo.numeric' => 'El stock mínimo debe ser un número.',
+            'unidad_medida.in'       => 'La unidad seleccionada no es válida.',
+            'stock_actual.numeric'   => 'El stock actual debe ser un número.',
+            'stock_minimo.numeric'   => 'El stock mínimo debe ser un número.',
+            'costo_unitario.numeric' => 'El costo unitario debe ser un número.',
+            'costo_unitario.min'     => 'El costo unitario no puede ser negativo.',
         ];
     }
 }

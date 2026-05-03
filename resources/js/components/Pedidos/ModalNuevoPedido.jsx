@@ -16,8 +16,17 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
 
     const [pedido, setPedido] = useState(PEDIDO_VACIO);
     const [carrito, setCarrito] = useState([]);
+    const [adicionesDisponibles, setAdicionesDisponibles] = useState([]);
     const [direccionError, setDireccionError] = useState('');
     const [enviando, setEnviando] = useState(false);
+
+    // Cargar adiciones disponibles
+    useEffect(() => {
+        fetch('/api/adiciones')
+            .then((r) => r.json())
+            .then(setAdicionesDisponibles)
+            .catch(() => {});
+    }, []);
 
     // Pre-cargar datos cuando se edita
     useEffect(() => {
@@ -32,8 +41,9 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 nombre: d.producto?.nombre ?? '',
                 precio: parseFloat(d.precio_unitario),
                 cantidad: d.cantidad,
-                subtotal: parseFloat(d.subtotal),
+                subtotal: parseFloat(d.precio_unitario) * d.cantidad,
                 nota: d.observacion ?? '',
+                adiciones: (d.adiciones ?? []),
             }));
             setCarrito(carritoInicial);
         } else if (abierto && !pedidoEditar) {
@@ -53,13 +63,60 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                         : i
                 );
             }
-            return [...prev, { id: producto.id, nombre: producto.nombre, precio: producto.precio, cantidad: 1, subtotal: producto.precio, nota: '' }];
+            return [...prev, { id: producto.id, nombre: producto.nombre, precio: producto.precio, cantidad: 1, subtotal: producto.precio, nota: '', adiciones: [] }];
         });
     };
 
     const cambiarNota = (productoId, valor) => {
         setCarrito((prev) =>
             prev.map((i) => (i.id === productoId ? { ...i, nota: valor } : i))
+        );
+    };
+
+    const adicionIncrementar = (productoId, adicion) => {
+        setCarrito((prev) =>
+            prev.map((item) => {
+                if (item.id !== productoId) return item;
+                const adiciones = item.adiciones ?? [];
+                const existe = adiciones.find((a) => a.adicion_id === adicion.id);
+                const nuevasAdiciones = existe
+                    ? adiciones.map((a) =>
+                          a.adicion_id === adicion.id
+                              ? { ...a, cantidad: a.cantidad + 1, subtotal: (a.cantidad + 1) * a.precio }
+                              : a
+                      )
+                    : [
+                          ...adiciones,
+                          {
+                              adicion_id: adicion.id,
+                              nombre: adicion.nombre,
+                              precio: parseFloat(adicion.precio),
+                              cantidad: 1,
+                              subtotal: parseFloat(adicion.precio),
+                          },
+                      ];
+                return { ...item, adiciones: nuevasAdiciones };
+            })
+        );
+    };
+
+    const adicionDecrementar = (productoId, adicion) => {
+        setCarrito((prev) =>
+            prev.map((item) => {
+                if (item.id !== productoId) return item;
+                const adiciones = item.adiciones ?? [];
+                const existe = adiciones.find((a) => a.adicion_id === adicion.id);
+                if (!existe || existe.cantidad === 0) return item;
+                const nuevasAdiciones =
+                    existe.cantidad === 1
+                        ? adiciones.filter((a) => a.adicion_id !== adicion.id)
+                        : adiciones.map((a) =>
+                              a.adicion_id === adicion.id
+                                  ? { ...a, cantidad: a.cantidad - 1, subtotal: (a.cantidad - 1) * a.precio }
+                                  : a
+                          );
+                return { ...item, adiciones: nuevasAdiciones };
+            })
         );
     };
 
@@ -129,6 +186,12 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 cantidad: item.cantidad,
                 precio: item.precio,
                 observacion: item.nota?.trim() || null,
+                adiciones: (item.adiciones ?? []).map((a) => ({
+                    adicion_id: a.adicion_id,
+                    nombre: a.nombre,
+                    precio: a.precio,
+                    cantidad: a.cantidad,
+                })),
             })),
         });
 
@@ -270,7 +333,14 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                 onIncrementar={incrementar}
                                 onDecrementar={decrementar}
                             />
-                            <Carrito carrito={carrito} onEliminar={eliminarDelCarrito} onNotaChange={cambiarNota} />
+                            <Carrito
+                                carrito={carrito}
+                                adicionesDisponibles={adicionesDisponibles}
+                                onEliminar={eliminarDelCarrito}
+                                onNotaChange={cambiarNota}
+                                onAdicionIncrementar={adicionIncrementar}
+                                onAdicionDecrementar={adicionDecrementar}
+                            />
                         </div>
                     </div>
 

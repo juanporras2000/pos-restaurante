@@ -7,6 +7,7 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\InsumoController;
+use App\Http\Controllers\Api\AdicionController;
 use App\Http\Controllers\Api\ConfiguracionController;
 use App\Http\Controllers\Api\InventarioController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -51,4 +52,9 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
     Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
     Route::put('/configuraciones', [ConfiguracionController::class, 'update']);
+
+    Route::get('/adiciones', [AdicionController::class, 'index']);
+    Route::post('/adiciones', [AdicionController::class, 'store']);
+    Route::put('/adiciones/{adicion}', [AdicionController::class, 'update']);
+    Route::delete('/adiciones/{adicion}', [AdicionController::class, 'destroy']);
 

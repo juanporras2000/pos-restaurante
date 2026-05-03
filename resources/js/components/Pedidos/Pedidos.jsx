@@ -45,12 +45,19 @@ function PedidoCard({ pedido, onPago, onEditar, onEliminar }) {
             </div>
 
             {/* Items */}
-            <div className="space-y-2 mb-4 max-h-32 overflow-y-auto">
+            <div className="space-y-2 mb-4 max-h-40 overflow-y-auto">
                 {pedido.detalles?.map((detalle) => (
-                    <div key={detalle.id} className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">{detalle.producto?.nombre}</span>
-                        <span className="text-gray-500">x{detalle.cantidad}</span>
-                        <span className="font-medium text-gray-900">${parseFloat(detalle.subtotal).toFixed(2)}</span>
+                    <div key={detalle.id} className="text-sm">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-700">{detalle.producto?.nombre}</span>
+                            <span className="text-gray-500">x{detalle.cantidad}</span>
+                            <span className="font-medium text-gray-900">${parseFloat(detalle.subtotal).toFixed(2)}</span>
+                        </div>
+                        {detalle.observacion && (
+                            <p className="text-xs text-amber-600 italic mt-0.5 ml-1">
+                                📝 {detalle.observacion}
+                            </p>
+                        )}
                     </div>
                 ))}
             </div>

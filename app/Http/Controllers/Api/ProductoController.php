@@ -24,6 +24,14 @@ class ProductoController extends Controller
         return $raw;
     }
 
+    private function parseInsumosDomicilio(Request $request): ?array
+    {
+        $raw = $request->input('receta_domicilio');
+        if (is_null($raw)) return null;
+        if (is_string($raw)) return json_decode($raw, true) ?? [];
+        return $raw;
+    }
+
     /**
      * Sincroniza la receta del producto en ambas estructuras:
      *  1. producto_insumo  → backward-compat para el ModalProducto del frontend
@@ -43,7 +51,7 @@ class ProductoController extends Controller
             }
             $producto->insumos()->sync($sync);
 
-            // ── 2. Receta canónica ──────────────────────────────────────────────────
+            // ── 2. Receta canónica 
             $receta = Receta::firstOrCreate(
                 ['producto_id' => $producto->id],
                 ['tenant_id'   => $producto->tenant_id]
@@ -59,7 +67,7 @@ class ProductoController extends Controller
                 ]);
             }
 
-            // ── 3. Persistir costo_calculado ────────────────────────────────────────
+            // ── 3. Persistir costo_calculado 
             $producto->load('receta.detalles.insumo');
             DB::table('productos')
                 ->where('id', $producto->id)
@@ -67,11 +75,22 @@ class ProductoController extends Controller
         });
     }
 
-    // ─── Endpoints ───────────────────────────────────────────────────────────
+    private function syncInsumosDomicilio(Producto $producto, ?array $insumos): void
+    {
+        if (is_null($insumos)) return;
+
+        $sync = [];
+        foreach ($insumos as $item) {
+            $sync[(int) $item['insumo_id']] = ['cantidad' => $item['cantidad']];
+        }
+        $producto->insumosDomicilio()->sync($sync);
+    }
+
+    // ─── Endpoints 
 
     public function index(Request $request)
     {
-        $query = Producto::with('categoria', 'insumos', 'receta.detalles.insumo');
+        $query = Producto::with('categoria', 'insumos', 'receta.detalles.insumo', 'insumosDomicilio');
 
         if ($request->filled('buscar')) {
             $query->where('nombre', 'like', '%' . $request->buscar . '%');
@@ -86,13 +105,12 @@ class ProductoController extends Controller
                     ->get()
             );
         }
-
         return response()->json($query->paginate(5));
     }
 
     public function show($id)
     {
-        $producto = Producto::with('categoria', 'insumos', 'receta.detalles.insumo')
+        $producto = Producto::with('categoria', 'insumos', 'receta.detalles.insumo', 'insumosDomicilio')
             ->findOrFail($id);
 
         return response()->json($producto);
@@ -109,9 +127,10 @@ class ProductoController extends Controller
 
         $producto = Producto::create($data);
         $this->syncInsumos($producto, $this->parseInsumos($request));
+        $this->syncInsumosDomicilio($producto, $this->parseInsumosDomicilio($request));
 
         return response()->json(
-            $producto->load('categoria', 'insumos', 'receta.detalles.insumo'),
+            $producto->load('categoria', 'insumos', 'receta.detalles.insumo', 'insumosDomicilio'),
             201
         );
     }
@@ -131,9 +150,10 @@ class ProductoController extends Controller
 
         $producto->update($data);
         $this->syncInsumos($producto, $this->parseInsumos($request));
+        $this->syncInsumosDomicilio($producto, $this->parseInsumosDomicilio($request));
 
         return response()->json(
-            $producto->load('categoria', 'insumos', 'receta.detalles.insumo')
+            $producto->load('categoria', 'insumos', 'receta.detalles.insumo', 'insumosDomicilio')
         );
     }
 

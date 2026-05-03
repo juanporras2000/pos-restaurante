@@ -7,34 +7,51 @@ const productoSchema = z.object({
     nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
     precio: z.preprocess((val) => Number(val), z.number().min(0.01, 'El precio debe ser mayor a 0')),
     categoria_id: z.string().min(1, 'Selecciona una categoría'),
+    es_domicilio: z.boolean().optional(),
     receta: z.array(z.object({
         insumo_id: z.number(),
         nombre: z.string(),
         unidad_medida: z.string(),
         cantidad: z.preprocess((val) => Number(val), z.number().min(0.001, 'Min 0.001')),
     })).min(1, 'La receta debe tener al menos 1 insumo'),
+    receta_domicilio: z.array(z.object({
+        insumo_id: z.number(),
+        nombre: z.string(),
+        unidad_medida: z.string(),
+        cantidad: z.preprocess((val) => Number(val), z.number().min(0.001, 'Min 0.001')),
+    })).optional(),
 });
 
 export default function ModalProducto({ abierto, producto, categorias, insumos = [], onGuardar, onCerrar, guardando }) {
     const nombreRef = useRef(null);
     const [filaInsumo, setFilaInsumo] = useState({ insumo_id: '', cantidad: '' });
+    const [filaInsumoDom, setFilaInsumoDom] = useState({ insumo_id: '', cantidad: '' });
 
     const {
         register,
         handleSubmit,
         control,
         reset,
+        watch,
         setError,
         formState: { errors }
     } = useForm({
         resolver: zodResolver(productoSchema),
-        defaultValues: { nombre: '', precio: '', categoria_id: '', receta: [] }
+        defaultValues: { nombre: '', precio: '', categoria_id: '', es_domicilio: false, receta: [], receta_domicilio: [] }
     });
+
+    const esDomicilio = watch('es_domicilio');
 
     const { fields, append, remove, update } = useFieldArray({
         control,
         name: 'receta',
         keyName: 'key' 
+    });
+
+    const { fields: fieldsDom, append: appendDom, remove: removeDom } = useFieldArray({
+        control,
+        name: 'receta_domicilio',
+        keyName: 'key'
     });
 
     useEffect(() => {
@@ -43,7 +60,14 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                 nombre: producto.nombre || '',
                 precio: producto.precio || '',
                 categoria_id: producto.categoria_id?.toString() || '',
+                es_domicilio: producto.es_domicilio ?? false,
                 receta: (producto.insumos || []).map(i => ({
+                    insumo_id: i.id,
+                    nombre: i.nombre,
+                    unidad_medida: i.unidad_medida,
+                    cantidad: i.pivot?.cantidad || i.cantidad || 0
+                })) || [],
+                receta_domicilio: (producto.insumos_domicilio || []).map(i => ({
                     insumo_id: i.id,
                     nombre: i.nombre,
                     unidad_medida: i.unidad_medida,
@@ -72,6 +96,22 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
             unidad_medida: insumo.unidad_medida 
         });
         setFilaInsumo({ insumo_id: '', cantidad: '' });
+    };
+
+    const agregarInsumoDom = () => {
+        if (!filaInsumoDom.insumo_id) return;
+        const cantidad = parseFloat(filaInsumoDom.cantidad);
+        if (isNaN(cantidad) || cantidad <= 0) return;
+        const insumo = insumos.find((i) => i.id === parseInt(filaInsumoDom.insumo_id));
+        if (!insumo) return;
+
+        appendDom({
+            insumo_id: insumo.id,
+            cantidad,
+            nombre: insumo.nombre,
+            unidad_medida: insumo.unidad_medida
+        });
+        setFilaInsumoDom({ insumo_id: '', cantidad: '' });
     };
 
     const handleFilaKeyDown = (e) => {
@@ -152,6 +192,24 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                     ))}
                                 </select>
                                 {errors.categoria_id && <p className="mt-1 text-xs text-red-500">{errors.categoria_id.message}</p>}
+                            </div>
+
+                            {/* Disponible a domicilio */}
+                            <div className="flex items-center gap-3 col-span-full">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        {...register('es_domicilio')}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                                <span className="text-sm font-medium text-gray-700">Disponible a domicilio</span>
+                                {esDomicilio && (
+                                    <span className="ml-auto text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5 font-medium">
+                                        Agrega los insumos adicionales abajo
+                                    </span>
+                                )}
                             </div>
 
                             {/* Imagen */}
@@ -257,6 +315,96 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                             )}
                             {errors.receta && <p className="mt-2 text-xs text-red-500">{errors.receta.message}</p>}
                         </div>
+
+                        {/* Sección Insumos Adicionales para Domicilio */}
+                        {esDomicilio && (
+                            <div className="mt-6">
+                                <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                    <svg className="h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                    Insumos adicionales a domicilio
+                                    <span className="text-xs font-normal text-blue-500">(empaque, bolsa, etc.)</span>
+                                </h3>
+
+                                {/* Fila para agregar insumo domicilio */}
+                                <div className="flex gap-2 mb-3">
+                                    <select
+                                        value={filaInsumoDom.insumo_id}
+                                        onChange={(e) => setFilaInsumoDom((f) => ({ ...f, insumo_id: e.target.value }))}
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                    >
+                                        <option value="">Seleccionar insumo</option>
+                                        {insumos.map((ins) => (
+                                            <option key={ins.id} value={ins.id}>
+                                                {ins.nombre} ({ins.unidad_medida})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="Cantidad"
+                                        value={filaInsumoDom.cantidad}
+                                        onChange={(e) => setFilaInsumoDom((f) => ({ ...f, cantidad: e.target.value }))}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregarInsumoDom(); } }}
+                                        className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={agregarInsumoDom}
+                                        disabled={!filaInsumoDom.insumo_id || !filaInsumoDom.cantidad}
+                                        className="px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+                                        title="Agregar insumo domicilio"
+                                    >
+                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                {/* Lista insumos domicilio */}
+                                {fieldsDom.length === 0 ? (
+                                    <div className="text-xs text-center py-3 border border-dashed border-blue-200 bg-blue-50 text-blue-400 rounded-lg">
+                                        Sin insumos adicionales para domicilio
+                                    </div>
+                                ) : (
+                                    <div className="border border-blue-200 rounded-lg overflow-hidden">
+                                        <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 bg-blue-50 text-xs font-medium text-blue-600 uppercase tracking-wide">
+                                            <span>Insumo</span>
+                                            <span className="text-right w-28">Cantidad</span>
+                                            <span className="w-8"></span>
+                                        </div>
+                                        {fieldsDom.map((fila, index) => (
+                                            <div key={fila.key} className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 border-t border-blue-100 items-center">
+                                                <span className="text-sm text-gray-800">
+                                                    {fila.nombre}
+                                                    <span className="text-gray-400 ml-1 text-xs">({fila.unidad_medida})</span>
+                                                </span>
+                                                <div className="flex flex-col">
+                                                    <input
+                                                        {...register(`receta_domicilio.${index}.cantidad`)}
+                                                        type="number"
+                                                        step="0.001"
+                                                        className="w-28 px-2 py-1 border border-gray-300 rounded text-sm text-right focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeDom(index)}
+                                                    className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                    title="Quitar insumo"
+                                                >
+                                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </form>
                 </div>
 

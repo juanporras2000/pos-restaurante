@@ -40,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
         return view('insumos');
     });
 
+    Route::get('/configuraciones', function () {
+        return view('configuraciones');
+    })->name('configuraciones');
+
 });
 
 require __DIR__.'/auth.php';

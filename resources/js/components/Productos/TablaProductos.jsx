@@ -35,6 +35,12 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                 const margen   = parseFloat(producto.margen)  || 0;
                 const tieneCosto = costo > 0;
 
+                // Valores reales calculados desde el API (receta base + insumos domicilio)
+                const costoDom    = parseFloat(producto.costo_domicilio)    || 0;
+                const utilidadDom = parseFloat(producto.utilidad_domicilio) || 0;
+                const margenDom   = parseFloat(producto.margen_domicilio)   || 0;
+                const tieneCostoDom = costoDom > 0;
+
                 return (
                     <div
                         key={producto.id}
@@ -60,7 +66,12 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                         {/* Product Info */}
                         <div className="mb-3 flex-1">
                             <h3 className="font-semibold text-gray-900 text-lg leading-tight">{producto.nombre}</h3>
-                            <p className="text-sm text-gray-500 mb-2">{producto.categoria?.nombre ?? 'Sin categoría'}</p>
+                            <div className="flex items-center gap-2 mb-2">
+                                <p className="text-sm text-gray-500">{producto.categoria?.nombre ?? 'Sin categoría'}</p>
+                                {producto.es_domicilio && (
+                                    <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-2 py-0.5 font-medium">🛵 Domicilio</span>
+                                )}
+                            </div>
                             <p className="text-xl font-bold text-gray-900">
                                 ${precio.toFixed(2)}
                             </p>
@@ -89,6 +100,31 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                         ) : (
                             <div className="mb-4 text-xs text-gray-400 italic text-center bg-gray-50 rounded-lg py-2">
                                 Sin costo asignado en receta
+                            </div>
+                        )}
+
+                        {/* Cost & Profitability a domicilio */}
+                        {producto.es_domicilio && tieneCostoDom && (
+                            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-1.5 text-sm">
+                                <p className="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1">
+                                    🛵 A domicilio <span className="font-normal text-blue-500">(costo real con insumos adicionales)</span>
+                                </p>
+                                <div className="flex justify-between text-gray-600">
+                                    <span>Costo</span>
+                                    <span className="font-medium text-gray-800">${costoDom.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-gray-600">
+                                    <span>Utilidad</span>
+                                    <span className={`font-semibold ${utilidadDom >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {utilidadDom >= 0 ? '+' : ''}${utilidadDom.toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center pt-1 border-t border-blue-200">
+                                    <span className="text-gray-500">Margen</span>
+                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badgeMargen(margenDom)}`}>
+                                        {margenDom.toFixed(1)}% · {labelMargen(margenDom)}
+                                    </span>
+                                </div>
                             </div>
                         )}
 

@@ -33,6 +33,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 precio: parseFloat(d.precio_unitario),
                 cantidad: d.cantidad,
                 subtotal: parseFloat(d.subtotal),
+                nota: d.observacion ?? '',
             }));
             setCarrito(carritoInicial);
         } else if (abierto && !pedidoEditar) {
@@ -52,8 +53,14 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                         : i
                 );
             }
-            return [...prev, { id: producto.id, nombre: producto.nombre, precio: producto.precio, cantidad: 1, subtotal: producto.precio }];
+            return [...prev, { id: producto.id, nombre: producto.nombre, precio: producto.precio, cantidad: 1, subtotal: producto.precio, nota: '' }];
         });
+    };
+
+    const cambiarNota = (productoId, valor) => {
+        setCarrito((prev) =>
+            prev.map((i) => (i.id === productoId ? { ...i, nota: valor } : i))
+        );
     };
 
     const decrementar = (producto) => {
@@ -121,6 +128,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 producto_id: item.id,
                 cantidad: item.cantidad,
                 precio: item.precio,
+                observacion: item.nota?.trim() || null,
             })),
         });
 
@@ -262,7 +270,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                 onIncrementar={incrementar}
                                 onDecrementar={decrementar}
                             />
-                            <Carrito carrito={carrito} onEliminar={eliminarDelCarrito} />
+                            <Carrito carrito={carrito} onEliminar={eliminarDelCarrito} onNotaChange={cambiarNota} />
                         </div>
                     </div>
 

@@ -26,8 +26,11 @@ class PedidoController extends Controller
 
     public function cerradosHoy()
     {
+        $inicio = now()->startOfDay()->utc();
+        $fin    = now()->endOfDay()->utc();
+
         $pedidos = Pedido::where('estado', 'pagado')
-            ->whereDate('updated_at', today())
+            ->whereBetween('updated_at', [$inicio, $fin])
             ->with(['detalles.producto', 'pago'])
             ->orderBy('updated_at', 'desc')
             ->get();

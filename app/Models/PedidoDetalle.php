@@ -8,13 +8,18 @@ use App\Models\Producto;
 class PedidoDetalle extends Model
 {
 
-      protected $fillable = [
+    protected $fillable = [
         'pedido_id',
         'producto_id',
         'cantidad',
         'precio_unitario',
         'subtotal',
-        'observacion'
+        'observacion',
+        'adiciones',
+    ];
+
+    protected $casts = [
+        'adiciones' => 'array',
     ];
     
         public function pedido()

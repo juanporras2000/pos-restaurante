@@ -24,12 +24,24 @@ class PedidoController extends Controller
         return response()->json($pedidos);
     }
 
+    public function cerradosHoy()
+    {
+        $pedidos = Pedido::where('estado', 'pagado')
+            ->whereDate('updated_at', today())
+            ->with(['detalles.producto', 'pago'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return response()->json($pedidos);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'tipo'          => 'required|in:mesa,domicilio',
+            'tipo'          => 'required|in:mesa,domicilio,recoger',
             'numero_mesa'   => 'nullable|integer|min:1',
             'direccion'     => 'nullable|string|max:500',
+            'nombre_cliente' => 'nullable|string|max:100',
             'productos'     => 'required|array|min:1',
             'productos.*.producto_id' => 'required|exists:productos,id',
             'productos.*.cantidad'    => 'required|integer|min:1',
@@ -42,7 +54,7 @@ class PedidoController extends Controller
         $productos = [];
         foreach ($request->productos as $item) {
             $producto = Producto::with('insumos')->findOrFail($item['producto_id']);
-            $productos[] = ['producto' => $producto, 'cantidad' => $item['cantidad'], 'observacion' => $item['observacion'] ?? null];
+            $productos[] = ['producto' => $producto, 'cantidad' => $item['cantidad'], 'observacion' => $item['observacion'] ?? null, 'adiciones' => $item['adiciones'] ?? []];
 
             foreach ($producto->insumos as $insumo) {
                 $id = $insumo->id;
@@ -74,17 +86,32 @@ class PedidoController extends Controller
             }
 
             $pedido = Pedido::create([
-                'user_id'      => auth()->id(),
-                'tipo'         => $request->tipo,
-                'numero_mesa'  => $request->numero_mesa,
-                'direccion'    => $request->direccion,
-                'total'        => 0,
+                'user_id'        => auth()->id(),
+                'tipo'           => $request->tipo,
+                'numero_mesa'    => $request->numero_mesa,
+                'direccion'      => $request->direccion,
+                'nombre_cliente' => $request->nombre_cliente,
+                'total'          => 0,
             ]);
 
             $total = 0;
             foreach ($productos as $item) {
                 $producto = $item['producto'];
                 $subtotal = $producto->precio * $item['cantidad'];
+
+                // Calcular subtotal de adiciones
+                $adicionesData = [];
+                foreach ($item['adiciones'] ?? [] as $adic) {
+                    $adicSubtotal = floatval($adic['precio']) * intval($adic['cantidad']);
+                    $subtotal += $adicSubtotal;
+                    $adicionesData[] = [
+                        'adicion_id' => $adic['adicion_id'],
+                        'nombre'     => $adic['nombre'],
+                        'precio'     => floatval($adic['precio']),
+                        'cantidad'   => intval($adic['cantidad']),
+                        'subtotal'   => $adicSubtotal,
+                    ];
+                }
 
                 PedidoDetalle::create([
                     'pedido_id'       => $pedido->id,
@@ -93,6 +120,7 @@ class PedidoController extends Controller
                     'precio_unitario' => $producto->precio,
                     'subtotal'        => $subtotal,
                     'observacion'     => $item['observacion'],
+                    'adiciones'       => !empty($adicionesData) ? $adicionesData : null,
                 ]);
 
                 $total += $subtotal;
@@ -143,9 +171,10 @@ class PedidoController extends Controller
         }
 
         $request->validate([
-            'tipo'          => 'required|in:mesa,domicilio',
+            'tipo'          => 'required|in:mesa,domicilio,recoger',
             'numero_mesa'   => 'nullable|integer|min:1',
             'direccion'     => 'nullable|string|max:500',
+            'nombre_cliente'=> 'nullable|string|max:100',
             'productos'     => 'required|array|min:1',
             'productos.*.producto_id' => 'required|exists:productos,id',
             'productos.*.cantidad'    => 'required|integer|min:1',
@@ -159,6 +188,20 @@ class PedidoController extends Controller
             $producto = Producto::findOrFail($item['producto_id']);
             $subtotal = $producto->precio * $item['cantidad'];
 
+            // Calcular subtotal de adiciones
+            $adicionesData = [];
+            foreach ($item['adiciones'] ?? [] as $adic) {
+                $adicSubtotal = floatval($adic['precio']) * intval($adic['cantidad']);
+                $subtotal += $adicSubtotal;
+                $adicionesData[] = [
+                    'adicion_id' => $adic['adicion_id'],
+                    'nombre'     => $adic['nombre'],
+                    'precio'     => floatval($adic['precio']),
+                    'cantidad'   => intval($adic['cantidad']),
+                    'subtotal'   => $adicSubtotal,
+                ];
+            }
+
             PedidoDetalle::create([
                 'pedido_id'       => $pedido->id,
                 'producto_id'     => $producto->id,
@@ -166,16 +209,18 @@ class PedidoController extends Controller
                 'precio_unitario' => $producto->precio,
                 'subtotal'        => $subtotal,
                 'observacion'     => $item['observacion'] ?? null,
+                'adiciones'       => !empty($adicionesData) ? $adicionesData : null,
             ]);
 
             $total += $subtotal;
         }
 
         $pedido->update([
-            'tipo'        => $request->tipo,
-            'numero_mesa' => $request->numero_mesa,
-            'direccion'   => $request->direccion,
-            'total'       => $total,
+            'tipo'           => $request->tipo,
+            'numero_mesa'    => $request->numero_mesa,
+            'direccion'      => $request->direccion,
+            'nombre_cliente' => $request->nombre_cliente,
+            'total'          => $total,
         ]);
 
         return response()->json([

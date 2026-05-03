@@ -9,6 +9,7 @@ const PEDIDO_VACIO = {
     tipo: 'mesa',
     numero_mesa: '',
     direccion: '',
+    nombre_cliente: '',
 };
 
 export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerrar, pedidoEditar = null }) {
@@ -16,8 +17,17 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
 
     const [pedido, setPedido] = useState(PEDIDO_VACIO);
     const [carrito, setCarrito] = useState([]);
+    const [adicionesDisponibles, setAdicionesDisponibles] = useState([]);
     const [direccionError, setDireccionError] = useState('');
     const [enviando, setEnviando] = useState(false);
+
+    // Cargar adiciones disponibles
+    useEffect(() => {
+        fetch('/api/adiciones')
+            .then((r) => r.json())
+            .then(setAdicionesDisponibles)
+            .catch(() => {});
+    }, []);
 
     // Pre-cargar datos cuando se edita
     useEffect(() => {
@@ -26,14 +36,16 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 tipo: pedidoEditar.tipo,
                 numero_mesa: pedidoEditar.numero_mesa ?? '',
                 direccion: pedidoEditar.direccion ?? '',
+                nombre_cliente: pedidoEditar.nombre_cliente ?? '',
             });
             const carritoInicial = (pedidoEditar.detalles ?? []).map((d) => ({
                 id: d.producto_id,
                 nombre: d.producto?.nombre ?? '',
                 precio: parseFloat(d.precio_unitario),
                 cantidad: d.cantidad,
-                subtotal: parseFloat(d.subtotal),
+                subtotal: parseFloat(d.precio_unitario) * d.cantidad,
                 nota: d.observacion ?? '',
+                adiciones: (d.adiciones ?? []),
             }));
             setCarrito(carritoInicial);
         } else if (abierto && !pedidoEditar) {
@@ -53,13 +65,60 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                         : i
                 );
             }
-            return [...prev, { id: producto.id, nombre: producto.nombre, precio: producto.precio, cantidad: 1, subtotal: producto.precio, nota: '' }];
+            return [...prev, { id: producto.id, nombre: producto.nombre, precio: producto.precio, cantidad: 1, subtotal: producto.precio, nota: '', adiciones: [] }];
         });
     };
 
     const cambiarNota = (productoId, valor) => {
         setCarrito((prev) =>
             prev.map((i) => (i.id === productoId ? { ...i, nota: valor } : i))
+        );
+    };
+
+    const adicionIncrementar = (productoId, adicion) => {
+        setCarrito((prev) =>
+            prev.map((item) => {
+                if (item.id !== productoId) return item;
+                const adiciones = item.adiciones ?? [];
+                const existe = adiciones.find((a) => a.adicion_id === adicion.id);
+                const nuevasAdiciones = existe
+                    ? adiciones.map((a) =>
+                          a.adicion_id === adicion.id
+                              ? { ...a, cantidad: a.cantidad + 1, subtotal: (a.cantidad + 1) * a.precio }
+                              : a
+                      )
+                    : [
+                          ...adiciones,
+                          {
+                              adicion_id: adicion.id,
+                              nombre: adicion.nombre,
+                              precio: parseFloat(adicion.precio),
+                              cantidad: 1,
+                              subtotal: parseFloat(adicion.precio),
+                          },
+                      ];
+                return { ...item, adiciones: nuevasAdiciones };
+            })
+        );
+    };
+
+    const adicionDecrementar = (productoId, adicion) => {
+        setCarrito((prev) =>
+            prev.map((item) => {
+                if (item.id !== productoId) return item;
+                const adiciones = item.adiciones ?? [];
+                const existe = adiciones.find((a) => a.adicion_id === adicion.id);
+                if (!existe || existe.cantidad === 0) return item;
+                const nuevasAdiciones =
+                    existe.cantidad === 1
+                        ? adiciones.filter((a) => a.adicion_id !== adicion.id)
+                        : adiciones.map((a) =>
+                              a.adicion_id === adicion.id
+                                  ? { ...a, cantidad: a.cantidad - 1, subtotal: (a.cantidad - 1) * a.precio }
+                                  : a
+                          );
+                return { ...item, adiciones: nuevasAdiciones };
+            })
         );
     };
 
@@ -93,6 +152,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         if (carrito.length === 0) return false;
         if (pedido.tipo === 'mesa') return String(pedido.numero_mesa).trim() !== '' && parseInt(pedido.numero_mesa) > 0;
         if (pedido.tipo === 'domicilio') return DIRECCION_REGEX.test(pedido.direccion);
+        if (pedido.tipo === 'recoger') return true;
         return false;
     };
 
@@ -124,11 +184,18 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
             tipo: pedido.tipo,
             numero_mesa: pedido.numero_mesa || null,
             direccion: pedido.direccion || null,
+            nombre_cliente: pedido.nombre_cliente?.trim() || null,
             productos: carrito.map((item) => ({
                 producto_id: item.id,
                 cantidad: item.cantidad,
                 precio: item.precio,
                 observacion: item.nota?.trim() || null,
+                adiciones: (item.adiciones ?? []).map((a) => ({
+                    adicion_id: a.adicion_id,
+                    nombre: a.nombre,
+                    precio: a.precio,
+                    cantidad: a.cantidad,
+                })),
             })),
         });
 
@@ -138,7 +205,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         try {
             const res = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                 body,
             });
 
@@ -208,7 +275,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             name="tipo"
                                             value="mesa"
                                             checked={pedido.tipo === 'mesa'}
-                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '' }))}
+                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
                                             className="text-blue-600 focus:ring-blue-500"
                                         />
                                         <span className="ml-2 text-sm font-medium text-gray-700">Para llevar a mesa</span>
@@ -234,7 +301,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             name="tipo"
                                             value="domicilio"
                                             checked={pedido.tipo === 'domicilio'}
-                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '' }))}
+                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
                                             className="text-blue-600 focus:ring-blue-500"
                                         />
                                         <span className="ml-2 text-sm font-medium text-gray-700">Para domicilio</span>
@@ -258,6 +325,31 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             )}
                                         </div>
                                     )}
+
+                                    <label className="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="tipo"
+                                            value="recoger"
+                                            checked={pedido.tipo === 'recoger'}
+                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
+                                            className="text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <span className="ml-2 text-sm font-medium text-gray-700">El cliente pasa a recoger</span>
+                                    </label>
+
+                                    {pedido.tipo === 'recoger' && (
+                                        <div className="ml-6">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del cliente <span className="text-gray-400 font-normal">(opcional)</span></label>
+                                            <input
+                                                type="text"
+                                                value={pedido.nombre_cliente}
+                                                onChange={(e) => setPedido((p) => ({ ...p, nombre_cliente: e.target.value }))}
+                                                placeholder="Ej: Juan Pérez"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -270,7 +362,14 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                 onIncrementar={incrementar}
                                 onDecrementar={decrementar}
                             />
-                            <Carrito carrito={carrito} onEliminar={eliminarDelCarrito} onNotaChange={cambiarNota} />
+                            <Carrito
+                                carrito={carrito}
+                                adicionesDisponibles={adicionesDisponibles}
+                                onEliminar={eliminarDelCarrito}
+                                onNotaChange={cambiarNota}
+                                onAdicionIncrementar={adicionIncrementar}
+                                onAdicionDecrementar={adicionDecrementar}
+                            />
                         </div>
                     </div>
 

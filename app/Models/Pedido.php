@@ -16,6 +16,7 @@ class Pedido extends Model
         'tipo',
         'numero_mesa',
         'direccion',
+        'nombre_cliente',
         'total',
         'estado',
         'razon_eliminacion',

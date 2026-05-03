@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
+import HistorialPedidos from '../Productos/HistorialPedidos';
 
 function formatDate(dateString) {
     return new Date(dateString).toLocaleString('es-ES', {
@@ -106,6 +107,7 @@ function PedidoCard({ pedido, onPago, onEditar, onEliminar }) {
 }
 
 export default function Pedidos() {
+    const [tab, setTab] = useState('pedidos');
     const [productos, setProductos] = useState([]);
     const [pedidosPendientes, setPedidosPendientes] = useState([]);
     const [modalNuevoAbierto, setModalNuevoAbierto] = useState(false);
@@ -179,7 +181,7 @@ export default function Pedidos() {
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             {/* Header */}
-            <div className="mb-8">
+            <div className="mb-6">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
@@ -191,21 +193,60 @@ export default function Pedidos() {
                         </h1>
                         <p className="text-gray-600 mt-1">Administra pedidos pendientes y crea nuevos</p>
                     </div>
+                    {tab === 'pedidos' && (
+                        <button
+                            type="button"
+                            onClick={() => setModalNuevoAbierto(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                        >
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Nuevo Pedido
+                        </button>
+                    )}
+                </div>
+
+                {/* Tabs */}
+                <div className="mt-6 flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
                     <button
                         type="button"
-                        onClick={() => setModalNuevoAbierto(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                        onClick={() => setTab('pedidos')}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            tab === 'pedidos'
+                                ? 'bg-white text-blue-700 shadow-sm border border-gray-200'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
                     >
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 4v16m8-8H4"></path>
+                            <rect x="6" y="4" width="12" height="16" rx="2"></rect>
+                            <path d="M9 8h6M9 12h6M9 16h4"></path>
                         </svg>
-                        Nuevo Pedido
+                        Pendientes
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setTab('historial')}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            tab === 'historial'
+                                ? 'bg-white text-blue-700 shadow-sm border border-gray-200'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Historial del Día
                     </button>
                 </div>
             </div>
 
-            {/* Pedidos por categoría */}
-            {pedidosPendientes.length === 0 && (
+            {/* Tab: Historial */}
+            {tab === 'historial' && <HistorialPedidos />}
+
+            {/* Tab: Pedidos pendientes */}
+            {tab === 'pedidos' && pedidosPendientes.length === 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center mb-8">
                     <svg className="h-16 w-16 text-gray-300 mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                         <circle cx="9" cy="21" r="1"></circle>
@@ -217,8 +258,7 @@ export default function Pedidos() {
                 </div>
             )}
 
-            {/* Pedidos para Mesa */}
-            {pedidosPendientes.some((p) => p.tipo === 'mesa') && (
+            {tab === 'pedidos' && pedidosPendientes.some((p) => p.tipo === 'mesa') && (
                 <div className="mb-10">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -244,8 +284,7 @@ export default function Pedidos() {
                 </div>
             )}
 
-            {/* Pedidos a Domicilio */}
-            {pedidosPendientes.some((p) => p.tipo === 'domicilio') && (
+            {tab === 'pedidos' && pedidosPendientes.some((p) => p.tipo === 'domicilio') && (
                 <div className="mb-10">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

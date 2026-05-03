@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
     Route::post('pagos', [PagoController::class, 'store']);
     Route::get('pedidos/pendientes', [PedidoController::class, 'pendientes']);
+    Route::get('pedidos/cerrados-hoy', [PedidoController::class, 'cerradosHoy']);
     Route::post('pedidos', [PedidoController::class, 'store']);
     Route::put('pedidos/{pedido}', [PedidoController::class, 'update']);
     Route::delete('pedidos/{pedido}', [PedidoController::class, 'destroy']);

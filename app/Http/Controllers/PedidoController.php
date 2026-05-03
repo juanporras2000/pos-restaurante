@@ -24,6 +24,17 @@ class PedidoController extends Controller
         return response()->json($pedidos);
     }
 
+    public function cerradosHoy()
+    {
+        $pedidos = Pedido::where('estado', 'pagado')
+            ->whereDate('updated_at', today())
+            ->with(['detalles.producto', 'pago'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return response()->json($pedidos);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

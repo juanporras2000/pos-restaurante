@@ -243,10 +243,11 @@ class ReporteController extends Controller
     // ─── Reporte diario (legacy) ──────────────────────────────────────────────
     public function diario()
     {
-        $hoy = Carbon::today();
+        $inicio = now()->startOfDay()->utc();
+        $fin    = now()->endOfDay()->utc();
 
-        $pedidos = Pedido::whereDate('created_at', $hoy)->get();
-        $pagos   = Pago::whereDate('created_at', $hoy)->get();
+        $pedidos = Pedido::whereBetween('created_at', [$inicio, $fin])->get();
+        $pagos   = Pago::whereBetween('created_at', [$inicio, $fin])->get();
 
         $totalVentas    = $pedidos->sum('total');
         $totalPagos     = $pagos->sum('recibido');

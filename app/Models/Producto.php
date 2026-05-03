@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Cache;
 
 class Producto extends Model
 {
@@ -21,13 +22,18 @@ class Producto extends Model
         'imagen_producto',
         'tenant_id',
         'costo_calculado',
+        'es_domicilio',
+    ];
+
+    protected $casts = [
+        'es_domicilio' => 'boolean',
     ];
 
     /**
      * Exponer costo, utilidad y margen en todas las serializaciones JSON.
      * Los accessors son seguros: retornan 0 si la receta no está cargada.
      */
-    protected $appends = ['costo', 'utilidad', 'margen'];
+    protected $appends = ['costo', 'utilidad', 'margen', 'costo_domicilio', 'utilidad_domicilio', 'margen_domicilio'];
 
     // ─── Relaciones ───────────────────────────────────────────────────────────
 
@@ -46,6 +52,16 @@ class Producto extends Model
      * Receta formal (canonical). Úsala para cálculo de costos.
      * Eager load: with('receta.detalles.insumo')
      */
+    /**
+     * Insumos adicionales exclusivos para pedidos a domicilio (empaque, bolsas, etc.).
+     */
+    public function insumosDomicilio(): BelongsToMany
+    {
+        return $this->belongsToMany(Insumo::class, 'producto_domicilio_insumos')
+                    ->withPivot('cantidad')
+                    ->withTimestamps();
+    }
+
     public function receta(): HasOne
     {
         return $this->hasOne(Receta::class);
@@ -104,5 +120,45 @@ class Producto extends Model
         }
 
         return round(($this->utilidad / $precio) * 100, 2);
+    }
+
+    /**
+     * Costo a domicilio = costo base + insumos adicionales de domicilio + recargo global.
+     * Requiere: with('receta.detalles.insumo', 'insumosDomicilio')
+     */
+    public function getCostoDomicilioAttribute(): float
+    {
+        $base  = $this->costo;
+        $extra = 0.0;
+
+        if ($this->relationLoaded('insumosDomicilio')) {
+            $extra = (float) $this->insumosDomicilio->sum(
+                fn (Insumo $ins) =>
+                    (float) ($ins->pivot->cantidad ?? 0) * (float) ($ins->costo_unitario ?? 0)
+            );
+        }
+
+        // Recargo fijo global (configurable desde Ajustes)
+        $recargo = (float) Cache::remember('cfg_recargo_domicilio', 300, fn () =>
+            Configuracion::get('recargo_domicilio', 0)
+        );
+
+        return round($base + $extra + $recargo, 4);
+    }
+
+    public function getUtilidadDomicilioAttribute(): float
+    {
+        return round((float) $this->precio - $this->costo_domicilio, 4);
+    }
+
+    public function getMargenDomicilioAttribute(): float
+    {
+        $precio = (float) $this->precio;
+
+        if ($precio <= 0) {
+            return 0.0;
+        }
+
+        return round(($this->utilidad_domicilio / $precio) * 100, 2);
     }
 }

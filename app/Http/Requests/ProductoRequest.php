@@ -26,6 +26,7 @@ class ProductoRequest extends FormRequest
             'precio'        => 'required|numeric|min:0.01',
             'categoria_id'  => 'required|exists:categorias,id',
             'receta'        => 'required', // Se valida el string JSON o el array
+            'es_domicilio'  => 'nullable|boolean',
         ];
     }
 

@@ -98,6 +98,7 @@ export default function Productos() {
         formData.append('nombre', data.nombre);
         formData.append('precio', data.precio);
         formData.append('categoria_id', data.categoria_id);
+        formData.append('es_domicilio', data.es_domicilio ? '1' : '0');
         
         // Imagen desde la variable global temporal
         if (window._tmp_img) {
@@ -107,6 +108,11 @@ export default function Productos() {
         // Receta como JSON string para compatibilidad con FormData
         formData.append('receta', JSON.stringify(
             (data.receta ?? []).map((r) => ({ insumo_id: r.insumo_id, cantidad: r.cantidad }))
+        ));
+
+        // Insumos adicionales para domicilio
+        formData.append('receta_domicilio', JSON.stringify(
+            (data.receta_domicilio ?? []).map((r) => ({ insumo_id: r.insumo_id, cantidad: r.cantidad }))
         ));
 
         const esEdicion = Boolean(productoActual.id);

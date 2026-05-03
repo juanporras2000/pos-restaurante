@@ -8,6 +8,10 @@ use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\InsumoController;
 use App\Http\Controllers\Api\InventarioController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
+
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
 
     Route::post('pagos', [PagoController::class, 'store']);
@@ -26,7 +30,7 @@ use App\Http\Controllers\Api\InventarioController;
     Route::get('/reportes/insumos-top',           [ReporteController::class, 'insumosTop']);
     Route::get('/reportes/insumos-uso',           [ReporteController::class, 'insumosTop']);
     Route::get('/reporte-diario',                 [ReporteController::class, 'diario']);
-    
+
     Route::get('/productos', [ProductoController::class, 'index']);
     Route::post('/productos', [ProductoController::class, 'store']);
     Route::get('/productos/{producto}', [ProductoController::class, 'show']);

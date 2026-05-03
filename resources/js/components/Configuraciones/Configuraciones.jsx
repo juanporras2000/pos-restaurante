@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import GestionAdiciones from './GestionAdiciones';
 
 export default function Configuraciones() {
     const [recargoDomicilio, setRecargoDomicilio] = useState('');
@@ -57,7 +59,7 @@ export default function Configuraciones() {
     }
 
     return (
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
                     <svg className="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -102,6 +104,8 @@ export default function Configuraciones() {
                     </div>
                 </form>
             </div>
+
+            <GestionAdiciones />
         </div>
     );
 }

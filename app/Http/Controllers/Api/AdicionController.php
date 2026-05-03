@@ -8,11 +8,13 @@ use Illuminate\Http\Request;
 
 class AdicionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(
-            Adicion::where('activo', true)->orderBy('nombre')->get()
-        );
+        $query = $request->boolean('todas')
+            ? Adicion::orderBy('activo', 'desc')->orderBy('nombre')
+            : Adicion::where('activo', true)->orderBy('nombre');
+
+        return response()->json($query->get());
     }
 
     public function store(Request $request)

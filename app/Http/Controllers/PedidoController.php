@@ -38,9 +38,10 @@ class PedidoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tipo'          => 'required|in:mesa,domicilio',
+            'tipo'          => 'required|in:mesa,domicilio,recoger',
             'numero_mesa'   => 'nullable|integer|min:1',
             'direccion'     => 'nullable|string|max:500',
+            'nombre_cliente' => 'nullable|string|max:100',
             'productos'     => 'required|array|min:1',
             'productos.*.producto_id' => 'required|exists:productos,id',
             'productos.*.cantidad'    => 'required|integer|min:1',
@@ -85,11 +86,12 @@ class PedidoController extends Controller
             }
 
             $pedido = Pedido::create([
-                'user_id'      => auth()->id(),
-                'tipo'         => $request->tipo,
-                'numero_mesa'  => $request->numero_mesa,
-                'direccion'    => $request->direccion,
-                'total'        => 0,
+                'user_id'        => auth()->id(),
+                'tipo'           => $request->tipo,
+                'numero_mesa'    => $request->numero_mesa,
+                'direccion'      => $request->direccion,
+                'nombre_cliente' => $request->nombre_cliente,
+                'total'          => 0,
             ]);
 
             $total = 0;
@@ -169,9 +171,10 @@ class PedidoController extends Controller
         }
 
         $request->validate([
-            'tipo'          => 'required|in:mesa,domicilio',
+            'tipo'          => 'required|in:mesa,domicilio,recoger',
             'numero_mesa'   => 'nullable|integer|min:1',
             'direccion'     => 'nullable|string|max:500',
+            'nombre_cliente'=> 'nullable|string|max:100',
             'productos'     => 'required|array|min:1',
             'productos.*.producto_id' => 'required|exists:productos,id',
             'productos.*.cantidad'    => 'required|integer|min:1',
@@ -213,10 +216,11 @@ class PedidoController extends Controller
         }
 
         $pedido->update([
-            'tipo'        => $request->tipo,
-            'numero_mesa' => $request->numero_mesa,
-            'direccion'   => $request->direccion,
-            'total'       => $total,
+            'tipo'           => $request->tipo,
+            'numero_mesa'    => $request->numero_mesa,
+            'direccion'      => $request->direccion,
+            'nombre_cliente' => $request->nombre_cliente,
+            'total'          => $total,
         ]);
 
         return response()->json([

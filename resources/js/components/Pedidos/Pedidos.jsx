@@ -158,6 +158,34 @@ export default function Pedidos() {
                 </div>
             )}
 
+            {tab === 'pedidos' && pedidosPendientes.some((p) => p.tipo === 'recoger') && (
+                <div className="mb-10">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="h-5 w-5 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 12V22H4V12"></path>
+                            <path d="M22 7H2v5h20V7z"></path>
+                            <path d="M12 22V7"></path>
+                            <path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"></path>
+                            <path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"></path>
+                        </svg>
+                        Para Recoger
+                        <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            {pedidosPendientes.filter((p) => p.tipo === 'recoger').length}
+                        </span>
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {pedidosPendientes.filter((p) => p.tipo === 'recoger').map((pedido) => (
+                            <PedidoCard
+                                key={pedido.id}
+                                pedido={pedido}
+                                productos={productos}
+                                onActualizado={cargarPendientes}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Modal nuevo pedido */}
             <ModalNuevoPedido
                 abierto={modalNuevoAbierto}

@@ -83,11 +83,25 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
                             {pedido.direccion}
                         </p>
                     )}
+                    {pedido.tipo === 'recoger' && (
+                        <p className="text-sm text-orange-600 mt-1 flex items-center gap-1">
+                            <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M20 12V22H4V12"></path>
+                                <path d="M22 7H2v5h20V7z"></path>
+                                <path d="M12 22V7"></path>
+                                <path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"></path>
+                                <path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"></path>
+                            </svg>
+                            {pedido.nombre_cliente ? `Recoger — ${pedido.nombre_cliente}` : 'Para recoger'}
+                        </p>
+                    )}
                 </div>
                 <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    pedido.tipo === 'mesa' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                    pedido.tipo === 'mesa' ? 'bg-blue-100 text-blue-800'
+                    : pedido.tipo === 'domicilio' ? 'bg-green-100 text-green-800'
+                    : 'bg-orange-100 text-orange-800'
                 }`}>
-                    {pedido.tipo === 'mesa' ? 'Mesa' : 'Domicilio'}
+                    {pedido.tipo === 'mesa' ? 'Mesa' : pedido.tipo === 'domicilio' ? 'Domicilio' : 'Recoger'}
                 </span>
             </div>
 

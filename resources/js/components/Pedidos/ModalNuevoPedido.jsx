@@ -9,6 +9,7 @@ const PEDIDO_VACIO = {
     tipo: 'mesa',
     numero_mesa: '',
     direccion: '',
+    nombre_cliente: '',
 };
 
 export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerrar, pedidoEditar = null }) {
@@ -35,6 +36,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 tipo: pedidoEditar.tipo,
                 numero_mesa: pedidoEditar.numero_mesa ?? '',
                 direccion: pedidoEditar.direccion ?? '',
+                nombre_cliente: pedidoEditar.nombre_cliente ?? '',
             });
             const carritoInicial = (pedidoEditar.detalles ?? []).map((d) => ({
                 id: d.producto_id,
@@ -150,6 +152,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         if (carrito.length === 0) return false;
         if (pedido.tipo === 'mesa') return String(pedido.numero_mesa).trim() !== '' && parseInt(pedido.numero_mesa) > 0;
         if (pedido.tipo === 'domicilio') return DIRECCION_REGEX.test(pedido.direccion);
+        if (pedido.tipo === 'recoger') return true;
         return false;
     };
 
@@ -181,6 +184,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
             tipo: pedido.tipo,
             numero_mesa: pedido.numero_mesa || null,
             direccion: pedido.direccion || null,
+            nombre_cliente: pedido.nombre_cliente?.trim() || null,
             productos: carrito.map((item) => ({
                 producto_id: item.id,
                 cantidad: item.cantidad,
@@ -201,7 +205,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         try {
             const res = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                 body,
             });
 
@@ -271,7 +275,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             name="tipo"
                                             value="mesa"
                                             checked={pedido.tipo === 'mesa'}
-                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '' }))}
+                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
                                             className="text-blue-600 focus:ring-blue-500"
                                         />
                                         <span className="ml-2 text-sm font-medium text-gray-700">Para llevar a mesa</span>
@@ -297,7 +301,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             name="tipo"
                                             value="domicilio"
                                             checked={pedido.tipo === 'domicilio'}
-                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '' }))}
+                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
                                             className="text-blue-600 focus:ring-blue-500"
                                         />
                                         <span className="ml-2 text-sm font-medium text-gray-700">Para domicilio</span>
@@ -319,6 +323,31 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             {direccionError && (
                                                 <p className="mt-1 text-sm text-red-600">{direccionError}</p>
                                             )}
+                                        </div>
+                                    )}
+
+                                    <label className="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="tipo"
+                                            value="recoger"
+                                            checked={pedido.tipo === 'recoger'}
+                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
+                                            className="text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <span className="ml-2 text-sm font-medium text-gray-700">El cliente pasa a recoger</span>
+                                    </label>
+
+                                    {pedido.tipo === 'recoger' && (
+                                        <div className="ml-6">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del cliente <span className="text-gray-400 font-normal">(opcional)</span></label>
+                                            <input
+                                                type="text"
+                                                value={pedido.nombre_cliente}
+                                                onChange={(e) => setPedido((p) => ({ ...p, nombre_cliente: e.target.value }))}
+                                                placeholder="Ej: Juan Pérez"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
                                         </div>
                                     )}
                                 </div>

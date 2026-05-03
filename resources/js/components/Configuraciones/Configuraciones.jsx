@@ -12,7 +12,7 @@ export default function Configuraciones() {
             .then((r) => r.json())
             .then((data) => {
                 const entry = data.find((c) => c.clave === 'recargo_domicilio');
-                setRecargoDomicilio(entry ? entry.valor : '0');
+                setRecargoDomicilio(entry ? String(parseFloat(entry.valor) / 1000) : '0');
             })
             .finally(() => setCargando(false));
     }, []);
@@ -30,7 +30,7 @@ export default function Configuraciones() {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                 },
-                body: JSON.stringify({ recargo_domicilio: parseFloat(recargoDomicilio) || 0 }),
+                body: JSON.stringify({ recargo_domicilio: (parseFloat(recargoDomicilio) || 0) * 1000 }),
             });
 
             if (!res.ok) throw new Error('Error al guardar');
@@ -85,12 +85,15 @@ export default function Configuraciones() {
                             <input
                                 type="number"
                                 min="0"
-                                step="1"
+                                step="0.001"
                                 value={recargoDomicilio}
                                 onChange={(e) => setRecargoDomicilio(e.target.value)}
                                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
+                        {recargoDomicilio !== '' && !isNaN(parseFloat(recargoDomicilio)) && (
+                            <p className="mt-0.5 text-xs text-gray-400">= ${(parseFloat(recargoDomicilio) * 1000).toLocaleString('es-CO')}</p>
+                        )}
                     </div>
 
                     <div className="pt-2 flex justify-end">

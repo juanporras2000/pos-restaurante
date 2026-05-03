@@ -7,7 +7,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
     const [procesando, setProcesando] = useState(false);
 
     const total = pedido ? parseFloat(pedido.total) : 0;
-    const recibidoNum = parseFloat(recibido) || 0;
+    const recibidoNum = (parseFloat(recibido) || 0) * 1000;
     const cambio = recibidoNum - total;
 
     const cerrar = () => {
@@ -62,7 +62,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
             if (metodoPago === 'efectivo') {
                 Swal.fire({
                     icon: 'success',
-                    title: `Pago procesado. Cambio: $${parseFloat(data.cambio).toFixed(2)}`,
+                    title: `Pago procesado. Cambio: $${parseFloat(data.cambio).toLocaleString('es-CO')}`,  
                     timer: 2500,
                     showConfirmButton: false,
                     toast: true,
@@ -124,7 +124,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                         <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-gray-700">Total a pagar</span>
-                                <span className="text-lg font-semibold text-gray-900">${total.toFixed(2)}</span>
+                                <span className="text-lg font-semibold text-gray-900">${total.toLocaleString('es-CO')}</span>
                             </div>
                         </div>
 
@@ -150,17 +150,20 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                     type="number"
                                     value={recibido}
                                     onChange={(e) => setRecibido(e.target.value)}
-                                    placeholder="0.00"
-                                    step="0.01"
+                                    placeholder="Ej: 25"
+                                    step="0.001"
                                     min="0"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
+                                {recibido !== '' && !isNaN(parseFloat(recibido)) && (
+                                    <p className="mt-0.5 text-xs text-gray-400">= ${(parseFloat(recibido) * 1000).toLocaleString('es-CO')}</p>
+                                )}
                                 {recibidoNum > 0 && (
                                     <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
                                         <div className="flex justify-between text-sm">
                                             <span className="text-green-700">Cambio:</span>
                                             <span className="font-medium text-green-700">
-                                                ${cambio.toFixed(2)}
+                                                ${cambio.toLocaleString('es-CO')}
                                             </span>
                                         </div>
                                     </div>

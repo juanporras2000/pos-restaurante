@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 
 function ModalAdicion({ adicion, onGuardar, onCerrar }) {
     const [nombre, setNombre] = useState(adicion?.nombre ?? '');
-    const [precio, setPrecio] = useState(adicion?.precio ?? '');
+    const [precio, setPrecio] = useState(adicion?.precio != null ? adicion.precio / 1000 : '');
     const [guardando, setGuardando] = useState(false);
 
     const esEdicion = !!adicion?.id;
@@ -22,7 +22,7 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ nombre: nombre.trim(), precio: parseFloat(precio) }),
+                body: JSON.stringify({ nombre: nombre.trim(), precio: parseFloat(precio) * 1000 }),
             });
             if (!res.ok) throw new Error();
             const data = await res.json();
@@ -68,14 +68,17 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
                             <input
                                 type="number"
                                 min="0"
-                                step="0.01"
+                                step="0.001"
                                 value={precio}
                                 onChange={(e) => setPrecio(e.target.value)}
-                                placeholder="0.00"
+                                placeholder="Ej: 2"
                                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                 required
                             />
                         </div>
+                        {precio !== '' && !isNaN(parseFloat(precio)) && (
+                            <p className="mt-0.5 text-xs text-gray-400">= ${(parseFloat(precio) * 1000).toLocaleString('es-CO')}</p>
+                        )}
                     </div>
 
                     <div className="flex gap-2 pt-1">

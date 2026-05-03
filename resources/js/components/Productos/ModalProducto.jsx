@@ -5,7 +5,7 @@ import * as z from 'zod';
 
 const productoSchema = z.object({
     nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
-    precio: z.preprocess((val) => Number(val), z.number().min(0.01, 'El precio debe ser mayor a 0')),
+    precio: z.preprocess((val) => Number(val) * 1000, z.number().min(1, 'El precio debe ser mayor a 0')),
     categoria_id: z.string().min(1, 'Selecciona una categoría'),
     es_domicilio: z.boolean().optional(),
     receta: z.array(z.object({
@@ -41,6 +41,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
     });
 
     const esDomicilio = watch('es_domicilio');
+    const precioWatch = watch('precio');
 
     const { fields, append, remove, update } = useFieldArray({
         control,
@@ -58,7 +59,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
         if (abierto) {
             reset({
                 nombre: producto.nombre || '',
-                precio: producto.precio || '',
+                precio: producto.precio ? producto.precio / 1000 : '',
                 categoria_id: producto.categoria_id?.toString() || '',
                 es_domicilio: producto.es_domicilio ?? false,
                 receta: (producto.insumos || []).map(i => ({
@@ -173,9 +174,13 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                 <input
                                     {...register('precio')}
                                     type="number"
-                                    step="0.01"
+                                    step="0.001"
+                                    placeholder="Ej: 15"
                                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.precio ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                 />
+                                {precioWatch !== '' && !isNaN(Number(precioWatch)) && Number(precioWatch) > 0 && (
+                                    <p className="mt-0.5 text-xs text-gray-400">= ${(Number(precioWatch) * 1000).toLocaleString('es-CO')}</p>
+                                )}
                                 {errors.precio && <p className="mt-1 text-xs text-red-500">{errors.precio.message}</p>}
                             </div>
 

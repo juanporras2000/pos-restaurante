@@ -21,14 +21,17 @@ class ReporteController extends Controller
         $hasta   = $request->query('hasta');
 
         if ($desde && $hasta) {
-            return [Carbon::parse($desde)->startOfDay(), Carbon::parse($hasta)->endOfDay()];
+            return [
+                Carbon::parse($desde)->startOfDay()->utc(),
+                Carbon::parse($hasta)->endOfDay()->utc(),
+            ];
         }
 
         $ahora = Carbon::now();
         return match ($periodo) {
-            'semana' => [$ahora->copy()->startOfWeek(), $ahora->copy()->endOfWeek()],
-            'mes'    => [$ahora->copy()->startOfMonth(), $ahora->copy()->endOfMonth()],
-            default  => [$ahora->copy()->startOfDay(), $ahora->copy()->endOfDay()],
+            'semana' => [$ahora->copy()->startOfWeek()->utc(), $ahora->copy()->endOfWeek()->utc()],
+            'mes'    => [$ahora->copy()->startOfMonth()->utc(), $ahora->copy()->endOfMonth()->utc()],
+            default  => [$ahora->copy()->startOfDay()->utc(), $ahora->copy()->endOfDay()->utc()],
         };
     }
 
@@ -255,7 +258,7 @@ class ReporteController extends Controller
         $cantidadPedidos = $pedidos->count();
 
         return response()->json([
-            'fecha'           => $hoy->toDateString(),
+            'fecha'           => now()->toDateString(),
             'total_ventas'    => $totalVentas,
             'total_recibido'  => $totalPagos,
             'total_cambio'    => $totalCambio,

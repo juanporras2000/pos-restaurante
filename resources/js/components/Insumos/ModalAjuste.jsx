@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { ModalAjustePropTypes } from '../../propTypes';
 
 export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     const [tipo, setTipo] = useState('entrada');
@@ -14,8 +15,8 @@ export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     if (!abierto || !insumo) return null;
 
     const guardar = async () => {
-        const cant = parseFloat(cantidad);
-        if (isNaN(cant) || cant <= 0) { Swal.fire('Error', 'La cantidad debe ser mayor a 0', 'error'); return; }
+        const cant = Number.parseFloat(cantidad);
+        if (Number.isNaN(cant) || cant <= 0) { Swal.fire('Error', 'La cantidad debe ser mayor a 0', 'error'); return; }
         setGuardando(true);
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
@@ -81,7 +82,7 @@ export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
                         />
                     </div>
                     <div className="text-xs text-gray-500 bg-gray-50 rounded p-2">
-                        Stock actual: <strong>{parseFloat(insumo.stock_actual).toFixed(2)} {insumo.unidad_medida}</strong>
+                        Stock actual: <strong>{Number.parseFloat(insumo.stock_actual).toFixed(2)} {insumo.unidad_medida}</strong>
                     </div>
                 </div>
                 <div className="px-5 pb-5 flex justify-end gap-3">
@@ -94,3 +95,6 @@ export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
         </div>
     );
 }
+
+ModalAjuste.propTypes = ModalAjustePropTypes;
+

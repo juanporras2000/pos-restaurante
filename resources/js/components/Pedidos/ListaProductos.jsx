@@ -1,4 +1,5 @@
 import React from 'react';
+import { ListaProductosPropTypes } from '../../propTypes';
 
 export default function ListaProductos({ productos, carrito, onIncrementar, onDecrementar }) {
     const getCantidad = (productoId) => {
@@ -49,3 +50,6 @@ export default function ListaProductos({ productos, carrito, onIncrementar, onDe
         </div>
     );
 }
+
+ListaProductos.propTypes = ListaProductosPropTypes;
+

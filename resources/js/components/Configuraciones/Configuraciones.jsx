@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import GestionAdiciones from './GestionAdiciones';
-import RecargoDomicilio from './RecargoDomicilio';
+import AjustesGenerales from './AjustesGenerales';
 
 export default function Configuraciones() {
     const [tab, setTab] = useState('general');
@@ -40,7 +40,7 @@ export default function Configuraciones() {
                 </button>
             </div>
 
-            {tab === 'general' && <RecargoDomicilio />}
+            {tab === 'general' && <AjustesGenerales />}
             {tab === 'adiciones' && <GestionAdiciones />}
         </div>
     );

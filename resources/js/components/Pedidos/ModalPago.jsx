@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
+import { ModalPagoPropTypes } from '../../propTypes';
 
 export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
     const [metodoPago, setMetodoPago] = useState('efectivo');
@@ -195,3 +196,6 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
         </div>
     );
 }
+
+ModalPago.propTypes = ModalPagoPropTypes;
+

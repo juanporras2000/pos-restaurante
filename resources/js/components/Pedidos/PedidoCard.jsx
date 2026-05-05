@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
+import { PedidoCardPropTypes } from '../../propTypes';
 
 function formatDate(dateString) {
     return new Date(dateString).toLocaleString('es-ES', {
@@ -213,3 +214,6 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
         </>
     );
 }
+
+PedidoCard.propTypes = PedidoCardPropTypes;
+

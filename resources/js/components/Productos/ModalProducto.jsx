@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { ModalProductoPropTypes } from '../../propTypes';
 
 const productoSchema = z.object({
     nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
@@ -435,3 +436,6 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
         </div>
     );
 }
+
+ModalProducto.propTypes = ModalProductoPropTypes;
+

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CarritoPropTypes } from '../../propTypes';
 
 export default function Carrito({ 
     carrito, 
@@ -130,7 +131,7 @@ export default function Carrito({
                                                 <div key={adicion.id} className="flex items-center justify-between text-xs">
                                                     <span className="text-gray-700 flex-1">
                                                         {adicion.nombre}
-                                                        <span className="text-purple-500 ml-1">+${parseFloat(adicion.precio).toFixed(2)}</span>
+                                                        <span className="text-purple-500 ml-1">+${Number.parseFloat(adicion.precio).toFixed(2)}</span>
                                                     </span>
                                                     <div className="flex items-center gap-1 shrink-0">
                                                         <button
@@ -205,3 +206,5 @@ export default function Carrito({
         </div>
     );
 }
+
+Carrito.propTypes = CarritoPropTypes;

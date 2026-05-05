@@ -8,6 +8,7 @@ import {
     Tooltip, Legend,
 } from 'recharts';
 import { REPORT_CONFIG, CHART_PALETTE } from '../../constants';
+import { GraficaLineaPropTypes, GraficaBarraPropTypes, GraficaPiePropTypes } from '../../propTypes';
 
 const PALETTE = CHART_PALETTE;
 
@@ -153,3 +154,8 @@ export function GraficaPie({ data = [], nameKey = 'metodo_pago', valueKey = 'tot
         </div>
     );
 }
+
+GraficaLinea.propTypes = GraficaLineaPropTypes;
+GraficaBarra.propTypes = GraficaBarraPropTypes;
+GraficaPie.propTypes = GraficaPiePropTypes;
+

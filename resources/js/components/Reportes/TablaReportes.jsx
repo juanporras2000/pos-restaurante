@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TablaReportesPropTypes } from '../../propTypes';
 
 const fmtQ = (n) =>
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
@@ -148,3 +149,6 @@ export default function TablaReportes({ rows = [], emptyMsg = 'Sin datos para es
         </div>
     );
 }
+
+TablaReportes.propTypes = TablaReportesPropTypes;
+

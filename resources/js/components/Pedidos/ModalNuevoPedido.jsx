@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import ListaProductos from './ListaProductos';
 import Carrito from './Carrito';
+import { ModalNuevoPedidoPropTypes } from '../../propTypes';
 
 const PEDIDO_VACIO = {
     tipo: 'mesa',
@@ -406,3 +407,6 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         </div>
     );
 }
+
+ModalNuevoPedido.propTypes = ModalNuevoPedidoPropTypes;
+

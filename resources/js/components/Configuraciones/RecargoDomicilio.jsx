@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 
 export default function RecargoDomicilio() {
     const [recargoDomicilio, setRecargoDomicilio] = useState('');
+    const [horaCierre, setHoraCierre] = useState('5');
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
 
@@ -10,8 +11,11 @@ export default function RecargoDomicilio() {
         fetch('/api/configuraciones')
             .then((r) => r.json())
             .then((data) => {
-                const entry = data.find((c) => c.clave === 'recargo_domicilio');
-                setRecargoDomicilio(entry ? String(parseFloat(entry.valor) / 1000) : '0');
+                const recargo = data.find((c) => c.clave === 'recargo_domicilio');
+                setRecargoDomicilio(recargo ? String(parseFloat(recargo.valor) / 1000) : '0');
+                
+                const hora = data.find((c) => c.clave === 'hora_cierre');
+                setHoraCierre(hora ? hora.valor : '5');
             })
             .finally(() => setCargando(false));
     }, []);
@@ -29,7 +33,10 @@ export default function RecargoDomicilio() {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                 },
-                body: JSON.stringify({ recargo_domicilio: (parseFloat(recargoDomicilio) || 0) * 1000 }),
+                body: JSON.stringify({ 
+                    recargo_domicilio: (parseFloat(recargoDomicilio) || 0) * 1000,
+                    hora_cierre: parseInt(horaCierre)
+                }),
             });
 
             if (!res.ok) throw new Error('Error al guardar');
@@ -85,6 +92,24 @@ export default function RecargoDomicilio() {
                     {recargoDomicilio !== '' && !isNaN(parseFloat(recargoDomicilio)) && (
                         <p className="mt-0.5 text-xs text-gray-400">= ${(parseFloat(recargoDomicilio) * 1000).toLocaleString('es-CO')}</p>
                     )}
+                </div>
+
+                <div className="border-t border-gray-100 pt-5">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Hora de reinicio de pedidos
+                    </label>
+                    <p className="text-xs text-gray-400 mb-2">
+                        A qué hora de la madrugada quieres que el contador de pedidos (Pedido #1) vuelva a empezar.
+                    </p>
+                    <select
+                        value={horaCierre}
+                        onChange={(e) => setHoraCierre(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                        {[...Array(13).keys()].map(h => (
+                            <option key={h} value={h}>{h === 0 ? '12:00 AM (Medianoche)' : `${h}:00 AM`}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="pt-2 flex justify-end">

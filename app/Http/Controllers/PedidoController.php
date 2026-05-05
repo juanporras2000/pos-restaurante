@@ -43,7 +43,7 @@ class PedidoController extends Controller
         $request->validate([
             'tipo'          => 'required|in:mesa,domicilio,recoger',
             'numero_mesa'   => 'nullable|integer|min:1',
-            'direccion'     => 'nullable|string|max:500',
+            'direccion'     => 'nullable|string|max:1000',
             'nombre_cliente' => 'nullable|string|max:100',
             'productos'     => 'required|array|min:1',
             'productos.*.producto_id' => 'required|exists:productos,id',
@@ -130,6 +130,14 @@ class PedidoController extends Controller
             }
 
             $pedido->update(['total' => $total]);
+
+            // Aplicar recargo de domicilio si corresponde
+            if ($pedido->tipo === 'domicilio') {
+                $recargo = (float) \App\Models\Configuracion::get('recargo_domicilio', 0);
+                if ($recargo > 0) {
+                    $pedido->increment('total', $recargo);
+                }
+            }
 
             // Descontar stock de insumos y registrar movimientos
             foreach ($consumo as $insumoId => $cantidad) {

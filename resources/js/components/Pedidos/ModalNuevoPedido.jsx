@@ -3,8 +3,6 @@ import Swal from 'sweetalert2';
 import ListaProductos from './ListaProductos';
 import Carrito from './Carrito';
 
-const DIRECCION_REGEX = /^(carrera|calle) \d+ #\d+-\d+( .*)?$/i;
-
 const PEDIDO_VACIO = {
     tipo: 'mesa',
     numero_mesa: '',
@@ -18,16 +16,26 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
     const [pedido, setPedido] = useState(PEDIDO_VACIO);
     const [carrito, setCarrito] = useState([]);
     const [adicionesDisponibles, setAdicionesDisponibles] = useState([]);
+    const [configuraciones, setConfiguraciones] = useState([]);
     const [direccionError, setDireccionError] = useState('');
     const [enviando, setEnviando] = useState(false);
 
-    // Cargar adiciones disponibles
+    // Cargar configuraciones y adiciones
     useEffect(() => {
-        fetch('/api/adiciones')
-            .then((r) => r.json())
-            .then(setAdicionesDisponibles)
-            .catch(() => {});
-    }, []);
+        if (abierto) {
+            fetch('/api/configuraciones')
+                .then((r) => r.json())
+                .then(setConfiguraciones)
+                .catch(() => {});
+
+            fetch('/api/adiciones')
+                .then((r) => r.json())
+                .then(setAdicionesDisponibles)
+                .catch(() => {});
+        }
+    }, [abierto]);
+
+    const recargoDomicilio = parseFloat(configuraciones.find(c => c.clave === 'recargo_domicilio')?.valor ?? 0);
 
     // Pre-cargar datos cuando se edita
     useEffect(() => {
@@ -142,8 +150,8 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
     const validarDireccion = (valor) => {
         if (pedido.tipo !== 'domicilio') { setDireccionError(''); return; }
         setDireccionError(
-            !DIRECCION_REGEX.test(valor)
-                ? 'Formato: carrera/calle 23 #11-21 (opcional texto adicional)'
+            valor.trim().length < 5
+                ? 'Por favor ingresa una dirección más detallada'
                 : ''
         );
     };
@@ -151,7 +159,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
     const puedeCrear = () => {
         if (carrito.length === 0) return false;
         if (pedido.tipo === 'mesa') return String(pedido.numero_mesa).trim() !== '' && parseInt(pedido.numero_mesa) > 0;
-        if (pedido.tipo === 'domicilio') return DIRECCION_REGEX.test(pedido.direccion);
+        if (pedido.tipo === 'domicilio') return pedido.direccion.trim().length >= 5;
         if (pedido.tipo === 'recoger') return true;
         return false;
     };
@@ -254,7 +262,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                             <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 4v16m8-8H4"></path>
                             </svg>
-                            {esEdicion ? `Editar Pedido #${pedidoEditar.id}` : 'Crear Nuevo Pedido'}
+                            {esEdicion ? `Editar Pedido #${pedidoEditar.numero_dia || pedidoEditar.id}` : 'Crear Nuevo Pedido'}
                         </h2>
                         <button type="button" onClick={cerrar} className="text-gray-400 hover:text-gray-600">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -369,6 +377,8 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                 onNotaChange={cambiarNota}
                                 onAdicionIncrementar={adicionIncrementar}
                                 onAdicionDecrementar={adicionDecrementar}
+                                tipoPedido={pedido.tipo}
+                                recargoDomicilio={recargoDomicilio}
                             />
                         </div>
                     </div>

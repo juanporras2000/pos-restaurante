@@ -1,14 +1,26 @@
 import React, { useState } from 'react';
 
-export default function Carrito({ carrito, adicionesDisponibles = [], onEliminar, onNotaChange, onAdicionIncrementar, onAdicionDecrementar }) {
+export default function Carrito({ 
+    carrito, 
+    adicionesDisponibles = [], 
+    onEliminar, 
+    onNotaChange, 
+    onAdicionIncrementar, 
+    onAdicionDecrementar,
+    tipoPedido,
+    recargoDomicilio = 0
+}) {
     const [notaAbierta, setNotaAbierta] = useState(null);
     const [adicionAbierta, setAdicionAbierta] = useState(null);
 
-    const totalGeneral = carrito.reduce((sum, item) => {
+    const subtotalProductos = carrito.reduce((sum, item) => {
         const baseSubtotal = item.subtotal;
         const adicionesSubtotal = (item.adiciones ?? []).reduce((s, a) => s + a.subtotal, 0);
         return sum + baseSubtotal + adicionesSubtotal;
     }, 0);
+
+    const aplicaRecargo = tipoPedido === 'domicilio' && recargoDomicilio > 0;
+    const totalGeneral = subtotalProductos + (aplicaRecargo ? recargoDomicilio : 0);
 
     if (carrito.length === 0) return null;
 
@@ -166,7 +178,27 @@ export default function Carrito({ carrito, adicionesDisponibles = [], onEliminar
                     );
                 })}
             </div>
-            <div className="flex justify-between items-center text-lg font-semibold border-t border-gray-200 pt-3">
+
+            {aplicaRecargo && (
+                <div className="flex justify-between items-center text-sm text-gray-600 mb-1 border-t border-gray-100 pt-3">
+                    <span>Subtotal</span>
+                    <span>${subtotalProductos.toFixed(2)}</span>
+                </div>
+            )}
+            {aplicaRecargo && (
+                <div className="flex justify-between items-center text-sm text-blue-600 mb-2">
+                    <span className="flex items-center gap-1">
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        Recargo domicilio
+                    </span>
+                    <span>+${recargoDomicilio.toFixed(2)}</span>
+                </div>
+            )}
+
+            <div className={`flex justify-between items-center text-lg font-semibold ${aplicaRecargo ? 'border-t border-gray-200 pt-2' : 'border-t border-gray-200 pt-3'}`}>
                 <span>Total</span>
                 <span>${totalGeneral.toFixed(2)}</span>
             </div>

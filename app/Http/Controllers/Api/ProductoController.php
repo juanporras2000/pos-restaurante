@@ -105,7 +105,7 @@ class ProductoController extends Controller
                     ->get()
             );
         }
-        return response()->json($query->paginate(5));
+        return response()->json($query->paginate(8));
     }
 
     public function show($id)

@@ -41,6 +41,9 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
     Route::delete('/productos/{producto}', [ProductoController::class, 'destroy']);
 
     Route::get('/categorias', [CategoriaController::class, 'index']);
+    Route::post('/categorias', [CategoriaController::class, 'store']);
+    Route::put('/categorias/{categoria}', [CategoriaController::class, 'update']);
+    Route::delete('/categorias/{categoria}', [CategoriaController::class, 'destroy']);
     Route::get('/insumos', [InsumoController::class, 'index']);
     Route::post('/insumos', [InsumoController::class, 'store']);
     Route::put('/insumos/{insumo}', [InsumoController::class, 'update']);

@@ -64,6 +64,13 @@
                 Reportes
             </a>
 
+            <a href="/gastos" class="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors duration-200 group">
+                <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path>
+                </svg>
+                Gastos
+            </a>
+
             <a href="/insumos" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors duration-200 group">
                 <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <path d="M4 3v7a2 2 0 0 0 2 2h1v8"></path>

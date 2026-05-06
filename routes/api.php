@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\InsumoController;
 use App\Http\Controllers\Api\AdicionController;
 use App\Http\Controllers\Api\ConfiguracionController;
 use App\Http\Controllers\Api\InventarioController;
+use App\Http\Controllers\Api\GastoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
@@ -52,6 +53,11 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
     Route::get('/inventario/movimientos', [InventarioController::class, 'movimientos']);
     Route::post('/inventario/ajuste', [InventarioController::class, 'ajuste']);
     Route::get('/inventario/alertas', [InventarioController::class, 'alertas']);
+
+    Route::get('/gastos', [GastoController::class, 'index']);
+    Route::post('/gastos', [GastoController::class, 'store']);
+    Route::put('/gastos/{gasto}', [GastoController::class, 'update']);
+    Route::delete('/gastos/{gasto}', [GastoController::class, 'destroy']);
 
     Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
     Route::put('/configuraciones', [ConfiguracionController::class, 'update']);

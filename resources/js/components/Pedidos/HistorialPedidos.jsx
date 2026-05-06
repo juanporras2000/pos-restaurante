@@ -1,5 +1,11 @@
-import PropTypes from 'prop-types';
 import React, { useState, useEffect, useCallback } from 'react';
+
+const TIPOS_GASTO = {
+    insumos:   { label: 'Insumos',   color: 'bg-blue-100 text-blue-700' },
+    gasolina:  { label: 'Gasolina',  color: 'bg-yellow-100 text-yellow-700' },
+    servicios: { label: 'Servicios', color: 'bg-purple-100 text-purple-700' },
+    otro:      { label: 'Otro',      color: 'bg-gray-100 text-gray-600' },
+};
 
 const METODO_ETIQUETA = {
     efectivo: 'Efectivo',
@@ -24,11 +30,13 @@ function formatFecha(dateString) {
     });
 }
 
-function ResumenDia({ pedidos }) {
-    const total = pedidos.reduce((acc, p) => acc + parseFloat(p.total || 0), 0);
+function ResumenDia({ pedidos, gastos }) {
+    const totalVentas = pedidos.reduce((acc, p) => acc + Number.parseFloat(p.total || 0), 0);
+    const totalGastos = gastos.reduce((acc, g) => acc + Number.parseFloat(g.monto || 0), 0);
+    const neto = totalVentas - totalGastos;
     const porMetodo = pedidos.reduce((acc, p) => {
         const metodo = p.pago?.metodo_pago ?? 'desconocido';
-        acc[metodo] = (acc[metodo] ?? 0) + parseFloat(p.total || 0);
+        acc[metodo] = (acc[metodo] ?? 0) + Number.parseFloat(p.total || 0);
         return acc;
     }, {});
 
@@ -39,9 +47,23 @@ function ResumenDia({ pedidos }) {
                 <p className="text-2xl font-bold text-gray-900">{pedidos.length}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Total del día</p>
-                <p className="text-2xl font-bold text-green-600">${total.toFixed(2)}</p>
+                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Ventas del día</p>
+                <p className="text-2xl font-bold text-green-600">${totalVentas.toFixed(2)}</p>
             </div>
+            {totalGastos > 0 && (
+                <div className="bg-white rounded-xl border border-red-100 shadow-sm p-4">
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Gastos del día</p>
+                    <p className="text-2xl font-bold text-red-600">-${totalGastos.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''}</p>
+                </div>
+            )}
+            {totalGastos > 0 && (
+                <div className={`bg-white rounded-xl border shadow-sm p-4 ${neto >= 0 ? 'border-green-100' : 'border-red-200'}`}>
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Neto del día</p>
+                    <p className={`text-2xl font-bold ${neto >= 0 ? 'text-green-700' : 'text-red-600'}`}>${neto.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 mt-1">Ventas − Gastos</p>
+                </div>
+            )}
             {Object.entries(porMetodo).map(([metodo, monto]) => (
                 <div key={metodo} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">
@@ -167,20 +189,88 @@ function TarjetaPedido({ pedido }) {
     );
 }
 
+function SeccionGastos({ gastos }) {
+    const [expandido, setExpandido] = useState(true);
+    const total = gastos.reduce((s, g) => s + parseFloat(g.monto), 0);
+
+    return (
+        <div className="bg-white rounded-xl shadow-sm border border-red-100 overflow-hidden">
+            <button
+                type="button"
+                onClick={() => setExpandido((v) => !v)}
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-red-50 transition-colors"
+            >
+                <div className="flex items-center gap-2">
+                    <svg className="h-5 w-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                    </svg>
+                    <span className="font-semibold text-gray-800">Gastos del día</span>
+                    <span className="bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                        {gastos.length}
+                    </span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="font-bold text-red-600">-${total.toFixed(2)}</span>
+                    <svg
+                        className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${expandido ? 'rotate-180' : ''}`}
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    >
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </div>
+            </button>
+
+            {expandido && (
+                <div className="border-t border-red-100 divide-y divide-gray-50">
+                    {gastos.map((g) => {
+                        const tipo = TIPOS_GASTO[g.tipo] ?? TIPOS_GASTO.otro;
+                        const hora = new Date(g.created_at).toLocaleTimeString('es-CO', {
+                            hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota',
+                        });
+                        return (
+                            <div key={g.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${tipo.color}`}>
+                                        {tipo.label}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-gray-800 font-medium truncate">{g.concepto}</p>
+                                        {g.nota && <p className="text-xs text-gray-400 truncate">{g.nota}</p>}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0 ml-3">
+                                    <span className="text-xs text-gray-400">{hora}</span>
+                                    <span className="font-semibold text-red-600">${Number.parseFloat(g.monto).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function HistorialPedidos() {
     const [pedidos, setPedidos] = useState([]);
+    const [gastos, setGastos]   = useState([]);
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState(null);
 
     const cargar = useCallback(() => {
         setCargando(true);
         setError(null);
-        fetch('/api/pedidos/cerrados-hoy')
-            .then((r) => {
+        Promise.all([
+            fetch('/api/pedidos/cerrados-hoy').then((r) => {
                 if (!r.ok) throw new Error('Error al cargar el historial');
                 return r.json();
+            }),
+            fetch('/api/gastos').then((r) => r.json()).catch(() => ({ gastos: [], total: 0 })),
+        ])
+            .then(([pedidosData, gastosData]) => {
+                setPedidos(pedidosData);
+                setGastos(gastosData.gastos ?? []);
             })
-            .then(setPedidos)
             .catch((e) => setError(e.message))
             .finally(() => setCargando(false));
     }, []);
@@ -233,7 +323,7 @@ export default function HistorialPedidos() {
                 </div>
             )}
 
-            {!cargando && !error && pedidos.length === 0 && (
+            {!cargando && !error && pedidos.length === 0 && gastos.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                     <svg className="h-16 w-16 mb-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                         <rect x="6" y="4" width="12" height="16" rx="2"></rect>
@@ -244,14 +334,17 @@ export default function HistorialPedidos() {
                 </div>
             )}
 
-            {!cargando && !error && pedidos.length > 0 && (
+            {!cargando && !error && (pedidos.length > 0 || gastos.length > 0) && (
                 <>
-                    <ResumenDia pedidos={pedidos} />
-                    <div className="space-y-3">
-                        {pedidos.map((pedido) => (
-                            <TarjetaPedido key={pedido.id} pedido={pedido} />
-                        ))}
-                    </div>
+                    <ResumenDia pedidos={pedidos} gastos={gastos} />
+                    {pedidos.length > 0 && (
+                        <div className="space-y-3 mb-6">
+                            {pedidos.map((pedido) => (
+                                <TarjetaPedido key={pedido.id} pedido={pedido} />
+                            ))}
+                        </div>
+                    )}
+                    {gastos.length > 0 && <SeccionGastos gastos={gastos} />}
                 </>
             )}
         </div>

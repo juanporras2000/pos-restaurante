@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import Gastos from './components/GastosAperturaCaja/Gastos';
+import Gastos from './components/GastosAperturaCaja/GastosAperturaCaja';
 
 const container = document.getElementById('gastos-app');
 if (container) {

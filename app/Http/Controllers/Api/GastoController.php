@@ -48,6 +48,12 @@ class GastoController extends Controller
 
     public function update(Request $request, Gasto $gasto)
     {
+        $hoy = Carbon::now('America/Bogota')->toDateString();
+        $fechaGasto = Carbon::parse($gasto->created_at)->setTimezone('America/Bogota')->toDateString();
+        if ($fechaGasto !== $hoy) {
+            return response()->json(['message' => 'Solo se pueden modificar gastos del día actual.'], 422);
+        }
+
         $data = $request->validate([
             'concepto' => 'required|string|max:255',
             'tipo'     => 'required|in:insumos,gasolina,servicios,otro',
@@ -62,6 +68,12 @@ class GastoController extends Controller
 
     public function destroy(Gasto $gasto)
     {
+        $hoy = Carbon::now('America/Bogota')->toDateString();
+        $fechaGasto = Carbon::parse($gasto->created_at)->setTimezone('America/Bogota')->toDateString();
+        if ($fechaGasto !== $hoy) {
+            return response()->json(['message' => 'Solo se pueden eliminar gastos del día actual.'], 422);
+        }
+
         $gasto->delete();
         return response()->json(['message' => 'Gasto eliminado']);
     }

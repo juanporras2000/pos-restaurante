@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AdicionController;
 use App\Http\Controllers\Api\ConfiguracionController;
 use App\Http\Controllers\Api\InventarioController;
 use App\Http\Controllers\Api\GastoController;
+use App\Http\Controllers\Api\CajaAperturaController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
@@ -58,6 +59,9 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
     Route::post('/gastos', [GastoController::class, 'store']);
     Route::put('/gastos/{gasto}', [GastoController::class, 'update']);
     Route::delete('/gastos/{gasto}', [GastoController::class, 'destroy']);
+
+    Route::get('/caja-apertura/{fecha}', [CajaAperturaController::class, 'show']);
+    Route::post('/caja-apertura', [CajaAperturaController::class, 'store']);
 
     Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
     Route::put('/configuraciones', [ConfiguracionController::class, 'update']);

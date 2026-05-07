@@ -30,10 +30,12 @@ function formatFecha(dateString) {
     });
 }
 
-function ResumenDia({ pedidos, gastos }) {
+function ResumenDia({ pedidos, gastos, apertura }) {
     const totalVentas = pedidos.reduce((acc, p) => acc + Number.parseFloat(p.total || 0), 0);
     const totalGastos = gastos.reduce((acc, g) => acc + Number.parseFloat(g.monto || 0), 0);
     const neto = totalVentas - totalGastos;
+    const montoApertura = apertura ? Number.parseFloat(apertura.monto) : null;
+    const saldoCaja = montoApertura != null ? montoApertura + totalVentas - totalGastos : null;
     const porMetodo = pedidos.reduce((acc, p) => {
         const metodo = p.pago?.metodo_pago ?? 'desconocido';
         acc[metodo] = (acc[metodo] ?? 0) + Number.parseFloat(p.total || 0);
@@ -42,6 +44,13 @@ function ResumenDia({ pedidos, gastos }) {
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {apertura && (
+                <div className="bg-white rounded-xl border-2 border-green-200 shadow-sm p-4">
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Base de apertura</p>
+                    <p className="text-2xl font-bold text-green-600">${montoApertura.toFixed(2)}</p>
+                    {apertura.nota && <p className="text-xs text-gray-400 mt-1 truncate">{apertura.nota}</p>}
+                </div>
+            )}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                 <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Pedidos cerrados</p>
                 <p className="text-2xl font-bold text-gray-900">{pedidos.length}</p>
@@ -57,7 +66,14 @@ function ResumenDia({ pedidos, gastos }) {
                     <p className="text-xs text-gray-400 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''}</p>
                 </div>
             )}
-            {totalGastos > 0 && (
+            {saldoCaja != null && (
+                <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${saldoCaja >= 0 ? 'border-green-300' : 'border-red-300'}`}>
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Saldo en caja</p>
+                    <p className={`text-2xl font-bold ${saldoCaja >= 0 ? 'text-green-700' : 'text-red-600'}`}>${saldoCaja.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 mt-1">Base + Ventas − Gastos</p>
+                </div>
+            )}
+            {saldoCaja == null && totalGastos > 0 && (
                 <div className={`bg-white rounded-xl border shadow-sm p-4 ${neto >= 0 ? 'border-green-100' : 'border-red-200'}`}>
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Neto del día</p>
                     <p className={`text-2xl font-bold ${neto >= 0 ? 'text-green-700' : 'text-red-600'}`}>${neto.toFixed(2)}</p>
@@ -252,24 +268,28 @@ function SeccionGastos({ gastos }) {
 }
 
 export default function HistorialPedidos() {
-    const [pedidos, setPedidos] = useState([]);
-    const [gastos, setGastos]   = useState([]);
-    const [cargando, setCargando] = useState(false);
-    const [error, setError] = useState(null);
+    const [pedidos, setPedidos]     = useState([]);
+    const [gastos, setGastos]       = useState([]);
+    const [apertura, setApertura]   = useState(null);
+    const [cargando, setCargando]   = useState(false);
+    const [error, setError]         = useState(null);
 
     const cargar = useCallback(() => {
         setCargando(true);
         setError(null);
+        const fechaHoy = new Date().toISOString().slice(0, 10);
         Promise.all([
             fetch('/api/pedidos/cerrados-hoy').then((r) => {
                 if (!r.ok) throw new Error('Error al cargar el historial');
                 return r.json();
             }),
             fetch('/api/gastos').then((r) => r.json()).catch(() => ({ gastos: [], total: 0 })),
+            fetch(`/api/caja-apertura/${fechaHoy}`).then((r) => r.json()).catch(() => null),
         ])
-            .then(([pedidosData, gastosData]) => {
+            .then(([pedidosData, gastosData, aperturaData]) => {
                 setPedidos(pedidosData);
                 setGastos(gastosData.gastos ?? []);
+                setApertura(aperturaData ?? null);
             })
             .catch((e) => setError(e.message))
             .finally(() => setCargando(false));
@@ -334,9 +354,9 @@ export default function HistorialPedidos() {
                 </div>
             )}
 
-            {!cargando && !error && (pedidos.length > 0 || gastos.length > 0) && (
+            {!cargando && !error && (pedidos.length > 0 || gastos.length > 0 || apertura) && (
                 <>
-                    <ResumenDia pedidos={pedidos} gastos={gastos} />
+                    <ResumenDia pedidos={pedidos} gastos={gastos} apertura={apertura} />
                     {pedidos.length > 0 && (
                         <div className="space-y-3 mb-6">
                             {pedidos.map((pedido) => (

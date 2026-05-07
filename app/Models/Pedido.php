@@ -29,6 +29,10 @@ class Pedido extends Model
      */
     public function getNumeroDiaAttribute()
     {
+        if (!$this->created_at) {
+            return null;
+        }
+
         // La jornada inicia a la hora configurada (por defecto 5 AM)
         $horaCierre = (int) Configuracion::get('hora_cierre', 5);
 

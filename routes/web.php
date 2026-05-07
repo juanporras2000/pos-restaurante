@@ -40,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
         return view('insumos');
     });
 
+    Route::get('/gastos', function () {
+        return view('gastos');
+    })->name('gastos');
+
     Route::get('/configuraciones', function () {
         return view('configuraciones');
     })->name('configuraciones');

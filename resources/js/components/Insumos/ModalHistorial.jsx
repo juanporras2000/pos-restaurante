@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ModalHistorialPropTypes } from '../../propTypes';
 
 const TIPO_CLASE = {
     entrada: 'bg-green-100 text-green-700',
@@ -58,9 +59,9 @@ export default function ModalHistorial({ abierto, insumo, onCerrar }) {
                                         <td className="px-5 py-3">
                                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TIPO_CLASE[m.tipo]}`}>{TIPO_LABEL[m.tipo]}</span>
                                         </td>
-                                        <td className="px-5 py-3 text-right font-medium text-gray-900">{parseFloat(m.cantidad).toFixed(2)}</td>
-                                        <td className="px-5 py-3 text-right text-gray-500">{parseFloat(m.stock_antes).toFixed(2)}</td>
-                                        <td className="px-5 py-3 text-right text-gray-700">{parseFloat(m.stock_despues).toFixed(2)}</td>
+                                        <td className="px-5 py-3 text-right font-medium text-gray-900">{Number.parseFloat(m.cantidad).toFixed(2)}</td>
+                                        <td className="px-5 py-3 text-right text-gray-500">{Number.parseFloat(m.stock_antes).toFixed(2)}</td>
+                                        <td className="px-5 py-3 text-right text-gray-700">{Number.parseFloat(m.stock_despues).toFixed(2)}</td>
                                         <td className="px-5 py-3 text-gray-500 max-w-xs truncate">{m.motivo ?? ''}</td>
                                     </tr>
                                 ))}
@@ -75,3 +76,6 @@ export default function ModalHistorial({ abierto, insumo, onCerrar }) {
         </div>
     );
 }
+
+ModalHistorial.propTypes = ModalHistorialPropTypes;
+

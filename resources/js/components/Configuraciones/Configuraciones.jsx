@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import GestionAdiciones from './GestionAdiciones';
-import RecargoDomicilio from './RecargoDomicilio';
+import AjustesGenerales from './AjustesGenerales';
+import GestionCategorias from './GestionCategorias';
 
 export default function Configuraciones() {
     const [tab, setTab] = useState('general');
@@ -26,6 +27,20 @@ export default function Configuraciones() {
                 </button>
                 <button
                     type="button"
+                    onClick={() => setTab('categorias')}
+                    className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+                        tab === 'categorias'
+                            ? 'border-orange-500 text-orange-500'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M4 6h16M4 10h16M4 14h8M4 18h8" />
+                    </svg>
+                    Categorías
+                </button>
+                <button
+                    type="button"
                     onClick={() => setTab('adiciones')}
                     className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
                         tab === 'adiciones'
@@ -40,7 +55,8 @@ export default function Configuraciones() {
                 </button>
             </div>
 
-            {tab === 'general' && <RecargoDomicilio />}
+            {tab === 'general' && <AjustesGenerales />}
+            {tab === 'categorias' && <GestionCategorias />}
             {tab === 'adiciones' && <GestionAdiciones />}
         </div>
     );

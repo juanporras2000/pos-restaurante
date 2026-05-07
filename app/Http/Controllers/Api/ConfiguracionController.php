@@ -27,9 +27,10 @@ class ConfiguracionController extends Controller
     {
         $request->validate([
             'recargo_domicilio' => 'sometimes|numeric|min:0',
+            'hora_cierre' => 'sometimes|integer|between:0,23',
         ]);
 
-        foreach ($request->only(['recargo_domicilio']) as $clave => $valor) {
+        foreach ($request->only(['recargo_domicilio', 'hora_cierre']) as $clave => $valor) {
             Configuracion::set($clave, $valor);
             // Invalidar cache para que el cambio aplique de inmediato
             Cache::forget("cfg_{$clave}");

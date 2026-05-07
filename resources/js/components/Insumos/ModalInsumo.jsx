@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-
+import { ModalInsumosPropTypes } from '../../propTypes';
 
 const INSUMO_VACIO = { 
     id: null, nombre: '', unidad_medida: '', 
@@ -29,11 +29,7 @@ const insumoSchema = z.object({
     valor_producto: z.preprocess(
         (val) => (val === '' || val === null ? 0 : Number(val)),
         z.number().min(0, 'No puede ser negativo')
-    ),
-    costo_unitario: z.preprocess(
-        (val) => (val === '' || val === null ? 0 : Number(val)),
-        z.number().min(0)
-    ),
+    )
 });
 
 
@@ -46,9 +42,9 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
     const stockActual    = useWatch({ control, name: 'stock_actual' });
     const valorProducto  = useWatch({ control, name: 'valor_producto' });
     useEffect(() => {
-    const stock = parseFloat(stockActual)  || 0;
-    const valor = parseFloat(valorProducto) || 0;
-    const costo = stock > 0 ? parseFloat((valor / stock).toFixed(4)) : 0;
+    const stock = Number.parseFloat(stockActual)  || 0;
+    const valor = Number.parseFloat(valorProducto) || 0;
+    const costo = stock > 0 ? Number.parseFloat((valor / stock).toFixed(4)) : 0;
     setValue('costo_unitario', costo);
 }, [stockActual, valorProducto, setValue]);
     useEffect(() => {
@@ -197,3 +193,6 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
         </div>
     );
 }
+
+ModalInsumo.propTypes = ModalInsumosPropTypes;
+

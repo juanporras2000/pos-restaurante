@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
+import { PedidoCardPropTypes } from '../../propTypes';
 
 function formatDate(dateString) {
     return new Date(dateString).toLocaleString('es-ES', {
@@ -13,6 +14,11 @@ function formatDate(dateString) {
 export default function PedidoCard({ pedido, productos, onActualizado }) {
     const [modalPagoAbierto, setModalPagoAbierto] = useState(false);
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+
+    // Calcular subtotal (suma de items) para ver si hay recargo
+    const subtotalItems = pedido.detalles?.reduce((acc, d) => acc + parseFloat(d.subtotal), 0) || 0;
+    const tieneRecargo = pedido.tipo === 'domicilio' && parseFloat(pedido.total) > subtotalItems;
+    const valorRecargo = parseFloat(pedido.total) - subtotalItems;
 
     const eliminarPedido = async () => {
         const { value: razon, isConfirmed } = await Swal.fire({
@@ -63,7 +69,7 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
             {/* Cabecera */}
             <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 min-w-0 pr-2">
-                    <h3 className="font-semibold text-gray-900">Pedido #{pedido.id}</h3>
+                    <h3 className="font-semibold text-gray-900">Pedido #{pedido.numero_dia || pedido.id}</h3>
                     <p className="text-sm text-gray-500">{formatDate(pedido.created_at)}</p>
                     {pedido.tipo === 'mesa' && pedido.numero_mesa && (
                         <p className="text-lg font-medium text-blue-700 mt-1 flex items-center gap-1">
@@ -134,10 +140,27 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
             </div>
 
             {/* Total */}
-            <div className="border-t border-gray-200 pt-4 mb-4">
-                <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-900">Total</span>
-                    <span className="text-lg font-bold text-gray-900">${parseFloat(pedido.total).toFixed(2)}</span>
+            <div className="border-t border-gray-100 pt-3 mb-4 space-y-1">
+                {tieneRecargo && (
+                    <div className="flex justify-between items-center text-xs text-gray-500">
+                        <span>Subtotal items</span>
+                        <span>${subtotalItems.toFixed(2)}</span>
+                    </div>
+                )}
+                {tieneRecargo && (
+                    <div className="flex justify-between items-center text-xs text-blue-600">
+                        <span className="flex items-center gap-1">
+                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            </svg>
+                            Recargo domicilio
+                        </span>
+                        <span>+${valorRecargo.toFixed(2)}</span>
+                    </div>
+                )}
+                <div className="flex justify-between items-center pt-1">
+                    <span className="font-semibold text-gray-900">Total</span>
+                    <span className="text-xl font-bold text-gray-900">${parseFloat(pedido.total).toFixed(2)}</span>
                 </div>
             </div>
 
@@ -191,3 +214,6 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
         </>
     );
 }
+
+PedidoCard.propTypes = PedidoCardPropTypes;
+

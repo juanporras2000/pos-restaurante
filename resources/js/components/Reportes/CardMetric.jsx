@@ -1,4 +1,5 @@
 import React from 'react';
+import { CardMetricPropTypes } from '../../propTypes';
 
 const VARIANTS = {
     blue: {
@@ -80,3 +81,6 @@ export default function CardMetric({ label, value, sub, icon = 'default', varian
         </div>
     );
 }
+
+CardMetric.propTypes = CardMetricPropTypes;
+

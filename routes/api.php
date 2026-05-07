@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\InsumoController;
 use App\Http\Controllers\Api\AdicionController;
 use App\Http\Controllers\Api\ConfiguracionController;
 use App\Http\Controllers\Api\InventarioController;
+use App\Http\Controllers\Api\GastoController;
+use App\Http\Controllers\Api\CajaAperturaController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
@@ -41,6 +43,9 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
     Route::delete('/productos/{producto}', [ProductoController::class, 'destroy']);
 
     Route::get('/categorias', [CategoriaController::class, 'index']);
+    Route::post('/categorias', [CategoriaController::class, 'store']);
+    Route::put('/categorias/{categoria}', [CategoriaController::class, 'update']);
+    Route::delete('/categorias/{categoria}', [CategoriaController::class, 'destroy']);
     Route::get('/insumos', [InsumoController::class, 'index']);
     Route::post('/insumos', [InsumoController::class, 'store']);
     Route::put('/insumos/{insumo}', [InsumoController::class, 'update']);
@@ -49,6 +54,14 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
     Route::get('/inventario/movimientos', [InventarioController::class, 'movimientos']);
     Route::post('/inventario/ajuste', [InventarioController::class, 'ajuste']);
     Route::get('/inventario/alertas', [InventarioController::class, 'alertas']);
+
+    Route::get('/gastos', [GastoController::class, 'index']);
+    Route::post('/gastos', [GastoController::class, 'store']);
+    Route::put('/gastos/{gasto}', [GastoController::class, 'update']);
+    Route::delete('/gastos/{gasto}', [GastoController::class, 'destroy']);
+
+    Route::get('/caja-apertura/{fecha}', [CajaAperturaController::class, 'show']);
+    Route::post('/caja-apertura', [CajaAperturaController::class, 'store']);
 
     Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
     Route::put('/configuraciones', [ConfiguracionController::class, 'update']);

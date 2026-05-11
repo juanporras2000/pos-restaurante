@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('perfiles', function (Blueprint $table) {
-        // Eliminamos el string viejo
+        Schema::table('perfil', function (Blueprint $table) {
         $table->dropColumn('imagen_perfil');
-        // Añadimos la relación
-        $table->foreignId('id_imagen')->constrained('imagenes_perfil');
+        $table->foreignId('id_imagen')->constrained('imagenes_perfil', 'id_imagen');
     });
     }
 

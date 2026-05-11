@@ -16,7 +16,7 @@ class PerfilSeeder extends Seeder
         DB::table('perfil')->insert([
             'nombre'        => 'Gonzalo Taborda',
             'pin'           => 1234,
-            'imagen_perfil' => 'admin.png',
+            'id_imagen' => 1,
             'id_user'       => 1,
             'id_rol'        => 1,
             'created_at'    => now(),
@@ -27,7 +27,7 @@ class PerfilSeeder extends Seeder
         DB::table('perfil')->insert([
             'nombre'        => 'Juan José',
             'pin'           => 4321,
-            'imagen_perfil' => 'mesero.png',
+            'id_imagen' => 2,
             'id_user'       => 1,
             'id_rol'        => 2,
             'created_at'    => now(),

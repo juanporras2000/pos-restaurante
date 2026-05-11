@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Perfil extends Model {
     protected $table = 'perfil';
     protected $primaryKey = 'id_perfil';
-    protected $fillable = ['nombre', 'pin', 'imagen_perfil', 'id_user', 'id_rol'];
+    protected $fillable = ['nombre', 'pin', 'id_imagen', 'id_user', 'id_rol'];
 
     public function rol() {
         return $this->belongsTo(Rol::class, 'id_rol');

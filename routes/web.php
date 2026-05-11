@@ -40,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
         return view('insumos');
     });
 
+    Route::get('/perfiles', function(){
+        return view('perfiles');
+    });
+
 });
 
 require __DIR__.'/auth.php';

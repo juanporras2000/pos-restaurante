@@ -9,10 +9,12 @@ use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\InsumoController;
 use App\Http\Controllers\Api\InventarioController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\PerfilController;
 
 
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
+Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('pagos', [PagoController::class, 'store']);
     Route::get('pedidos/pendientes', [PedidoController::class, 'pendientes']);
@@ -47,3 +49,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
     Route::post('/inventario/ajuste', [InventarioController::class, 'ajuste']);
     Route::get('/inventario/alertas', [InventarioController::class, 'alertas']);
 
+
+    Route::get('/perfiles', [PerfilController::class, 'index']);
+    Route::post('/verificar-perfil-pin', [PerfilController::class, 'verificarPin']);
+
+});

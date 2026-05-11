@@ -47,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/configuraciones', function () {
         return view('configuraciones');
     })->name('configuraciones');
+    Route::get('/perfiles', function(){
+        return view('perfiles');
+    });
 
 });
 

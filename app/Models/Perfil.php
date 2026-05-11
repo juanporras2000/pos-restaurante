@@ -18,6 +18,10 @@ class Perfil extends Model {
     }
 
     public function users() {
-    return $this->belongsTo(User::class, 'id_user');
-}
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function imagen(){
+        return $this->belongsTo(ImagenPerfil::class, 'id_imagen');
+    }
 }

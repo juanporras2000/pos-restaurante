@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('imagenes_perfil', function (Blueprint $table) {
-            $table->id('id_imagen');
+            $table->id('id_imagen')->primary();
             $table->string('path');
             $table->timestamps();
         });

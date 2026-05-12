@@ -5,6 +5,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class PerfilSeeder extends Seeder
 {
@@ -15,8 +16,8 @@ class PerfilSeeder extends Seeder
     {
         DB::table('perfil')->insert([
             'nombre'        => 'Gonzalo Taborda',
-            'pin'           => 1234,
-            'id_imagen' => 1,
+            'pin'           => Hash::make('1234'),
+            'id_imagen'     => 1,
             'id_user'       => 1,
             'id_rol'        => 1,
             'created_at'    => now(),
@@ -26,8 +27,8 @@ class PerfilSeeder extends Seeder
         // Registro 2
         DB::table('perfil')->insert([
             'nombre'        => 'Juan José',
-            'pin'           => 4321,
-            'id_imagen' => 2,
+            'pin'           => Hash::make('4321'),
+            'id_imagen'     => 2,
             'id_user'       => 1,
             'id_rol'        => 2,
             'created_at'    => now(),

@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
+        $middleware->alias([
+            'check.perfil' => \App\Http\Middleware\CheckPerfilActivo::class,
+            'guest.perfil' => \App\Http\Middleware\RedirectIfPerfilActivo::class,
+        ]);
         $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {

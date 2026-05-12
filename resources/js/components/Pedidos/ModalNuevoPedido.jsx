@@ -233,7 +233,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     Swal.fire({
                         icon: 'error',
                         title: 'Stock insuficiente',
-                        html: `<ul class="text-left text-sm space-y-1 mt-2">${data.faltantes.map((f) => `<li>⚠️ ${f}</li>`).join('')}</ul>`,
+                        html: `<ul class="text-left text-sm space-y-1 mt-2">${data.faltantes.map((f) => `<li>· ${f}</li>`).join('')}</ul>`,
                         confirmButtonText: 'Entendido',
                         confirmButtonColor: '#dc2626',
                     });

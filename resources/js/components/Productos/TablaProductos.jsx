@@ -1,4 +1,5 @@
 import React from 'react';
+import { TruckIcon } from '@heroicons/react/24/outline';
 
 /**
  * Retorna el color del badge según el margen de ganancia:
@@ -69,7 +70,7 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                             <div className="flex items-center gap-2 mb-2">
                                 <p className="text-sm text-gray-500">{producto.categoria?.nombre ?? 'Sin categoría'}</p>
                                 {producto.es_domicilio && (
-                                    <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-2 py-0.5 font-medium">🛵 Domicilio</span>
+                                    <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-2 py-0.5 font-medium flex items-center gap-1"><TruckIcon className="h-3 w-3" /> Domicilio</span>
                                 )}
                             </div>
                             <p className="text-xl font-bold text-gray-900">
@@ -107,7 +108,7 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                         {producto.es_domicilio && tieneCostoDom && (
                             <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-1.5 text-sm">
                                 <p className="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1">
-                                    🛵 A domicilio <span className="font-normal text-blue-500">(costo real con insumos adicionales)</span>
+                                    <TruckIcon className="h-3.5 w-3.5" /> A domicilio <span className="font-normal text-blue-500">(costo real con insumos adicionales)</span>
                                 </p>
                                 <div className="flex justify-between text-gray-600">
                                     <span>Costo</span>

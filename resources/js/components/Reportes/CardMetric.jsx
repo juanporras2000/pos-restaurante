@@ -1,4 +1,11 @@
 import React from 'react';
+import {
+    BanknotesIcon,
+    ClipboardDocumentListIcon,
+    ArrowTrendingUpIcon,
+    CheckCircleIcon,
+    ChartBarIcon,
+} from '@heroicons/react/24/outline';
 import { CardMetricPropTypes } from '../../propTypes';
 
 const VARIANTS = {
@@ -40,11 +47,11 @@ const VARIANTS = {
 };
 
 const ICONS = {
-    coins:   '💰',
-    receipt: '🧾',
-    chart:   '📈',
-    check:   '✅',
-    default: '📊'
+    coins:   BanknotesIcon,
+    receipt: ClipboardDocumentListIcon,
+    chart:   ArrowTrendingUpIcon,
+    check:   CheckCircleIcon,
+    default: ChartBarIcon,
 };
 
 /**
@@ -59,12 +66,12 @@ const ICONS = {
 export default function CardMetric({ label, value, sub, icon = 'default', variant = 'blue', trend }) {
     const v = VARIANTS[variant] ?? VARIANTS.blue;
     const trendPositive = trend > 0;
-    const iconDisplay = ICONS[icon] ?? icon;
+    const IconComponent = ICONS[icon] ?? ChartBarIcon;
 
     return (
         <div className={`rounded-2xl p-5 shadow-sm flex items-start gap-4 ${v.wrap}`}>
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${v.icon}`}>
-                {iconDisplay}
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${v.icon}`}>
+                <IconComponent className="h-6 w-6" />
             </div>
             <div className="flex-1 min-w-0">
                 <p className={`text-xs font-medium uppercase tracking-wide truncate ${v.label}`}>{label}</p>

@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToTenant;
 
 class Pago extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'pagos';
 
     protected $fillable = [
@@ -14,6 +17,7 @@ class Pago extends Model
     'recibido',
     'cambio',
     'metodo_pago',
+    'tenant_id',
 ];
 
     // Relación

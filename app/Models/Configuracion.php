@@ -3,27 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToTenant;
 
 class Configuracion extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'configuraciones';
 
-    protected $fillable = ['clave', 'valor', 'descripcion'];
+    protected $fillable = ['clave', 'valor', 'descripcion', 'tenant_id'];
 
-    /**
-     * Obtiene el valor de una configuración.
-     * Si no existe, retorna $default.
-     */
     public static function get(string $clave, mixed $default = null): mixed
     {
         $registro = static::where('clave', $clave)->first();
-
         return $registro ? $registro->valor : $default;
     }
 
-    /**
-     * Crea o actualiza una configuración.
-     */
     public static function set(string $clave, mixed $valor, string $descripcion = ''): void
     {
         static::updateOrCreate(

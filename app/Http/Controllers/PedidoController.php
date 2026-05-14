@@ -15,6 +15,8 @@ class PedidoController extends Controller
 {
     public function pendientes()
     {
+        // El global scope de BelongsToTenant ya filtra por tenant_id.
+        // Mantenemos where('user_id') para que cada empleado vea solo sus pedidos.
         $pedidos = Pedido::where('user_id', auth()->id())
             ->whereDoesntHave('pago')
             ->with(['detalles.producto'])
@@ -29,6 +31,7 @@ class PedidoController extends Controller
         $inicio = now()->startOfDay()->utc();
         $fin    = now()->endOfDay()->utc();
 
+        // El global scope se encarga del tenant_id automáticamente.
         $pedidos = Pedido::where('estado', 'pagado')
             ->whereBetween('updated_at', [$inicio, $fin])
             ->with(['detalles.producto', 'pago'])
@@ -95,6 +98,7 @@ class PedidoController extends Controller
                 'direccion'      => $request->direccion,
                 'nombre_cliente' => $request->nombre_cliente,
                 'total'          => 0,
+                // tenant_id lo inyecta automáticamente el trait BelongsToTenant
             ]);
 
             $total = 0;

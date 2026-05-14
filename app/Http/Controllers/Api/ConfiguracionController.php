@@ -32,8 +32,9 @@ class ConfiguracionController extends Controller
 
         foreach ($request->only(['recargo_domicilio', 'hora_cierre']) as $clave => $valor) {
             Configuracion::set($clave, $valor);
-            // Invalidar cache para que el cambio aplique de inmediato
-            Cache::forget("cfg_{$clave}");
+            // Cache key incluye el tenant para no mezclar configuraciones entre restaurantes
+            $tenantId = app()->has('tenant_id') ? app('tenant_id') : 'global';
+            Cache::forget("cfg_{$tenantId}_{$clave}");
         }
 
         return response()->json(['message' => 'Configuración actualizada']);

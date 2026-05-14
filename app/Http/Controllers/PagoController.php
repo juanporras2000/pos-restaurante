@@ -11,14 +11,14 @@ class PagoController extends Controller
 {
     public function store(Request $request)
     {
-        // ✅ Validación
+        // Validación
         $request->validate([
             'pedido_id' => 'required|integer',
             'recibido' => 'required|numeric|min:0',
             'metodo_pago' => 'required|string' // ✅ NUEVO
         ]);
 
-        // ✅ Buscar pedido (sin lanzar excepción automática)
+        // Buscar pedido (sin lanzar excepción automática)
         $pedido = Pedido::find($request->pedido_id);
 
         if (!$pedido) {
@@ -27,7 +27,7 @@ class PagoController extends Controller
             ], 404);
         }
 
-        // ✅ Validar estado
+        // Validar estado
         if ($pedido->estado === 'pagado') {
             return response()->json([
                 'error' => 'El pedido ya está pagado'
@@ -37,7 +37,7 @@ class PagoController extends Controller
         $total = $pedido->total;
         $recibido = $request->recibido;
 
-        // ✅ Validar dinero suficiente
+        // Validar dinero suficiente
         if ($recibido < $total) {
             return response()->json([
                 'error' => 'El dinero recibido es insuficiente'
@@ -46,16 +46,17 @@ class PagoController extends Controller
 
         $cambio = $recibido - $total;
 
-        // ✅ Crear pago (campos correctos)
+        // Crear pago (campos correctos)
         $pago = Pago::create([
-        'pedido_id' => $pedido->id,
-        'total' => $total,
-        'recibido' => $recibido,
-        'cambio' => $cambio,
-        'metodo_pago' => $request->metodo_pago, // ✅ CLAVE
+        'pedido_id'   => $pedido->id,
+        'total'       => $total,
+        'recibido'    => $recibido,
+        'cambio'      => $cambio,
+        'metodo_pago' => $request->metodo_pago,
+        // tenant_id lo inyecta automáticamente el trait BelongsToTenant
         ]);
 
-        // ✅ Actualizar estado del pedido
+        // Actualizar estado del pedido
         $pedido->update([
             'estado' => 'pagado'
         ]);

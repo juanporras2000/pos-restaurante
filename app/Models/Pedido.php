@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\PedidoDetalle;
 use App\Models\Pago;
+use App\Traits\BelongsToTenant;
 
 class Pedido extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, BelongsToTenant;
 
      protected $fillable = [
         'user_id',
@@ -20,6 +21,7 @@ class Pedido extends Model
         'total',
         'estado',
         'razon_eliminacion',
+        'tenant_id',
     ];
 
     protected $appends = ['numero_dia'];

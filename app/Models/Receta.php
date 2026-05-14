@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\BelongsToTenant;
 
 class Receta extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = ['producto_id', 'tenant_id'];
 
     // ─── Relaciones ───────────────────────────────────────────────────────────

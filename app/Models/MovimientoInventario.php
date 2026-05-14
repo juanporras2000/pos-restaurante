@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToTenant;
 
 class MovimientoInventario extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'movimientos_inventario';
 
     protected $fillable = [
@@ -17,6 +20,7 @@ class MovimientoInventario extends Model
         'stock_antes',
         'stock_despues',
         'motivo',
+        'tenant_id',
     ];
 
     public function insumo()

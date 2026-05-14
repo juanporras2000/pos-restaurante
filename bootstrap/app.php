@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/*',
         ]);
         $middleware->statefulApi();
+        // Resuelve el tenant del usuario autenticado en cada request
+        $middleware->appendToGroup('api', \App\Http\Middleware\SetTenantFromUser::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\SetTenantFromUser::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -96,6 +96,10 @@ class ProductoController extends Controller
             $query->where('nombre', 'like', '%' . $request->buscar . '%');
         }
 
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+
         // Ruta sin paginar: usada por el POS de pedidos (no necesita datos de costo)
         if ($request->boolean('todos')) {
             return response()->json(

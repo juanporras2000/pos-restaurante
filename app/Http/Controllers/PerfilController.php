@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Perfil;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class PerfilController extends Controller
 {
@@ -24,7 +25,11 @@ class PerfilController extends Controller
             return response()->json(['error' => 'Perfil no encontrado o no autorizado'], 404);
         }
 
-        if ($perfil->pin === (int)$request->pin) {
+        if (Hash::check($request->pin, $perfil->pin)){
+
+        session(['id_perfil' => $perfil->id_perfil]);
+        session(['nombre_perfil' => $perfil->nombre]);
+
             return response()->json([
                 'success' => true,
                 'perfil'  => [
@@ -41,16 +46,14 @@ class PerfilController extends Controller
 
     public function index()
     {
-        // 1. Obtenemos el ID del usuario que se acaba de loguear
         $userId = Auth::id();
 
-        // 2. Buscamos en la tabla 'perfil' todos los que tengan ese id_user
-        $perfiles = Perfil::with('rol, imagen')
+        $perfiles = Perfil::with([ 'rol', 'imagen'])
                             ->where('id_user', $userId)
                             ->get();
 
-        // 3. Se los enviamos a React como una lista (JSON)
         return response()->json($perfiles);
+
     }
 }
 

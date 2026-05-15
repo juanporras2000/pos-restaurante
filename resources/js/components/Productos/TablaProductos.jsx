@@ -25,6 +25,7 @@ function labelMargen(margen) {
     return 'Con pérdida';
 }
 
+
 export default function TablaProductos({ productos, onEditar, onEliminar }) {
 
     return (
@@ -51,7 +52,7 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                         <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                             {producto.imagen_producto ? (
                                 <img
-                                    src={`http://127.0.0.1:8000/storage/${producto.imagen_producto}`}
+                                    src={`${import.meta.env.VITE_URL_IMAGEN}${producto.imagen_producto}`}
                                     alt={producto.nombre}
                                     className="w-full h-full object-cover rounded-lg"
                                 />

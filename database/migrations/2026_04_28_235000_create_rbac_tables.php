@@ -27,7 +27,7 @@ return new class extends Migration
         Schema::create('perfil', function (Blueprint $table) {
             $table->id('id_perfil');
             $table->string('nombre');
-            $table->integer('pin');
+            $table->string('pin');
             $table->string('imagen_perfil');
             $table->foreignId('id_user')->constrained('users')
                 ->onDelete('cascade');

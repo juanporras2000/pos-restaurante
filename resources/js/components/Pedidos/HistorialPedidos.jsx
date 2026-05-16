@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useImprimir } from '../../hooks/useImprimir';
 
 const TIPOS_GASTO = {
     insumos:   { label: 'Insumos',   color: 'bg-blue-100 text-blue-700' },
@@ -83,6 +84,7 @@ function ResumenDia({ pedidos, gastos, apertura }) {
 
 function TarjetaPedido({ pedido }) {
     const [expandido, setExpandido] = useState(false);
+    const { imprimir } = useImprimir();
     const pago = pedido.pago;
 
     const metodoLabel = METODO_ETIQUETA[pago?.metodo_pago] ?? pago?.metodo_pago ?? '—';
@@ -188,6 +190,20 @@ function TarjetaPedido({ pedido }) {
                             </div>
                         </div>
                     )}
+
+                    {/* Botón imprimir recibo */}
+                    <button
+                        type="button"
+                        onClick={() => imprimir(pedido)}
+                        className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors text-sm font-medium"
+                    >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6 9V2h12v7"></path>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        Imprimir recibo
+                    </button>
                 </div>
             )}
         </div>

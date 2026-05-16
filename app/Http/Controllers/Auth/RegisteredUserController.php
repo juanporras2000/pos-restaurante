@@ -91,7 +91,10 @@ class RegisteredUserController extends Controller
         ]);
 
         // Configuraciones por defecto
-        Configuracion::set('recargo_domicilio', 0, 'Recargo fijo (en pesos) que se suma al costo de todo pedido a domicilio.');
-        Configuracion::set('hora_cierre', 5,   'Hora (0-23) a la que se cierra la jornada del día anterior.');
+        Configuracion::set('recargo_domicilio',  0,              'Recargo fijo (en pesos) que se suma al costo de todo pedido a domicilio.');
+        Configuracion::set('hora_cierre',        5,              'Hora (0-23) a la que se cierra la jornada del día anterior.');
+        Configuracion::set('nombre_negocio',     $tenant->nombre, 'Nombre del negocio que aparece en los recibos.');
+        Configuracion::set('telefono_negocio',   '',             'Teléfono de contacto que aparece en los recibos.');
+        Configuracion::set('direccion_negocio',  '',             'Dirección del negocio que aparece en los recibos.');
     }
 }

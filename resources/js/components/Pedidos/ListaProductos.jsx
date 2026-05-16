@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ListaProductosPropTypes } from '../../propTypes';
+import PillsCategorias from '../shared/PillsCategorias';
 
 export default function ListaProductos({ productos, carrito, onIncrementar, onDecrementar }) {
     const [categoriaActiva, setCategoriaActiva] = useState(null);
@@ -51,35 +52,13 @@ export default function ListaProductos({ productos, carrito, onIncrementar, onDe
             </div>
 
             {/* Pills de categoría */}
-            {categorias.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto pb-2 mb-3 scrollbar-none">
-                    <button
-                        type="button"
-                        onClick={() => setCategoriaActiva(null)}
-                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                            categoriaActiva === null
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                    >
-                        Todos
-                    </button>
-                    {categorias.map((cat) => (
-                        <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => setCategoriaActiva(cat.id === categoriaActiva ? null : cat.id)}
-                            className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                                categoriaActiva === cat.id
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                        >
-                            {cat.nombre}
-                        </button>
-                    ))}
-                </div>
-            )}
+            <div className="mb-3">
+                <PillsCategorias
+                    categorias={categorias}
+                    activa={categoriaActiva}
+                    onChange={setCategoriaActiva}
+                />
+            </div>
 
             {/* Grid de productos */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto">

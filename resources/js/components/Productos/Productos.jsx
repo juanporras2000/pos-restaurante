@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import TablaProductos from './TablaProductos';
 import ModalProducto from './ModalProducto';
+import PillsCategorias from '../shared/PillsCategorias';
 
 const PRODUCTO_VACIO = {
     id: null,
@@ -17,6 +18,7 @@ export default function Productos() {
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [buscar, setBuscar] = useState('');
+    const [categoriaFiltro, setCategoriaFiltro] = useState('');
     const [paginacion, setPaginacion] = useState(null);
     const [paginaActual, setPaginaActual] = useState(1);
     const [insumos, setInsumos] = useState([]);
@@ -38,11 +40,12 @@ export default function Productos() {
             .catch(() => {});
     }, []);
 
-    // Cargar productos cuando cambia búsqueda o página
+    // Cargar productos cuando cambia búsqueda, categoría o página
     const cargarProductos = useCallback(() => {
         setCargando(true);
         const params = new URLSearchParams({ page: paginaActual });
         if (buscar.trim()) params.append('buscar', buscar.trim());
+        if (categoriaFiltro) params.append('categoria_id', categoriaFiltro);
 
         fetch(`/api/productos?${params}`)
             .then((r) => r.json())
@@ -54,14 +57,14 @@ export default function Productos() {
                 Swal.fire('Error', 'No se pudo cargar los productos', 'error');
             })
             .finally(() => setCargando(false));
-    }, [buscar, paginaActual]);
+    }, [buscar, categoriaFiltro, paginaActual]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
             setPaginaActual(1);
         }, 300);
         return () => clearTimeout(timer);
-    }, [buscar]);
+    }, [buscar, categoriaFiltro]);
 
     useEffect(() => {
         cargarProductos();
@@ -229,7 +232,7 @@ export default function Productos() {
                         <button
                             type="button"
                             onClick={abrirCrear}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2 shrink-0"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 4v16m8-8H4"></path>
@@ -237,6 +240,16 @@ export default function Productos() {
                             Nuevo Producto
                         </button>
                     </div>
+                </div>
+
+                {/* Pills de categoría */}
+                <div className="mt-4">
+                    <PillsCategorias
+                        categorias={categorias}
+                        activa={categoriaFiltro}
+                        onChange={(id) => setCategoriaFiltro(id ? String(id) : '')}
+                        size="md"
+                    />
                 </div>
             </div>
 

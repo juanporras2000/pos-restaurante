@@ -34,8 +34,8 @@ function ResumenDia({ pedidos, gastos, apertura }) {
     const totalVentas = pedidos.reduce((acc, p) => acc + Number.parseFloat(p.total || 0), 0);
     const totalGastos = gastos.reduce((acc, g) => acc + Number.parseFloat(g.monto || 0), 0);
     const neto = totalVentas - totalGastos;
-    const montoApertura = apertura ? Number.parseFloat(apertura.monto) : null;
-    const saldoCaja = montoApertura != null ? montoApertura + totalVentas - totalGastos : null;
+    const montoApertura = apertura?.monto ? (Number.parseFloat(apertura.monto) || 0) : 0;
+    const saldoCaja = montoApertura + totalVentas - totalGastos;
     const porMetodo = pedidos.reduce((acc, p) => {
         const metodo = p.pago?.metodo_pago ?? 'desconocido';
         acc[metodo] = (acc[metodo] ?? 0) + Number.parseFloat(p.total || 0);
@@ -44,13 +44,11 @@ function ResumenDia({ pedidos, gastos, apertura }) {
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {apertura && (
-                <div className="bg-white rounded-xl border-2 border-green-200 shadow-sm p-4">
-                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Base de apertura</p>
-                    <p className="text-2xl font-bold text-green-600">${montoApertura.toFixed(2)}</p>
-                    {apertura.nota && <p className="text-xs text-gray-400 mt-1 truncate">{apertura.nota}</p>}
-                </div>
-            )}
+            <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${montoApertura > 0 ? 'border-green-200' : 'border-gray-200'}`}>
+                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Base de apertura</p>
+                <p className="text-2xl font-bold text-green-600">${montoApertura.toFixed(2)}</p>
+                {apertura?.nota && <p className="text-xs text-gray-400 mt-1 truncate">{apertura.nota}</p>}
+            </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                 <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Pedidos cerrados</p>
                 <p className="text-2xl font-bold text-gray-900">{pedidos.length}</p>
@@ -66,20 +64,11 @@ function ResumenDia({ pedidos, gastos, apertura }) {
                     <p className="text-xs text-gray-400 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''}</p>
                 </div>
             )}
-            {saldoCaja != null && (
-                <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${saldoCaja >= 0 ? 'border-green-300' : 'border-red-300'}`}>
-                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Saldo en caja</p>
-                    <p className={`text-2xl font-bold ${saldoCaja >= 0 ? 'text-green-700' : 'text-red-600'}`}>${saldoCaja.toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 mt-1">Base + Ventas − Gastos</p>
-                </div>
-            )}
-            {saldoCaja == null && totalGastos > 0 && (
-                <div className={`bg-white rounded-xl border shadow-sm p-4 ${neto >= 0 ? 'border-green-100' : 'border-red-200'}`}>
-                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Neto del día</p>
-                    <p className={`text-2xl font-bold ${neto >= 0 ? 'text-green-700' : 'text-red-600'}`}>${neto.toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 mt-1">Ventas − Gastos</p>
-                </div>
-            )}
+            <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${saldoCaja >= 0 ? 'border-green-300' : 'border-red-300'}`}>
+                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Saldo en caja</p>
+                <p className={`text-2xl font-bold ${saldoCaja >= 0 ? 'text-green-700' : 'text-red-600'}`}>${saldoCaja.toFixed(2)}</p>
+                <p className="text-xs text-gray-400 mt-1">Base + Ventas − Gastos</p>
+            </div>
             {Object.entries(porMetodo).map(([metodo, monto]) => (
                 <div key={metodo} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">
@@ -277,7 +266,8 @@ export default function HistorialPedidos() {
     const cargar = useCallback(() => {
         setCargando(true);
         setError(null);
-        const fechaHoy = new Date().toISOString().slice(0, 10);
+        const d = new Date();
+        const fechaHoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         Promise.all([
             fetch('/api/pedidos/cerrados-hoy').then((r) => {
                 if (!r.ok) throw new Error('Error al cargar el historial');

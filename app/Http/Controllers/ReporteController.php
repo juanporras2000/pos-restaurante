@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pedido;
 use App\Models\PedidoDetalle;
 use App\Models\Pago;
+use App\Models\Gasto;
 use App\Models\Insumo;
 use App\Models\MovimientoInventario;
 use Carbon\Carbon;
@@ -13,6 +14,57 @@ use Illuminate\Support\Facades\DB;
 
 class ReporteController extends Controller
 {
+    // ─── Helper: rango del período ANTERIOR para comparativas ───────────────
+    private function rangoAnterior(string $periodo, ?string $desde, ?string $hasta): array
+    {
+        // Si es rango personalizado, calculamos el mismo intervalo en días hacia atrás
+        if ($desde && $hasta) {
+            $ini  = Carbon::parse($desde)->startOfDay();
+            $fin  = Carbon::parse($hasta)->endOfDay();
+            $dias = $ini->diffInDays($fin) + 1;
+            return [
+                $ini->copy()->subDays($dias)->utc(),
+                $fin->copy()->subDays($dias)->utc(),
+            ];
+        }
+
+        $ahora = Carbon::now();
+        return match ($periodo) {
+            'semana' => [
+                $ahora->copy()->subWeek()->startOfWeek()->utc(),
+                $ahora->copy()->subWeek()->endOfWeek()->utc(),
+            ],
+            'mes' => [
+                $ahora->copy()->subMonth()->startOfMonth()->utc(),
+                $ahora->copy()->subMonth()->endOfMonth()->utc(),
+            ],
+            default => [
+                $ahora->copy()->subDay()->startOfDay()->utc(),
+                $ahora->copy()->subDay()->endOfDay()->utc(),
+            ],
+        };
+    }
+
+    // ─── Helper: calcula resumen de ventas en un rango ───────────────────────
+    private function resumenVentas(Carbon $desde, Carbon $hasta): array
+    {
+        $query  = Pedido::whereBetween('created_at', [$desde, $hasta])->whereNotNull('total');
+        $count  = (clone $query)->count();
+        $suma   = (clone $query)->sum('total');
+        return [
+            'total_ventas'    => round($suma, 2),
+            'total_pedidos'   => $count,
+            'promedio_pedido' => $count > 0 ? round($suma / $count, 2) : 0,
+        ];
+    }
+
+    // ─── Helper: calcula porcentaje de cambio ────────────────────────────────
+    private static function pct(float $actual, float $anterior): ?float
+    {
+        if ($anterior == 0) return null;
+        return round((($actual - $anterior) / abs($anterior)) * 100, 1);
+    }
+
     // ─── Helper: rango de fechas desde query params ──────────────────────────
     private function rango(Request $request): array
     {
@@ -40,6 +92,8 @@ class ReporteController extends Controller
     {
         [$desde, $hasta] = $this->rango($request);
         $periodo         = $request->query('periodo', 'dia');
+        $desde_raw       = $request->query('desde');
+        $hasta_raw       = $request->query('hasta');
 
         $pgExpr = match ($periodo) {
             'semana' => "TO_CHAR(created_at, 'YYYY-MM-DD')",
@@ -58,18 +112,23 @@ class ReporteController extends Controller
             ->orderByRaw($pgExpr)
             ->get();
 
-        $resumen = Pedido::whereBetween('created_at', [$desde, $hasta])->whereNotNull('total');
-        $count   = (clone $resumen)->count();
-        $suma    = (clone $resumen)->sum('total');
+        $actual   = $this->resumenVentas($desde, $hasta);
+        [$dprev, $hprev] = $this->rangoAnterior($periodo, $desde_raw, $hasta_raw);
+        $anterior = $this->resumenVentas($dprev, $hprev);
 
         return response()->json([
             'periodo'          => $periodo,
             'desde'            => $desde->toDateTimeString(),
             'hasta'            => $hasta->toDateTimeString(),
-            'total_ventas'     => round($suma, 2),
-            'total_pedidos'    => $count,
-            'promedio_pedido'  => $count > 0 ? round($suma / $count, 2) : 0,
-            'serie'            => $ventas,
+            'total_ventas'     => $actual['total_ventas'],
+            'total_pedidos'    => $actual['total_pedidos'],
+            'promedio_pedido'  => $actual['promedio_pedido'],
+            'comparativa'      => [
+                'total_ventas'    => self::pct($actual['total_ventas'],   $anterior['total_ventas']),
+                'total_pedidos'   => self::pct($actual['total_pedidos'],  $anterior['total_pedidos']),
+                'promedio_pedido' => self::pct($actual['promedio_pedido'], $anterior['promedio_pedido']),
+            ],
+            'serie' => $ventas,
         ]);
     }
 
@@ -240,6 +299,68 @@ class ReporteController extends Controller
             'desde'   => $desde->toDateString(),
             'hasta'   => $hasta->toDateString(),
             'insumos' => $insumos,
+        ]);
+    }
+
+    // ─── 8. Gastos agrupados por período ─────────────────────────────────────
+    public function gastosPorPeriodo(Request $request)
+    {
+        [$desde, $hasta] = $this->rango($request);
+        $periodo         = $request->query('periodo', 'dia');
+        $desde_raw       = $request->query('desde');
+        $hasta_raw       = $request->query('hasta');
+
+        $gastos = Gasto::whereBetween('created_at', [$desde, $hasta]);
+
+        $totalActual = round((clone $gastos)->sum('monto'), 2);
+        $porTipo     = (clone $gastos)
+            ->select('tipo', DB::raw('SUM(monto) as total'), DB::raw('COUNT(*) as cantidad'))
+            ->groupBy('tipo')
+            ->orderByDesc('total')
+            ->get();
+
+        // Comparativa con período anterior
+        [$dprev, $hprev] = $this->rangoAnterior($periodo, $desde_raw, $hasta_raw);
+        $totalAnterior   = round(Gasto::whereBetween('created_at', [$dprev, $hprev])->sum('monto'), 2);
+
+        return response()->json([
+            'desde'      => $desde->toDateString(),
+            'hasta'      => $hasta->toDateString(),
+            'total'      => $totalActual,
+            'por_tipo'   => $porTipo,
+            'comparativa'=> self::pct($totalActual, $totalAnterior),
+        ]);
+    }
+
+    // ─── 9. Distribución por tipo de pedido (mesa / domicilio / recoger) ────
+    public function tipoPedido(Request $request)
+    {
+        [$desde, $hasta] = $this->rango($request);
+
+        $tipos = Pedido::whereBetween('created_at', [$desde, $hasta])
+            ->select(
+                'tipo',
+                DB::raw('COUNT(*) as cantidad'),
+                DB::raw('SUM(total) as total_ventas')
+            )
+            ->groupBy('tipo')
+            ->orderByDesc('cantidad')
+            ->get();
+
+        $totalPedidos = $tipos->sum('cantidad');
+
+        $tipos = $tipos->map(function ($t) use ($totalPedidos) {
+            $t->porcentaje = $totalPedidos > 0
+                ? round(($t->cantidad / $totalPedidos) * 100, 1)
+                : 0;
+            return $t;
+        });
+
+        return response()->json([
+            'desde'          => $desde->toDateString(),
+            'hasta'          => $hasta->toDateString(),
+            'total_pedidos'  => $totalPedidos,
+            'tipos'          => $tipos,
         ]);
     }
 

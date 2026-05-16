@@ -1,0 +1,88 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { CalendarDaysIcon } from '@heroicons/react/24/outline';
+
+const PERIODOS = [
+    { value: 'dia',    label: 'Hoy' },
+    { value: 'semana', label: 'Esta semana' },
+    { value: 'mes',    label: 'Este mes' },
+];
+
+/**
+ * SelectorPeriodo
+ * Responsabilidad única: gestionar la selección de período y/o rango de fechas.
+ * El padre recibe el estado a través de onChange({ periodo, desde, hasta }).
+ *
+ * Props:
+ *  - periodo   : string  — 'dia' | 'semana' | 'mes' | 'custom'
+ *  - desde     : string  — YYYY-MM-DD, solo activo cuando periodo === 'custom'
+ *  - hasta     : string  — YYYY-MM-DD, solo activo cuando periodo === 'custom'
+ *  - onChange  : fn({ periodo, desde, hasta })
+ */
+export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
+    const hoy = new Date().toISOString().split('T')[0];
+
+    const seleccionarPeriodo = (value) => {
+        onChange({ periodo: value, desde: '', hasta: '' });
+    };
+
+    const actualizarFecha = (campo, value) => {
+        const nuevoDesde = campo === 'desde' ? value : desde;
+        const nuevoHasta = campo === 'hasta' ? value : hasta;
+        onChange({ periodo: 'custom', desde: nuevoDesde, hasta: nuevoHasta });
+    };
+
+    return (
+        <div className="flex flex-wrap items-center gap-2">
+            {/* Botones de período rápido */}
+            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+                {PERIODOS.map((p) => (
+                    <button
+                        key={p.value}
+                        onClick={() => seleccionarPeriodo(p.value)}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                            periodo === p.value
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    >
+                        {p.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* Separador visual */}
+            <span className="text-gray-300 select-none">|</span>
+
+            {/* Rango personalizado */}
+            <div className={`flex items-center gap-1.5 bg-white border rounded-xl px-3 py-1.5 shadow-sm transition-colors ${
+                periodo === 'custom' ? 'border-blue-400 ring-1 ring-blue-200' : 'border-gray-200'
+            }`}>
+                <CalendarDaysIcon className={`h-4 w-4 flex-shrink-0 ${periodo === 'custom' ? 'text-blue-500' : 'text-gray-400'}`} />
+                <input
+                    type="date"
+                    value={desde}
+                    max={hasta || hoy}
+                    onChange={(e) => actualizarFecha('desde', e.target.value)}
+                    className="text-sm text-gray-700 bg-transparent border-none outline-none focus:ring-0 p-0 cursor-pointer"
+                />
+                <span className="text-gray-300 text-xs">→</span>
+                <input
+                    type="date"
+                    value={hasta}
+                    min={desde}
+                    max={hoy}
+                    onChange={(e) => actualizarFecha('hasta', e.target.value)}
+                    className="text-sm text-gray-700 bg-transparent border-none outline-none focus:ring-0 p-0 cursor-pointer"
+                />
+            </div>
+        </div>
+    );
+}
+
+SelectorPeriodo.propTypes = {
+    periodo: PropTypes.string.isRequired,
+    desde: PropTypes.string.isRequired,
+    hasta: PropTypes.string.isRequired,
+    onChange: PropTypes.func.isRequired,
+};

@@ -187,3 +187,30 @@ export const GraficaPiePropTypes = {
     nameKey: PropTypes.string,
     valueKey: PropTypes.string,
 };
+
+// ─── Reportes ─────────────────────────────────────────────────────────────────
+
+export const tipoPedidoItemShape = PropTypes.shape({
+    tipo: PropTypes.string,
+    cantidad: PropTypes.number,
+    total_ventas: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    porcentaje: PropTypes.number,
+});
+
+export const gastoTipoItemShape = PropTypes.shape({
+    tipo: PropTypes.string,
+    total: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    cantidad: PropTypes.number,
+});
+
+export const SeccionTipoPedidoPropTypes = {
+    periodo: PropTypes.string.isRequired,
+    params: PropTypes.object.isRequired,
+};
+
+export const SeccionGastosIngresosPropTypes = {
+    periodo: PropTypes.string.isRequired,
+    params: PropTypes.object.isRequired,
+    totalVentas: PropTypes.number,
+};
+

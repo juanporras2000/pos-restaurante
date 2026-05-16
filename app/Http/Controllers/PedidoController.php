@@ -32,10 +32,12 @@ class PedidoController extends Controller
         $fin    = now()->endOfDay()->utc();
 
         // El global scope se encarga del tenant_id automáticamente.
+        // Filtramos por created_at para que el pedido aparezca en el día en que fue creado,
+        // no en el día en que fue cerrado.
         $pedidos = Pedido::where('estado', 'pagado')
-            ->whereBetween('updated_at', [$inicio, $fin])
+            ->whereBetween('created_at', [$inicio, $fin])
             ->with(['detalles.producto', 'pago'])
-            ->orderBy('updated_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json($pedidos);

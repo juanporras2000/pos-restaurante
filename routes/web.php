@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-
 });
 
 Route::get('/dashboard', function () {
@@ -20,37 +19,42 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/pedidos', function () {
-        return view('pedidos');
-    })->name('pedidos');
-
-    Route::get('/pagos', function () {
-        return view('pagos');
+    Route::middleware(['guest.perfil'])->group(function () {
+        Route::get('/perfiles', function () {
+            return view('perfiles');
+        });
     });
 
-    Route::get('/reportes', function () {
-        return view('reportes');
-    })->name('reportes');
+    Route::middleware(['check.perfil'])->group(function () {
 
-     Route::get('/productos', function () {
-        return view('productos');
+        Route::get('/pedidos', function () {
+            return view('pedidos');
+        })->middleware('permiso:1')->name('pedidos');
+
+        Route::get('/pagos', function () {
+            return view('pagos');
+        })->middleware('permiso:1');
+
+        Route::get('/productos', function () {
+            return view('productos');
+        })->middleware('permiso:2');
+
+        Route::get('/reportes', function () {
+            return view('reportes');
+        })->middleware('permiso:3')->name('reportes');
+
+        Route::get('/gastos', function () {
+            return view('gastos');
+        })->middleware('permiso:4')->name('gastos');
+
+        Route::get('/insumos', function () {
+            return view('insumos');
+        })->middleware('permiso:5');
+
+        Route::get('/configuraciones', function () {
+            return view('configuraciones');
+        })->middleware('permiso:6')->name('configuraciones');
     });
-
-    Route::get('/insumos', function () {
-        return view('insumos');
-    });
-
-    Route::get('/gastos', function () {
-        return view('gastos');
-    })->name('gastos');
-
-    Route::get('/configuraciones', function () {
-        return view('configuraciones');
-    })->name('configuraciones');
-    Route::get('/perfiles', function(){
-        return view('perfiles');
-    });
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

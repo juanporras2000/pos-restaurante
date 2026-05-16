@@ -16,7 +16,8 @@ class Perfil extends Model {
     }
 
     public function permisos() {
-        return $this->belongsToMany(Permiso::class, 'perfil_permiso', 'id_perfil', 'id_permiso');
+        return $this->belongsToMany(Permiso::class, 'perfil_permiso', 'id_perfil', 'id_permiso')
+                    ->withTimestamps();
     }
 
     public function users() {

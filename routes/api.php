@@ -73,8 +73,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/adiciones/{adicion}', [AdicionController::class, 'update']);
     Route::delete('/adiciones/{adicion}', [AdicionController::class, 'destroy']);
 
-
     Route::get('/perfiles', [PerfilController::class, 'index']);
     Route::post('/verificar-perfil-pin', [PerfilController::class, 'verificarPin']);
+    Route::get('/perfiles-admin', [PerfilController::class, 'indexAdmin']);
+    Route::post('/perfiles', [PerfilController::class, 'store']);
+    Route::put('/perfiles/{id}', [PerfilController::class, 'update']);
+    Route::delete('/perfiles/{id}', [PerfilController::class, 'destroy']);
+
+    Route::get('/permisos-lista', function() {
+        return \App\Models\Permiso::all(['id_permiso', 'descripcion']);
+    });
+
+    Route::get('/perfiles-data-inicial', [PerfilController::class, 'dataInicialAdmin']);
 
 });

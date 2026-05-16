@@ -10,6 +10,7 @@ class Permiso extends Model {
     protected $fillable = ['descripcion'];
 
     public function perfiles() {
-        return $this->belongsToMany(Perfil::class, 'perfil_permiso', 'id_permiso', 'id_perfil');
+        return $this->belongsToMany(Perfil::class, 'perfil_permiso', 'id_permiso', 'id_perfil')
+                    ->withTimestamps();
     }
 }

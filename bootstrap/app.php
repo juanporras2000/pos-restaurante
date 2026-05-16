@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
+        $middleware->alias([
+            'check.perfil' => \App\Http\Middleware\CheckPerfilActivo::class,
+            'guest.perfil' => \App\Http\Middleware\RedirectIfPerfilActivo::class,
+            'permiso'      => \App\Http\Middleware\CheckPermiso::class
+        ]);
         $middleware->statefulApi();
         // Resuelve el tenant del usuario autenticado en cada request
         $middleware->appendToGroup('api', \App\Http\Middleware\SetTenantFromUser::class);

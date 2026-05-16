@@ -22,6 +22,7 @@ class PerfilSeeder extends Seeder
             'id_rol'        => 1,
             'created_at'    => now(),
             'updated_at'    => now(),
+            'tenant_id'     => 2, 
         ]);
 
         // Registro 2
@@ -33,6 +34,7 @@ class PerfilSeeder extends Seeder
             'id_rol'        => 2,
             'created_at'    => now(),
             'updated_at'    => now(),
+            'tenant_id'     => 2,
         ]);
     }
 }

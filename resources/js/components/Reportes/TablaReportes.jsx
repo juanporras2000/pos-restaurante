@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { TablaReportesPropTypes } from '../../propTypes';
 
 const fmtQ = (n) =>
@@ -50,7 +51,7 @@ export default function TablaReportes({ rows = [], emptyMsg = 'Sin datos para es
             {/* Buscador */}
             <div className="flex items-center gap-2">
                 <div className="relative flex-1 max-w-xs">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Buscar producto…"

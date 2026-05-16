@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
+import { useImprimir } from '../../hooks/useImprimir';
 import { PedidoCardPropTypes } from '../../propTypes';
 
 function formatDate(dateString) {
@@ -14,6 +15,7 @@ function formatDate(dateString) {
 export default function PedidoCard({ pedido, productos, onActualizado }) {
     const [modalPagoAbierto, setModalPagoAbierto] = useState(false);
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+    const { imprimir } = useImprimir();
 
     // Calcular subtotal (suma de items) para ver si hay recargo
     const subtotalItems = pedido.detalles?.reduce((acc, d) => acc + parseFloat(d.subtotal), 0) || 0;
@@ -172,6 +174,19 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
                 >
                     Procesar Pago
+                </button>
+                {/* Imprimir comanda (sin pago) */}
+                <button
+                    type="button"
+                    onClick={() => imprimir(pedido)}
+                    className="px-3 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-sm"
+                    title="Imprimir comanda"
+                >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M6 9V2h12v7"></path>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
                 </button>
                 <button
                     type="button"

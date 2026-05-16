@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
+import { useImprimir } from '../../hooks/useImprimir';
 import { ModalPagoPropTypes } from '../../propTypes';
 
 export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
     const [metodoPago, setMetodoPago] = useState('efectivo');
     const [recibido, setRecibido] = useState('');
     const [procesando, setProcesando] = useState(false);
+    const { imprimir } = useImprimir();
 
     const total = pedido ? parseFloat(pedido.total) : 0;
     const recibidoNum = (parseFloat(recibido) || 0) * 1000;
@@ -63,7 +65,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
             if (metodoPago === 'efectivo') {
                 Swal.fire({
                     icon: 'success',
-                    title: `Pago procesado. Cambio: $${parseFloat(data.cambio).toLocaleString('es-CO')}`,  
+                    title: `Pago procesado. Cambio: $${parseFloat(data.cambio).toLocaleString('es-CO')}`,
                     timer: 2500,
                     showConfirmButton: false,
                     toast: true,
@@ -80,8 +82,30 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                 });
             }
 
+            // Construir pedido enriquecido con los datos del pago recién creado
+            // para que el recibo incluya método, recibido y cambio.
+            const pedidoPagado = { ...pedido, pago: data.pago };
+
             cerrar();
             onPagado();
+
+            // Ofrecer imprimir recibo sin bloquear el flujo principal
+            const { isConfirmed } = await Swal.fire({
+                icon: 'question',
+                title: '¿Imprimir recibo?',
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Imprimir',
+                cancelButtonText: 'No, gracias',
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#6b7280',
+                timer: 6000,
+                timerProgressBar: true,
+            });
+
+            if (isConfirmed) {
+                imprimir(pedidoPagado);
+            }
         } catch {
             Swal.fire({
                 icon: 'error',

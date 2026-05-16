@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import TablaProductos from './TablaProductos';
 import ModalProducto from './ModalProducto';
+import PillsCategorias from '../shared/PillsCategorias';
 
 const PRODUCTO_VACIO = {
     id: null,
@@ -242,35 +243,14 @@ export default function Productos() {
                 </div>
 
                 {/* Pills de categoría */}
-                {categorias.length > 0 && (
-                    <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-                        <button
-                            type="button"
-                            onClick={() => setCategoriaFiltro('')}
-                            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                                categoriaFiltro === ''
-                                    ? 'bg-blue-600 text-white shadow-sm'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                            }`}
-                        >
-                            Todos
-                        </button>
-                        {categorias.map((cat) => (
-                            <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() => setCategoriaFiltro(String(cat.id) === categoriaFiltro ? '' : String(cat.id))}
-                                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                                    categoriaFiltro === String(cat.id)
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                }`}
-                            >
-                                {cat.nombre}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <div className="mt-4">
+                    <PillsCategorias
+                        categorias={categorias}
+                        activa={categoriaFiltro}
+                        onChange={(id) => setCategoriaFiltro(id ? String(id) : '')}
+                        size="md"
+                    />
+                </div>
             </div>
 
             {/* Spinner */}

@@ -19,7 +19,6 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-
     Route::middleware(['guest.perfil'])->group(function () {
         Route::get('/perfiles', function () {
             return view('perfiles');
@@ -27,33 +26,34 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['check.perfil'])->group(function () {
+
         Route::get('/pedidos', function () {
             return view('pedidos');
-        })->name('pedidos');
+        })->middleware('permiso:1')->name('pedidos');
 
         Route::get('/pagos', function () {
             return view('pagos');
-        });
-
-        Route::get('/reportes', function () {
-            return view('reportes');
-        })->name('reportes');
+        })->middleware('permiso:1');
 
         Route::get('/productos', function () {
             return view('productos');
-        });
+        })->middleware('permiso:2');
 
-        Route::get('/insumos', function () {
-            return view('insumos');
-        });
+        Route::get('/reportes', function () {
+            return view('reportes');
+        })->middleware('permiso:3')->name('reportes');
 
         Route::get('/gastos', function () {
             return view('gastos');
-        })->name('gastos');
+        })->middleware('permiso:4')->name('gastos');
+
+        Route::get('/insumos', function () {
+            return view('insumos');
+        })->middleware('permiso:5');
 
         Route::get('/configuraciones', function () {
             return view('configuraciones');
-        })->name('configuraciones');
+        })->middleware('permiso:6')->name('configuraciones');
     });
 });
 

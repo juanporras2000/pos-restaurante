@@ -14,16 +14,35 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
+    <body class="font-sans text-gray-900 antialiased overflow-hidden">
+        <div class="min-h-screen relative flex items-center justify-center bg-slate-50 overflow-hidden">
+            <!-- Capas de fondo decorativas -->
+            <div class="absolute inset-0 z-0">
+                <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+                <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-slate-100 rounded-full blur-3xl opacity-50"></div>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+            <div class="relative z-10 w-full max-w-sm px-4">
+                <div class="flex flex-col items-center">
+                    <!-- Logo con contenedor -->
+                    <div class="mb-4 transform transition-transform hover:scale-110 duration-500">
+                        <div class="p-3 bg-white rounded-2xl shadow-xl flex items-center justify-center">
+                            <a href="/">
+                                <x-application-logo class="w-16 h-16 fill-current text-blue-600" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card principal -->
+                    <div class="w-full bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100 px-8 py-10 transition-all duration-300">
+                        {{ $slot }}
+                    </div>
+
+                    <!-- Footer simple -->
+                    <p class="mt-8 text-xs text-center text-gray-400 font-medium">
+                        &copy; {{ date('Y') }} {{ config('app.name') }}. Todos los derechos reservados.
+                    </p>
+                </div>
             </div>
         </div>
     </body>

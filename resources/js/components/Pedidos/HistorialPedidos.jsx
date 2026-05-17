@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useImprimir } from '../../hooks/useImprimir';
+import { fmtCOP } from '../../utils/format';
 
 const TIPOS_GASTO = {
     insumos:   { label: 'Insumos',   color: 'bg-blue-100 text-blue-700' },
@@ -60,28 +61,28 @@ function ResumenDia({ pedidos, gastos, apertura }) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${montoApertura > 0 ? 'border-green-200' : 'border-gray-200'}`}>
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Base de apertura</p>
-                    <p className="text-2xl font-bold text-green-600">${montoApertura.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">{fmtCOP(montoApertura)}</p>
                     <p className="text-xs text-gray-400 mt-1">Dinero inicial en caja</p>
                     {apertura?.nota && <p className="text-xs text-gray-400 mt-0.5 truncate italic">"{apertura.nota}"</p>}
                 </div>
 
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Total ventas</p>
-                    <p className="text-2xl font-bold text-green-600">${totalVentas.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">{fmtCOP(totalVentas)}</p>
                     <p className="text-xs text-gray-400 mt-1">{pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''} cerrado{pedidos.length !== 1 ? 's' : ''}</p>
                 </div>
 
                 <div className={`bg-white rounded-xl shadow-sm p-4 ${totalGastos > 0 ? 'border border-red-100' : 'border border-gray-200'}`}>
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Total gastos</p>
                     <p className={`text-2xl font-bold ${totalGastos > 0 ? 'text-red-600' : 'text-gray-400'}`}>
-                        {totalGastos > 0 ? `-$${totalGastos.toFixed(2)}` : '$0.00'}
+                        {totalGastos > 0 ? `-${fmtCOP(totalGastos)}` : fmtCOP(0)}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''} registrado{gastos.length !== 1 ? 's' : ''}</p>
                 </div>
 
                 <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${resultadoNeto >= 0 ? 'border-blue-200' : 'border-red-300'}`}>
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Resultado neto</p>
-                    <p className={`text-2xl font-bold ${resultadoNeto >= 0 ? 'text-blue-700' : 'text-red-600'}`}>${resultadoNeto.toFixed(2)}</p>
+                    <p className={`text-2xl font-bold ${resultadoNeto >= 0 ? 'text-blue-700' : 'text-red-600'}`}>{fmtCOP(resultadoNeto)}</p>
                     <p className="text-xs text-gray-400 mt-1">Ventas − Gastos</p>
                 </div>
             </div>
@@ -105,7 +106,7 @@ function ResumenDia({ pedidos, gastos, apertura }) {
                                             <span className="text-xs text-gray-400 font-normal">— no entra a caja física</span>
                                         )}
                                     </span>
-                                    <span className={`font-bold ${c.text}`}>${monto.toFixed(2)}</span>
+                                    <span className={`font-bold ${c.text}`}>{fmtCOP(monto)}</span>
                                 </div>
                             );
                         })}
@@ -114,18 +115,18 @@ function ResumenDia({ pedidos, gastos, apertura }) {
                         )}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-100 text-sm">
                             <span className="font-semibold text-gray-700">Total recaudado</span>
-                            <span className="font-bold text-green-700">${totalVentas.toFixed(2)}</span>
+                            <span className="font-bold text-green-700">{fmtCOP(totalVentas)}</span>
                         </div>
                         {ventasDigitales > 0 && (
                             <div className="flex justify-between items-center text-xs text-gray-500">
                                 <span>· Efectivo recibido</span>
-                                <span>${ventasEfectivo.toFixed(2)}</span>
+                                <span>{fmtCOP(ventasEfectivo)}</span>
                             </div>
                         )}
                         {ventasDigitales > 0 && (
                             <div className="flex justify-between items-center text-xs text-gray-500">
                                 <span>· Digital (tarjeta/transferencia)</span>
-                                <span>${ventasDigitales.toFixed(2)}</span>
+                                <span>{fmtCOP(ventasDigitales)}</span>
                             </div>
                         )}
                     </div>
@@ -136,32 +137,32 @@ function ResumenDia({ pedidos, gastos, apertura }) {
                     <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Saldo en caja</p>
                     <p className="text-xs text-gray-400 mb-3">Solo dinero físico (efectivo)</p>
                     <p className={`text-3xl font-bold mb-4 ${saldoCajaFisica >= 0 ? 'text-green-700' : 'text-red-600'}`}>
-                        ${saldoCajaFisica.toFixed(2)}
+                        {fmtCOP(saldoCajaFisica)}
                     </p>
                     <div className="space-y-1.5 text-sm border-t border-gray-100 pt-3">
                         <div className="flex justify-between text-gray-600">
                             <span>Base de apertura</span>
-                            <span className="text-green-600 font-medium">+${montoApertura.toFixed(2)}</span>
+                            <span className="text-green-600 font-medium">+{fmtCOP(montoApertura)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600">
                             <span>Ventas en efectivo</span>
-                            <span className="text-green-600 font-medium">+${ventasEfectivo.toFixed(2)}</span>
+                            <span className="text-green-600 font-medium">+{fmtCOP(ventasEfectivo)}</span>
                         </div>
                         {totalGastos > 0 && (
                             <div className="flex justify-between text-gray-600">
                                 <span>Gastos pagados</span>
-                                <span className="text-red-500 font-medium">−${totalGastos.toFixed(2)}</span>
+                                <span className="text-red-500 font-medium">−{fmtCOP(totalGastos)}</span>
                             </div>
                         )}
                         <div className="flex justify-between items-center pt-1.5 border-t border-gray-100 font-semibold text-gray-800">
                             <span>= Efectivo en caja</span>
                             <span className={saldoCajaFisica >= 0 ? 'text-green-700' : 'text-red-600'}>
-                                ${saldoCajaFisica.toFixed(2)}
+                                {fmtCOP(saldoCajaFisica)}
                             </span>
                         </div>
                         {ventasDigitales > 0 && (
                             <p className="text-xs text-gray-400 pt-1 italic">
-                                Los pagos por tarjeta/transferencia (${ventasDigitales.toFixed(2)}) no se cuentan aquí porque no entran a la caja física.
+                                Los pagos por tarjeta/transferencia ({fmtCOP(ventasDigitales)}) no se cuentan aquí porque no entran a la caja física.
                             </p>
                         )}
                     </div>
@@ -225,7 +226,7 @@ function TarjetaPedido({ pedido }) {
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-lg font-bold text-gray-900">${parseFloat(pedido.total).toFixed(2)}</span>
+                    <span className="text-lg font-bold text-gray-900">{fmtCOP(parseFloat(pedido.total))}</span>
                     <svg
                         className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandido ? 'rotate-180' : ''}`}
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -250,7 +251,7 @@ function TarjetaPedido({ pedido }) {
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0 ml-3">
                                     <span className="text-gray-400 text-xs">×{detalle.cantidad}</span>
-                                    <span className="font-medium text-gray-900">${parseFloat(detalle.subtotal).toFixed(2)}</span>
+                                    <span className="font-medium text-gray-900">{fmtCOP(parseFloat(detalle.subtotal))}</span>
                                 </div>
                             </div>
                         ))}
@@ -261,16 +262,16 @@ function TarjetaPedido({ pedido }) {
                         <div className="bg-gray-50 rounded-lg p-3 space-y-1.5 text-sm border border-gray-100">
                             <div className="flex justify-between text-gray-600">
                                 <span>Total</span>
-                                <span className="font-semibold text-gray-900">${parseFloat(pago.total).toFixed(2)}</span>
+                                <span className="font-semibold text-gray-900">{fmtCOP(parseFloat(pago.total))}</span>
                             </div>
                             <div className="flex justify-between text-gray-600">
                                 <span>Recibido</span>
-                                <span className="font-medium">${parseFloat(pago.recibido).toFixed(2)}</span>
+                                <span className="font-medium">{fmtCOP(parseFloat(pago.recibido))}</span>
                             </div>
                             {parseFloat(pago.cambio) > 0 && (
                                 <div className="flex justify-between text-gray-600">
                                     <span>Cambio</span>
-                                    <span className="font-medium text-blue-600">${parseFloat(pago.cambio).toFixed(2)}</span>
+                                    <span className="font-medium text-blue-600">{fmtCOP(parseFloat(pago.cambio))}</span>
                                 </div>
                             )}
                             <div className="flex justify-between items-center pt-1 border-t border-gray-200">
@@ -320,7 +321,7 @@ function SeccionGastos({ gastos }) {
                     </span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className="font-bold text-red-600">-${total.toFixed(2)}</span>
+                    <span className="font-bold text-red-600">-{fmtCOP(total)}</span>
                     <svg
                         className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${expandido ? 'rotate-180' : ''}`}
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -350,7 +351,7 @@ function SeccionGastos({ gastos }) {
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0 ml-3">
                                     <span className="text-xs text-gray-400">{hora}</span>
-                                    <span className="font-semibold text-red-600">${Number.parseFloat(g.monto).toFixed(2)}</span>
+                                    <span className="font-semibold text-red-600">{fmtCOP(Number.parseFloat(g.monto))}</span>
                                 </div>
                             </div>
                         );

@@ -31,53 +31,142 @@ function formatFecha(dateString) {
     });
 }
 
+const METODO_COLOR = {
+    efectivo:       { dot: 'bg-green-500',  text: 'text-green-700',  badge: 'bg-green-50 border-green-200' },
+    tarjeta:        { dot: 'bg-blue-500',   text: 'text-blue-700',   badge: 'bg-blue-50 border-blue-200' },
+    transferencia:  { dot: 'bg-purple-500', text: 'text-purple-700', badge: 'bg-purple-50 border-purple-200' },
+};
+
 function ResumenDia({ pedidos, gastos, apertura }) {
-    const totalVentas = pedidos.reduce((acc, p) => acc + Number.parseFloat(p.total || 0), 0);
-    const totalGastos = gastos.reduce((acc, g) => acc + Number.parseFloat(g.monto || 0), 0);
-    const neto = totalVentas - totalGastos;
+    const totalVentas   = pedidos.reduce((acc, p) => acc + Number.parseFloat(p.total || 0), 0);
+    const totalGastos   = gastos.reduce((acc, g) => acc + Number.parseFloat(g.monto || 0), 0);
     const montoApertura = apertura?.monto ? (Number.parseFloat(apertura.monto) || 0) : 0;
-    const saldoCaja = montoApertura + totalVentas - totalGastos;
+    const resultadoNeto = totalVentas - totalGastos;
+
     const porMetodo = pedidos.reduce((acc, p) => {
-        const metodo = p.pago?.metodo_pago ?? 'desconocido';
+        const metodo = p.pago?.metodo_pago ?? 'otro';
         acc[metodo] = (acc[metodo] ?? 0) + Number.parseFloat(p.total || 0);
         return acc;
     }, {});
 
+    const ventasEfectivo   = porMetodo['efectivo'] ?? 0;
+    const ventasDigitales  = totalVentas - ventasEfectivo;
+    const saldoCajaFisica  = montoApertura + ventasEfectivo - totalGastos;
+
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${montoApertura > 0 ? 'border-green-200' : 'border-gray-200'}`}>
-                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Base de apertura</p>
-                <p className="text-2xl font-bold text-green-600">${montoApertura.toFixed(2)}</p>
-                {apertura?.nota && <p className="text-xs text-gray-400 mt-1 truncate">{apertura.nota}</p>}
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Pedidos cerrados</p>
-                <p className="text-2xl font-bold text-gray-900">{pedidos.length}</p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Ventas del día</p>
-                <p className="text-2xl font-bold text-green-600">${totalVentas.toFixed(2)}</p>
-            </div>
-            {totalGastos > 0 && (
-                <div className="bg-white rounded-xl border border-red-100 shadow-sm p-4">
-                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Gastos del día</p>
-                    <p className="text-2xl font-bold text-red-600">-${totalGastos.toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''}</p>
+        <div className="space-y-4 mb-6">
+
+            {/* ── Fila 1: métricas globales ── */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${montoApertura > 0 ? 'border-green-200' : 'border-gray-200'}`}>
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Base de apertura</p>
+                    <p className="text-2xl font-bold text-green-600">${montoApertura.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 mt-1">Dinero inicial en caja</p>
+                    {apertura?.nota && <p className="text-xs text-gray-400 mt-0.5 truncate italic">"{apertura.nota}"</p>}
                 </div>
-            )}
-            <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${saldoCaja >= 0 ? 'border-green-300' : 'border-red-300'}`}>
-                <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Saldo en caja</p>
-                <p className={`text-2xl font-bold ${saldoCaja >= 0 ? 'text-green-700' : 'text-red-600'}`}>${saldoCaja.toFixed(2)}</p>
-                <p className="text-xs text-gray-400 mt-1">Base + Ventas − Gastos</p>
-            </div>
-            {Object.entries(porMetodo).map(([metodo, monto]) => (
-                <div key={metodo} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">
-                        {METODO_ETIQUETA[metodo] ?? metodo}
+
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Total ventas</p>
+                    <p className="text-2xl font-bold text-green-600">${totalVentas.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 mt-1">{pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''} cerrado{pedidos.length !== 1 ? 's' : ''}</p>
+                </div>
+
+                <div className={`bg-white rounded-xl shadow-sm p-4 ${totalGastos > 0 ? 'border border-red-100' : 'border border-gray-200'}`}>
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Total gastos</p>
+                    <p className={`text-2xl font-bold ${totalGastos > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                        {totalGastos > 0 ? `-$${totalGastos.toFixed(2)}` : '$0.00'}
                     </p>
-                    <p className="text-2xl font-bold text-blue-600">${monto.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''} registrado{gastos.length !== 1 ? 's' : ''}</p>
                 </div>
-            ))}
+
+                <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${resultadoNeto >= 0 ? 'border-blue-200' : 'border-red-300'}`}>
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Resultado neto</p>
+                    <p className={`text-2xl font-bold ${resultadoNeto >= 0 ? 'text-blue-700' : 'text-red-600'}`}>${resultadoNeto.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400 mt-1">Ventas − Gastos</p>
+                </div>
+            </div>
+
+            {/* ── Fila 2: desglose por método + saldo físico en caja ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* Desglose por método de pago */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-3">Ingresos por método de pago</p>
+                    <div className="space-y-2">
+                        {Object.entries(porMetodo).map(([metodo, monto]) => {
+                            const c = METODO_COLOR[metodo] ?? { dot: 'bg-gray-400', text: 'text-gray-700', badge: 'bg-gray-50 border-gray-200' };
+                            const esDigital = metodo !== 'efectivo';
+                            return (
+                                <div key={metodo} className={`flex items-center justify-between rounded-lg px-3 py-2 border ${c.badge}`}>
+                                    <span className="flex items-center gap-2 text-sm text-gray-700">
+                                        <span className={`inline-block w-2.5 h-2.5 rounded-full shrink-0 ${c.dot}`} />
+                                        <span className="font-medium">{METODO_ETIQUETA[metodo] ?? metodo}</span>
+                                        {esDigital && (
+                                            <span className="text-xs text-gray-400 font-normal">— no entra a caja física</span>
+                                        )}
+                                    </span>
+                                    <span className={`font-bold ${c.text}`}>${monto.toFixed(2)}</span>
+                                </div>
+                            );
+                        })}
+                        {Object.keys(porMetodo).length === 0 && (
+                            <p className="text-sm text-gray-400 italic">Sin ventas registradas</p>
+                        )}
+                        <div className="flex justify-between items-center pt-2 border-t border-gray-100 text-sm">
+                            <span className="font-semibold text-gray-700">Total recaudado</span>
+                            <span className="font-bold text-green-700">${totalVentas.toFixed(2)}</span>
+                        </div>
+                        {ventasDigitales > 0 && (
+                            <div className="flex justify-between items-center text-xs text-gray-500">
+                                <span>· Efectivo recibido</span>
+                                <span>${ventasEfectivo.toFixed(2)}</span>
+                            </div>
+                        )}
+                        {ventasDigitales > 0 && (
+                            <div className="flex justify-between items-center text-xs text-gray-500">
+                                <span>· Digital (tarjeta/transferencia)</span>
+                                <span>${ventasDigitales.toFixed(2)}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Saldo físico en caja */}
+                <div className={`bg-white rounded-xl border-2 shadow-sm p-4 ${saldoCajaFisica >= 0 ? 'border-green-300' : 'border-red-300'}`}>
+                    <p className="text-xs text-gray-500 uppercase font-medium tracking-wide mb-1">Saldo en caja</p>
+                    <p className="text-xs text-gray-400 mb-3">Solo dinero físico (efectivo)</p>
+                    <p className={`text-3xl font-bold mb-4 ${saldoCajaFisica >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+                        ${saldoCajaFisica.toFixed(2)}
+                    </p>
+                    <div className="space-y-1.5 text-sm border-t border-gray-100 pt-3">
+                        <div className="flex justify-between text-gray-600">
+                            <span>Base de apertura</span>
+                            <span className="text-green-600 font-medium">+${montoApertura.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-600">
+                            <span>Ventas en efectivo</span>
+                            <span className="text-green-600 font-medium">+${ventasEfectivo.toFixed(2)}</span>
+                        </div>
+                        {totalGastos > 0 && (
+                            <div className="flex justify-between text-gray-600">
+                                <span>Gastos pagados</span>
+                                <span className="text-red-500 font-medium">−${totalGastos.toFixed(2)}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center pt-1.5 border-t border-gray-100 font-semibold text-gray-800">
+                            <span>= Efectivo en caja</span>
+                            <span className={saldoCajaFisica >= 0 ? 'text-green-700' : 'text-red-600'}>
+                                ${saldoCajaFisica.toFixed(2)}
+                            </span>
+                        </div>
+                        {ventasDigitales > 0 && (
+                            <p className="text-xs text-gray-400 pt-1 italic">
+                                Los pagos por tarjeta/transferencia (${ventasDigitales.toFixed(2)}) no se cuentan aquí porque no entran a la caja física.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

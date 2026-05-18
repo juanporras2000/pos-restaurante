@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
 import { useImprimir } from '../../hooks/useImprimir';
+import { fmtCOP } from '../../utils/format';
 import { PedidoCardPropTypes } from '../../propTypes';
 
 function formatDate(dateString) {
@@ -120,14 +121,14 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
                         <div className="flex justify-between items-center">
                             <span className="text-gray-700">{detalle.producto?.nombre}</span>
                             <span className="text-gray-500">x{detalle.cantidad}</span>
-                            <span className="font-medium text-gray-900">${parseFloat(detalle.subtotal).toFixed(2)}</span>
+                            <span className="font-medium text-gray-900">{fmtCOP(parseFloat(detalle.subtotal))}</span>
                         </div>
                         {detalle.adiciones?.length > 0 && (
                             <div className="mt-0.5 ml-1 space-y-0.5">
                                 {detalle.adiciones.map((adic, i) => (
                                     <p key={i} className="text-xs text-purple-600 flex justify-between">
                                         <span>+ {adic.nombre} x{adic.cantidad}</span>
-                                        <span>${parseFloat(adic.subtotal).toFixed(2)}</span>
+                                        <span>{fmtCOP(parseFloat(adic.subtotal))}</span>
                                     </p>
                                 ))}
                             </div>
@@ -146,7 +147,7 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
                 {tieneRecargo && (
                     <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Subtotal items</span>
-                        <span>${subtotalItems.toFixed(2)}</span>
+                        <span>{fmtCOP(subtotalItems)}</span>
                     </div>
                 )}
                 {tieneRecargo && (
@@ -157,12 +158,12 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
                             </svg>
                             Recargo domicilio
                         </span>
-                        <span>+${valorRecargo.toFixed(2)}</span>
+                        <span>+{fmtCOP(valorRecargo)}</span>
                     </div>
                 )}
                 <div className="flex justify-between items-center pt-1">
                     <span className="font-semibold text-gray-900">Total</span>
-                    <span className="text-xl font-bold text-gray-900">${parseFloat(pedido.total).toFixed(2)}</span>
+                    <span className="text-xl font-bold text-gray-900">{fmtCOP(parseFloat(pedido.total))}</span>
                 </div>
             </div>
 

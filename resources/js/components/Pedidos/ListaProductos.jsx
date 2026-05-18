@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ListaProductosPropTypes } from '../../propTypes';
 import PillsCategorias from '../shared/PillsCategorias';
+import { fmtCOP } from '../../utils/format';
 
 export default function ListaProductos({ productos, carrito, onIncrementar, onDecrementar }) {
     const [categoriaActiva, setCategoriaActiva] = useState(null);
@@ -69,7 +70,7 @@ export default function ListaProductos({ productos, carrito, onIncrementar, onDe
                     >
                         <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-gray-900 truncate">{producto.nombre}</h4>
-                            <p className="text-sm text-gray-500">${parseFloat(producto.precio).toFixed(2)}</p>
+                            <p className="text-sm text-gray-500">{fmtCOP(parseFloat(producto.precio))}</p>
                         </div>
                         <div className="flex items-center gap-2 ml-2">
                             <button

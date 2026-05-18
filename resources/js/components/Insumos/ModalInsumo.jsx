@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -39,14 +39,19 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
         defaultValues: INSUMO_VACIO,
     });
 
+    const [valorLoteDisplay, setValorLoteDisplay] = useState('');
+
     const stockActual    = useWatch({ control, name: 'stock_actual' });
     const valorProducto  = useWatch({ control, name: 'valor_producto' });
     useEffect(() => {
-    const stock = Number.parseFloat(stockActual)  || 0;
-    const valor = Number.parseFloat(valorProducto) || 0;
-    const costo = stock > 0 ? Number.parseFloat((valor / stock).toFixed(4)) : 0;
-    setValue('costo_unitario', costo);
-}, [stockActual, valorProducto, setValue]);
+        // Solo recalcular cuando el usuario ingresó un valor_producto explícito.
+        // Si está vacío (modo edición sin modificar el campo), conservar el valor cargado.
+        if (valorProducto === '' || valorProducto === null || valorProducto === undefined) return;
+        const stock = Number.parseFloat(stockActual)  || 0;
+        const valor = Number.parseFloat(valorProducto) || 0;
+        const costo = stock > 0 ? Number.parseFloat((valor / stock).toFixed(4)) : 0;
+        setValue('costo_unitario', costo);
+    }, [stockActual, valorProducto, setValue]);
     useEffect(() => {
         if (abierto) {
             reset(insumo.id
@@ -60,6 +65,7 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                   }
                 : INSUMO_VACIO
             );
+            setValorLoteDisplay('');
         }
     }, [abierto, insumo, reset]);
 
@@ -124,7 +130,8 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                             <input
                                 {...register('stock_actual')}
                                 type="number" step="0.01" placeholder="0"
-                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.stock_actual ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                readOnly
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-600 cursor-not-allowed"
                             />
                             {errors.stock_actual && <p className="mt-1 text-xs text-red-500">{errors.stock_actual.message}</p>}
                         </div>
@@ -147,8 +154,15 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                     <div className="relative">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm">$</span>
                         <input
-                            {...register('valor_producto')}
-                            type="number" step="0.01" placeholder="Ej: 5000"
+                            value={valorLoteDisplay}
+                            onChange={(e) => {
+                                const raw = e.target.value.replace(/[^0-9]/g, '');
+                                setValorLoteDisplay(raw);
+                                setValue('valor_producto', raw === '' ? '' : Number(raw) * 1000);
+                            }}
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="Ej: 5"
                             className={`w-full pl-7 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.valor_producto ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                         />
                     </div>

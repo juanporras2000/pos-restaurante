@@ -186,6 +186,23 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
             }
         }
 
+        const perfilActivoRaw = localStorage.getItem('perfil_activo');
+        let idPerfil = null;
+
+        if (perfilActivoRaw) {
+            try {
+                const perfilObj = JSON.parse(perfilActivoRaw);
+                idPerfil = perfilObj.id_perfil || perfilObj.id;
+            } catch (e) {
+                idPerfil = perfilActivoRaw;
+            }
+        }
+
+        if (!idPerfil && !esEdicion) {
+            Swal.fire({ icon: 'error', title: 'No se detectó un perfil activo. Por favor reingresa.', timer: 3000, showConfirmButton: false, toast: true, position: 'top-end' });
+            return;
+        }
+
         setEnviando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
@@ -194,6 +211,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
             numero_mesa: pedido.numero_mesa || null,
             direccion: pedido.direccion || null,
             nombre_cliente: pedido.nombre_cliente?.trim() || null,
+            id_perfil: idPerfil,
             productos: carrito.map((item) => ({
                 producto_id: item.id,
                 cantidad: item.cantidad,

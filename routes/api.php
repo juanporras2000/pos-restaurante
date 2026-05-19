@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('pedidos', [PedidoController::class, 'store']);
     Route::put('pedidos/{pedido}', [PedidoController::class, 'update']);
     Route::delete('pedidos/{pedido}', [PedidoController::class, 'destroy']);
+    
     Route::get('/reportes/ventas',                [ReporteController::class, 'ventas']);
     Route::get('/reportes/ventas-por-fecha',      [ReporteController::class, 'ventasPorFecha']);
     Route::get('/reportes/productos-top',         [ReporteController::class, 'productosTop']);

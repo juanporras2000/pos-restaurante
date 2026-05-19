@@ -179,6 +179,9 @@ function TarjetaPedido({ pedido }) {
     const metodoLabel = METODO_ETIQUETA[pago?.metodo_pago] ?? pago?.metodo_pago ?? '—';
     const esMesa = pedido.tipo === 'mesa';
 
+
+
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
             {/* Cabecera clicable */}
@@ -215,6 +218,9 @@ function TarjetaPedido({ pedido }) {
                             </span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                 {metodoLabel}
+                            </span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-purple-700">
+                                Atendido por: {pedido.perfil.nombre}
                             </span>
                         </div>
                         <p className="text-sm text-gray-500 mt-0.5 truncate">

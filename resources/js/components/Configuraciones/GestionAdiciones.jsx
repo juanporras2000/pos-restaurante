@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { fmtCOP } from '../../utils/format';
 
 function ModalAdicion({ adicion, onGuardar, onCerrar }) {
     const [nombre, setNombre] = useState(adicion?.nombre ?? '');
@@ -234,7 +235,7 @@ export default function GestionAdiciones() {
                             </div>
                             <div className="flex items-center gap-3 shrink-0 ml-4">
                                 <span className="text-sm font-semibold text-gray-700">
-                                    ${parseFloat(adicion.precio).toFixed(2)}
+                                    {fmtCOP(adicion.precio)}
                                 </span>
                                 <button
                                     type="button"

@@ -50,6 +50,7 @@ export const Perfiles = () => {
             })
             .then((res) => {
                 if (res.data.success) {
+
                     localStorage.setItem(
                         "perfil_activo",
                         JSON.stringify(res.data.perfil),

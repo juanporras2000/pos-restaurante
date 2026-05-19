@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { fmtCOP } from '../../utils/format';
 import { CarritoPropTypes } from '../../propTypes';
 
 export default function Carrito({ 
@@ -49,7 +50,7 @@ export default function Carrito({
                             <div className="flex justify-between items-center">
                                 <span className="flex-1 text-gray-700 font-medium truncate pr-1">{item.nombre}</span>
                                 <span className="mx-1 text-gray-500 shrink-0">x{item.cantidad}</span>
-                                <span className="font-medium text-gray-900 mr-1 shrink-0">${totalItem.toFixed(2)}</span>
+                                <span className="font-medium text-gray-900 mr-1 shrink-0">{fmtCOP(totalItem)}</span>
 
                                 {/* Botón adiciones */}
                                 {adicionesDisponibles.length > 0 && (
@@ -100,7 +101,7 @@ export default function Carrito({
                                 <div className="mt-0.5 ml-1 space-y-0.5">
                                     {item.adiciones.map((a) => (
                                         <p key={a.adicion_id} className="text-xs text-purple-600 italic">
-                                            + {a.cantidad > 1 ? `${a.cantidad}x ` : ''}{a.nombre} <span className="not-italic font-medium">(+${a.subtotal.toFixed(2)})</span>
+                                            + {a.cantidad > 1 ? `${a.cantidad}x ` : ''}{a.nombre} <span className="not-italic font-medium">(+{fmtCOP(a.subtotal)})</span>
                                         </p>
                                     ))}
                                 </div>
@@ -131,7 +132,7 @@ export default function Carrito({
                                                 <div key={adicion.id} className="flex items-center justify-between text-xs">
                                                     <span className="text-gray-700 flex-1">
                                                         {adicion.nombre}
-                                                        <span className="text-purple-500 ml-1">+${Number.parseFloat(adicion.precio).toFixed(2)}</span>
+                                                        <span className="text-purple-500 ml-1">+{fmtCOP(Number.parseFloat(adicion.precio))}</span>
                                                     </span>
                                                     <div className="flex items-center gap-1 shrink-0">
                                                         <button
@@ -183,7 +184,7 @@ export default function Carrito({
             {aplicaRecargo && (
                 <div className="flex justify-between items-center text-sm text-gray-600 mb-1 border-t border-gray-100 pt-3">
                     <span>Subtotal</span>
-                    <span>${subtotalProductos.toFixed(2)}</span>
+                    <span>{fmtCOP(subtotalProductos)}</span>
                 </div>
             )}
             {aplicaRecargo && (
@@ -195,13 +196,13 @@ export default function Carrito({
                         </svg>
                         Recargo domicilio
                     </span>
-                    <span>+${recargoDomicilio.toFixed(2)}</span>
+                    <span>+{fmtCOP(recargoDomicilio)}</span>
                 </div>
             )}
 
             <div className={`flex justify-between items-center text-lg font-semibold ${aplicaRecargo ? 'border-t border-gray-200 pt-2' : 'border-t border-gray-200 pt-3'}`}>
                 <span>Total</span>
-                <span>${totalGeneral.toFixed(2)}</span>
+                <span>{fmtCOP(totalGeneral)}</span>
             </div>
         </div>
     );

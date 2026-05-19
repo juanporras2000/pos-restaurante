@@ -20,6 +20,7 @@ class PerfilController extends Controller
 
         $perfil = Perfil::where('id_perfil', $request->id_perfil)
             ->where('id_user', Auth::id())
+            ->with('permisos')
             ->first();
 
         if (!$perfil) {
@@ -37,7 +38,8 @@ class PerfilController extends Controller
                     'id_perfil'     => $perfil->id_perfil,
                     'nombre'        => $perfil->nombre,
                     'id_rol'        => $perfil->id_rol,
-                    'imagen_perfil' => $perfil->imagen_perfil
+                    'imagen_perfil' => $perfil->imagen_perfil,
+                    'permisos'      => $perfil->permisos
                 ]
             ], 200);
         }

@@ -19,8 +19,8 @@ class PedidoController extends Controller
         // Mantenemos where('user_id') para que cada empleado vea solo sus pedidos.
         $pedidos = Pedido::where('user_id', auth()->id())
             ->whereDoesntHave('pago')
-            ->with(['detalles.producto'])
-            ->orderBy('created_at', 'desc')
+            ->with(['detalles.producto', 'perfil'])
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return response()->json($pedidos);
@@ -36,8 +36,8 @@ class PedidoController extends Controller
         // no en el día en que fue cerrado.
         $pedidos = Pedido::where('estado', 'pagado')
             ->whereBetween('created_at', [$inicio, $fin])
-            ->with(['detalles.producto', 'pago'])
-            ->orderBy('created_at', 'desc')
+            ->with(['detalles.producto', 'pago', 'perfil'])
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return response()->json($pedidos);
@@ -53,13 +53,14 @@ class PedidoController extends Controller
             'productos'     => 'required|array|min:1',
             'productos.*.producto_id' => 'required|exists:productos,id',
             'productos.*.cantidad'    => 'required|integer|min:1',
+            'id_perfil' => 'required|exists:perfil,id_perfil'
         ]);
 
         // --- Verificación de stock ---
         // Acumular consumo total por insumo considerando todos los items del pedido
         $consumo = []; // [ insumo_id => cantidad_total_requerida ]
-
         $productos = [];
+
         foreach ($request->productos as $item) {
             $producto = Producto::with('insumos')->findOrFail($item['producto_id']);
             $productos[] = ['producto' => $producto, 'cantidad' => $item['cantidad'], 'observacion' => $item['observacion'] ?? null, 'adiciones' => $item['adiciones'] ?? []];
@@ -100,6 +101,7 @@ class PedidoController extends Controller
                 'direccion'      => $request->direccion,
                 'nombre_cliente' => $request->nombre_cliente,
                 'total'          => 0,
+                'id_perfil'      => $request->id_perfil,
                 // tenant_id lo inyecta automáticamente el trait BelongsToTenant
             ]);
 
@@ -175,7 +177,7 @@ class PedidoController extends Controller
 
         return response()->json([
             'mensaje' => 'Pedido creado correctamente',
-            'pedido'  => $pedido,
+            'pedido'  => $pedido->load('perfil'),
         ], 201);
     }
 
@@ -242,7 +244,7 @@ class PedidoController extends Controller
 
         return response()->json([
             'mensaje' => 'Pedido actualizado correctamente',
-            'pedido'  => $pedido->load('detalles.producto'),
+            'pedido'  => $pedido->load('detalles.producto', 'perfil'),
         ]);
     }
 

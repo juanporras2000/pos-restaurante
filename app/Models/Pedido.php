@@ -22,6 +22,7 @@ class Pedido extends Model
         'estado',
         'razon_eliminacion',
         'tenant_id',
+        'id_perfil'
     ];
 
     protected $appends = ['numero_dia'];
@@ -40,14 +41,14 @@ class Pedido extends Model
 
         // Convertimos created_at (UTC) a Colombia
         $fechaLocal = $this->created_at->setTimezone('America/Bogota');
-        
+
         // Si es antes de la hora de cierre, pertenece a la jornada del día anterior
         if ($fechaLocal->hour < $horaCierre) {
             $inicioJornada = $fechaLocal->copy()->subDay()->hour($horaCierre)->minute(0)->second(0);
         } else {
             $inicioJornada = $fechaLocal->copy()->hour($horaCierre)->minute(0)->second(0);
         }
-        
+
         $finJornada = $inicioJornada->copy()->addDay()->subSecond();
 
         // Convertimos los rangos de vuelta a UTC para la consulta en BD
@@ -68,6 +69,11 @@ class Pedido extends Model
     public function pago()
     {
         return $this->hasOne(Pago::class);
+    }
+
+    public function perfil()
+    {
+        return $this->belongsTo(Perfil::class, 'id_perfil', 'id_perfil');
     }
 }
 

@@ -51,6 +51,9 @@ export default function TarjetaPedido({ pedido }) {
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                 {metodoLabel}
                             </span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-purple-700">
+                                Atendido por: {pedido.perfil.nombre}
+                            </span>
                         </div>
                         <p className="text-sm text-gray-500 mt-0.5 truncate">
                             {!esMesa && pedido.direccion && <span>{pedido.direccion} · </span>}

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import ResumenDia    from './ResumenDia';
 import TarjetaPedido from './TarjetaPedido';

@@ -53,7 +53,7 @@ export default function SeccionGastos({ gastos }) {
                                         )}
                                     </div>
                                 </div>
-                                <span className="shrink-0 text-sm font-bold text-red-600 ml-3">{fmtCOP(Number.parseFloat(g.monto))}</span>
+                                <span className="shrink-0 text-sm font-bold text-red-600 ml-3">{fmtCOP(g.monto)}</span>
                             </div>
                         );
                     })}

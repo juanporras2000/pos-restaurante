@@ -63,7 +63,7 @@ export default function TarjetaPedido({ pedido }) {
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-lg font-bold text-gray-900">{fmtCOP(parseFloat(pedido.total))}</span>
+                    <span className="text-lg font-bold text-gray-900">{fmtCOP(pedido.total)}</span>
                     <ChevronDownIcon className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandido ? 'rotate-180' : ''}`} />
                 </div>
             </button>
@@ -87,7 +87,7 @@ export default function TarjetaPedido({ pedido }) {
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0 ml-3">
                                     <span className="text-gray-400 text-xs">×{detalle.cantidad}</span>
-                                    <span className="font-medium text-gray-900">{fmtCOP(parseFloat(detalle.subtotal))}</span>
+                                    <span className="font-medium text-gray-900">{fmtCOP(detalle.subtotal)}</span>
                                 </div>
                             </div>
                         ))}
@@ -98,12 +98,12 @@ export default function TarjetaPedido({ pedido }) {
                         <div className="bg-gray-50 rounded-lg p-3 space-y-1.5 text-sm border border-gray-100">
                             <div className="flex justify-between text-gray-600">
                                 <span>Recibido</span>
-                                <span className="font-medium">{fmtCOP(parseFloat(pago.recibido))}</span>
+                                <span className="font-medium">{fmtCOP(pago.recibido)}</span>
                             </div>
                             {parseFloat(pago.cambio) > 0 && (
                                 <div className="flex justify-between text-gray-600">
                                     <span>Cambio</span>
-                                    <span className="font-medium text-blue-600">{fmtCOP(parseFloat(pago.cambio))}</span>
+                                    <span className="font-medium text-blue-600">{fmtCOP(pago.cambio)}</span>
                                 </div>
                             )}
                         </div>

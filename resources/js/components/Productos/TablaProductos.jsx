@@ -1,5 +1,6 @@
 import React from 'react';
 import { TruckIcon } from '@heroicons/react/24/outline';
+import { fmtCOP } from '../../utils/format';
 
 /**
  * Retorna el color del badge según el margen de ganancia:
@@ -31,16 +32,16 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {productos.map((producto) => {
-                const precio   = parseFloat(producto.precio)  || 0;
-                const costo    = parseFloat(producto.costo)   || 0;
-                const utilidad = parseFloat(producto.utilidad)|| 0;
-                const margen   = parseFloat(producto.margen)  || 0;
+                const precio   = Number.parseFloat(producto.precio)  || 0;
+                const costo    = Number.parseFloat(producto.costo)   || 0;
+                const utilidad = Number.parseFloat(producto.utilidad)|| 0;
+                const margen   = Number.parseFloat(producto.margen)  || 0;
                 const tieneCosto = costo > 0;
 
                 // Valores reales calculados desde el API (receta base + insumos domicilio)
-                const costoDom    = parseFloat(producto.costo_domicilio)    || 0;
-                const utilidadDom = parseFloat(producto.utilidad_domicilio) || 0;
-                const margenDom   = parseFloat(producto.margen_domicilio)   || 0;
+                const costoDom    = Number.parseFloat(producto.costo_domicilio)    || 0;
+                const utilidadDom = Number.parseFloat(producto.utilidad_domicilio) || 0;
+                const margenDom   = Number.parseFloat(producto.margen_domicilio)   || 0;
                 const tieneCostoDom = costoDom > 0;
 
                 return (
@@ -75,7 +76,7 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                                 )}
                             </div>
                             <p className="text-xl font-bold text-gray-900">
-                                ${precio.toFixed(2)}
+                                {fmtCOP(precio)}
                             </p>
                         </div>
 
@@ -84,12 +85,12 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                             <div className="mb-4 bg-gray-50 rounded-lg p-3 space-y-1.5 text-sm">
                                 <div className="flex justify-between text-gray-600">
                                     <span>Costo</span>
-                                    <span className="font-medium text-gray-800">${costo.toFixed(2)}</span>
+                                    <span className="font-medium text-gray-800">${fmtCOP(costo)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span>Utilidad</span>
                                     <span className={`font-semibold ${utilidad >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {utilidad >= 0 ? '+' : ''}${utilidad.toFixed(2)}
+                                        {utilidad >= 0 ? '+' : ''}${fmtCOP(utilidad)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center pt-1 border-t border-gray-200">
@@ -113,12 +114,12 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                                 </p>
                                 <div className="flex justify-between text-gray-600">
                                     <span>Costo</span>
-                                    <span className="font-medium text-gray-800">${costoDom.toFixed(2)}</span>
+                                    <span className="font-medium text-gray-800">{fmtCOP(costoDom)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span>Utilidad</span>
                                     <span className={`font-semibold ${utilidadDom >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {utilidadDom >= 0 ? '+' : ''}${utilidadDom.toFixed(2)}
+                                        {utilidadDom >= 0 ? '+' : ''}{fmtCOP(utilidadDom)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center pt-1 border-t border-blue-200">

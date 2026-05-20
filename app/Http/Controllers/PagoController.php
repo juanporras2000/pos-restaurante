@@ -15,7 +15,7 @@ class PagoController extends Controller
         $request->validate([
             'pedido_id' => 'required|integer',
             'recibido' => 'required|numeric|min:0',
-            'metodo_pago' => 'required|string' // ✅ NUEVO
+            'metodo_pago' => 'required|string' 
         ]);
 
         // Buscar pedido (sin lanzar excepción automática)

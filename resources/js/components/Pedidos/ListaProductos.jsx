@@ -70,7 +70,7 @@ export default function ListaProductos({ productos, carrito, onIncrementar, onDe
                     >
                         <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-gray-900 truncate">{producto.nombre}</h4>
-                            <p className="text-sm text-gray-500">{fmtCOP(parseFloat(producto.precio))}</p>
+                            <p className="text-sm text-gray-500">{fmtCOP(producto.precio)}</p>
                         </div>
                         <div className="flex items-center gap-2 ml-2">
                             <button

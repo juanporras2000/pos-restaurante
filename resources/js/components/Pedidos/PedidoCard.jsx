@@ -112,14 +112,14 @@ return (
                                 <div className="flex justify-between items-start">
                                     <span className="text-gray-700 font-medium flex-1 pr-2 truncate">{detalle.producto?.nombre}</span>
                                     <span className="text-gray-400 font-bold px-2">x{detalle.cantidad}</span>
-                                    <span className="font-semibold text-gray-900">${parseFloat(detalle.subtotal).toFixed(2)}</span>
+                                    <span className="font-semibold text-gray-900">{fmtCOP(detalle.subtotal)}</span>
                                 </div>
                                 {detalle.adiciones?.length > 0 && (
                                     <div className="mt-0.5 ml-2 bg-purple-50 p-1 rounded text-[11px] text-purple-700 space-y-0.5">
                                         {detalle.adiciones.map((adic, i) => (
                                             <p key={i} className="flex justify-between">
                                                 <span>+ {adic.nombre} (x{adic.cantidad})</span>
-                                                <span>${parseFloat(adic.subtotal).toFixed(2)}</span>
+                                                <span>{fmtCOP(adic.subtotal)}</span>
                                             </p>
                                         ))}
                                     </div>
@@ -156,18 +156,18 @@ return (
                     {tieneRecargo && (
                         <div className="flex justify-between text-[11px] text-gray-500">
                             <span>Subtotal</span>
-                            <span>${subtotalItems.toFixed(2)}</span>
+                            <span>{fmtCOP(subtotalItems)}</span>
                         </div>
                     )}
                     {tieneRecargo && (
                         <div className="flex justify-between text-[11px] text-green-600 font-medium">
                             <span>Domicilio</span>
-                            <span>+${valorRecargo.toFixed(2)}</span>
+                            <span>+{fmtCOP(valorRecargo)}</span>
                         </div>
                     )}
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-gray-500 uppercase">Total</span>
-                        <span className="text-lg font-black text-gray-900">${parseFloat(pedido.total).toFixed(2)}</span>
+                        <span className="text-lg font-black text-gray-900">{fmtCOP(pedido.total)}</span>
                     </div>
                 </div>
 

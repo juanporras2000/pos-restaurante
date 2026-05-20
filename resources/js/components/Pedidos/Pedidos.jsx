@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import HistorialPedidos from './HistorialPedidos';
-import PedidoCard from './PedidoCard';
 import { PedidoMesa } from './PedidoMesa';
 import { PedidoDomicilio } from './PedidoDomicilio';
 import { PedidoRecoger } from './PedidoRecoger';

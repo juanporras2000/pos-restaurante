@@ -70,27 +70,10 @@ export const Perfiles = () => {
 
     return (
         <div className="w-full h-screen flex flex-col items-center">
-            <span className="inline-flex items-center gap-2 mt-4">
-                <svg
-                    className="h-7 w-7 text-blue-600"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
-                >
-                    <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-                    <path d="M7 8h10"></path>
-                    <path d="M7 12h3"></path>
-                    <path d="M14 12h3"></path>
-                    <path d="M7 16h3"></path>
-                    <path d="M14 16h3"></path>
-                </svg>
-                <span className="font-bold text-3xl">POS</span>
-            </span>
+
 
             <div className="w-[90%] max-w-[1920px] mx-auto flex flex-col flex-grow justify-center items-center mb-[200px]">
-                <h1 className="text-black font-semibold text-center text-6xl mb-10">
+                <h1 className="text-gray-700 font-bold text-center text-6xl mb-10">
                     ¿Quién usará el sistema?
                 </h1>
                 <div className="flex justify-center gap-5">
@@ -98,6 +81,7 @@ export const Perfiles = () => {
                         <div
                             key={p.id_perfil}
                             onClick={() => handleCardClick(p)}
+                            className="hover:bg-gray-200 transition ease-in p-4 rounded-md"
                         >
                             <CardPerfil {...p} />
                         </div>

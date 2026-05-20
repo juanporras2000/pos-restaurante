@@ -14,10 +14,10 @@ export const CardPerfil = ({ imagen, nombre, rol}) => {
                     className="w-full h-full object-cover"
                 />
             </div>
-            <p className="text-center mt-2 text-blue-600 font-semibold">
+            <p className="text-center mt-2 text-gray-700">
                 {nombre}
             </p>
-            <p className="text-center">{rol.nombre}</p>
+            <p className="text-center text-blue-600 font-semibold">{rol.nombre}</p>
         </div>
     );
 };

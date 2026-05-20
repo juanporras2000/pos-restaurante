@@ -37,19 +37,9 @@
             class="fixed inset-y-0 left-0 lg:static lg:inset-auto lg:translate-x-0 z-30 w-64 h-full overflow-y-auto bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out"
         >
 
-            <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
-                <span class="text-2xl font-bold text-gray-800 inline-flex items-center gap-2">
-                    <svg class="h-7 w-7 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1.8" aria-hidden="true">
-                        <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-                        <path d="M7 8h10"></path>
-                        <path d="M7 12h3"></path>
-                        <path d="M14 12h3"></path>
-                        <path d="M7 16h3"></path>
-                        <path d="M14 16h3"></path>
-                    </svg>
-                    <span>POS</span>
-                </span>
+            <div class="pl-2 pr-16 py-2 border-b border-gray-200 flex items-center justify-around">
+                <img src="/assets/logo-postaurante.webp" alt="Logo Postaurante" class="w-10 h-10">
+                <p class="font-bold text-lg text-gray-700">POSTAURANTE</p>
                 <!-- Botón cerrar (solo móvil) -->
                 <button
                     @click="open = false"

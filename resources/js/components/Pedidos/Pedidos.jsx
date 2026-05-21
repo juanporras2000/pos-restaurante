@@ -42,25 +42,24 @@ export default function Pedidos() {
         }, [tab]);
 
         return (
-            <div className="min-h-screen bg-gray-50 p-6">
-                {/* Header */}
+            <div className="min-h-screen bg-gray-50 lg:p-6">
                 <div className="mb-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col lg:flex-row items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                                <svg className="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                                <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M9 12l2 2 4-4"></path>
                                     <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
                                 </svg>
                                 Gestión de Pedidos
                             </h1>
-                            <p className="text-gray-600 mt-1">Administra pedidos pendientes y crea nuevos</p>
+                            <p className="text-gray-600 lg:mt-1 text-sm lg:text-md">Administra pedidos pendientes y crea nuevos</p>
                         </div>
                         {tab === 'pedidos' && (
                             <button
                                 type="button"
                                 onClick={() => setModalNuevoAbierto(true)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                                className="bg-blue-600 lg:hover:bg-blue-700 text-white font-medium mt-4 lg:mt-0 py-1 px-2  lg:py-2 lg:px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
                             >
                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M12 4v16m8-8H4"></path>
@@ -70,8 +69,8 @@ export default function Pedidos() {
                         )}
                     </div>
 
-                    <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-                        <div className="mt-6 flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+                    <div className="mt-6 flex flex-col md:flex-row justify-between items-center w-full gap-4">
+                        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit mx-auto md:mx-0">
                             <button
                                 type="button"
                                 onClick={() => setTab('pedidos')}

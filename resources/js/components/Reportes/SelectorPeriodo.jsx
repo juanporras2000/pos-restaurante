@@ -33,14 +33,14 @@ export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col items-center 2xl:flex-row justify-center lg:justify-between lg:items-end 2xl:items-center gap-2 flex-1 w-fit">
             {/* Botones de período rápido */}
             <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
                 {PERIODOS.map((p) => (
                     <button
                         key={p.value}
                         onClick={() => seleccionarPeriodo(p.value)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                        className={`px-2 py-1 lg:px-4 lg:py-2 text-sm font-medium rounded-lg transition-all ${
                             periodo === p.value
                                 ? 'bg-blue-600 text-white shadow-sm'
                                 : 'text-gray-600 hover:bg-gray-100'
@@ -52,10 +52,10 @@ export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
             </div>
 
             {/* Separador visual */}
-            <span className="text-gray-300 select-none">|</span>
+            <span className="text-gray-300 select-none hidden 2xl:block">|</span>
 
             {/* Rango personalizado */}
-            <div className={`flex items-center gap-1.5 bg-white border rounded-xl px-3 py-1.5 shadow-sm transition-colors ${
+            <div className={`flex items-center gap-1.5 bg-white border rounded-xl px-1 lg:px-3 py-1.5 shadow-sm transition-colors ${
                 periodo === 'custom' ? 'border-blue-400 ring-1 ring-blue-200' : 'border-gray-200'
             }`}>
                 <CalendarDaysIcon className={`h-4 w-4 flex-shrink-0 ${periodo === 'custom' ? 'text-blue-500' : 'text-gray-400'}`} />

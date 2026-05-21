@@ -84,31 +84,31 @@ export default function Gastos() {
         : gastos.filter((g) => g.tipo === filtroTipo);
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-gray-50 lg:p-6">
             {/* Header */}
             <div className="mb-6">
-                <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-col lg:flex-row items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                            <svg className="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                            <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                             </svg>
                             Gastos de Caja
                         </h1>
-                        <p className="text-gray-500 mt-1 text-sm">Registra salidas de caja: insumos, gasolina, servicios y otros.</p>
+                        <p className="text-gray-600 text-center lg:mt-1 text-sm lg:text-md">Registra salidas de caja: insumos, gasolina, servicios y otros.</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 mt-4 lg:mt-0">
                         <input
                             type="date"
                             value={fecha}
                             onChange={(e) => setFecha(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="border border-gray-300 rounded-lg px-1 py-1 md:px-3 md:py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         {esHoy && (
                             <button
                                 type="button"
                                 onClick={abrirNuevo}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                                className="flex items-center gap-2 px-2 py-1 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                             >
                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M12 4v16m8-8H4" />

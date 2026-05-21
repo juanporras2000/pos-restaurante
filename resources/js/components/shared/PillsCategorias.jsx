@@ -27,7 +27,7 @@ export default function PillsCategorias({ categorias = [], activa = null, onChan
             : `bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200`;
 
     return (
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex justify-center lg:justify-normal gap-2 overflow-x-auto lg:pb-1 scrollbar-none">
             <button
                 type="button"
                 onClick={() => onChange(null)}

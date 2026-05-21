@@ -186,7 +186,7 @@ export const GestionPerfiles = () => {
         <div>
             <div className='bg-white p-5 rounded-2xl border border-gray-200 shadow-sm'>
                 <div className="space-y-6 animate-in fade-in duration-300">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row items-center justify-between mb-6 sm:mb-2">
                         <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Perfiles Registrados</h3>
                         <button
                             onClick={() => {
@@ -207,7 +207,8 @@ export const GestionPerfiles = () => {
 
                 </div>
 
-                <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                <div className="gap-3 hidden md:flex overflow-x-auto pb-4 no-scrollbar">
+
                     {perfiles.map((p) => {
                         const esElActivo = perfilSeleccionado?.id_perfil === p.id_perfil;
 
@@ -221,6 +222,50 @@ export const GestionPerfiles = () => {
                             />
                         );
                     })}
+                </div>
+
+                <div className='flex flex-col gap-2.5 w-full min-w-0 md:hidden'>
+                    {
+                        perfiles.map(p => {
+                            const esElActivo = perfilSeleccionado?.id_perfil === p.id_perfil;
+
+                            return (
+                                <button
+                                    key={p.id_perfil}
+                                    type="button"
+                                    onClick={() => cambiarDePerfilConValidacion(p)}
+                                    className={`w-full h-14 px-4 rounded-xl border transition-all flex items-center justify-between gap-3 touch-manipulation ${esElActivo
+                                        ? 'border-green-500 bg-green-50/50 text-green-700 shadow-sm font-bold'
+                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+                                        }`}
+                                >
+                                    {/* Contenedor del Avatar, Nombre y Rol */}
+                                    <div className="flex items-center gap-3 min-w-0 w-full">
+                                        {/* Mini Avatar circular */}
+                                        <div className="w-9 h-9 rounded-full border border-gray-100 overflow-hidden bg-gray-100 flex-shrink-0">
+                                            <img
+                                                className="object-cover w-full h-full"
+                                                src={`${import.meta.env.VITE_URL_IMAGEN}imagenes-perfiles/${p.rutaImagen || p.imagen}.webp`}
+                                                alt=""
+                                                loading="lazy"
+                                            />
+                                        </div>
+
+                                        {/* Textos: Nombre arriba y Rol abajo */}
+                                        <div className="flex flex-col items-start min-w-0 w-full text-left">
+                                            <span className="text-sm font-semibold text-gray-800 truncate w-full">
+                                                {p.nombre}
+                                            </span>
+                                            <span className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${esElActivo ? 'text-green-600' : 'text-gray-400'
+                                                }`}>
+                                                {p.nombre_rol}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </button>
+                            )
+                        })
+                    }
                 </div>
             </div>
             <div className="space-y-6 mt-6">

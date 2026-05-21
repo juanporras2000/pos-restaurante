@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import CardMetric from './CardMetric';
 import { GraficaLinea, GraficaBarra, GraficaPie } from './GraficaVentas';
 import TablaReportes from './TablaReportes';
@@ -35,15 +35,34 @@ function ErrorCard({ msg, onRetry }) {
 
 function SectionCard({ title, subtitle, children, action }) {
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-50">
-                <div>
-                    <h2 className="text-sm font-bold text-gray-800">{title}</h2>
-                    {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden w-full min-w-0">
+
+            <div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between gap-2 px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 border-b border-gray-50">
+
+                <div className="w-full sm:min-w-0 sm:flex-1">
+
+                    <h2 className="text-sm font-bold text-gray-800 sm:truncate" title={title}>
+                        {title}
+                    </h2>
+                    {subtitle && (
+
+                        <p className="text-xs text-gray-400 mt-0.5 break-words">
+                            {subtitle}
+                        </p>
+                    )}
                 </div>
-                {action}
+
+                {action && (
+                    <div className="w-full sm:w-auto flex-shrink-0 flex items-center justify-start sm:justify-end mt-1 sm:mt-0">
+                        {action}
+                    </div>
+                )}
             </div>
-            <div className="px-6 py-5">{children}</div>
+
+            {/* Contenedor del contenido interno */}
+            <div className="px-4 sm:px-6 py-4 sm:py-5 w-full min-w-0">
+                {children}
+            </div>
         </div>
     );
 }
@@ -52,8 +71,8 @@ function SectionCard({ title, subtitle, children, action }) {
 
 export default function Reportes() {
     const [periodo, setPeriodo] = useState('mes');
-    const [desde,   setDesde]   = useState('');
-    const [hasta,   setHasta]   = useState('');
+    const [desde, setDesde] = useState('');
+    const [hasta, setHasta] = useState('');
 
     // Construye los params según si es período rápido o rango personalizado
     const params = useMemo(() => {
@@ -70,30 +89,34 @@ export default function Reportes() {
     };
 
     // ── Datos ──────────────────────────────────────────────────────────────────
-    const ventas    = useReporte('reportes/ventas',                params);
-    const fechas    = useReporte('reportes/ventas-por-fecha',      params);
+    const ventas = useReporte('reportes/ventas', params);
+    const fechas = useReporte('reportes/ventas-por-fecha', params);
     const productos = useReporte('reportes/productos-mas-vendidos', { ...params, limit: 8 });
-    const metodos   = useReporte('reportes/metodos-pago',          params);
-    const ganancias = useReporte('reportes/ganancias',             params);
-    const gastos    = useReporte('reportes/gastos',                params);
-    const tipoPed   = useReporte('reportes/tipo-pedido',           params);
+    const metodos = useReporte('reportes/metodos-pago', params);
+    const ganancias = useReporte('reportes/ganancias', params);
+    const gastos = useReporte('reportes/gastos', params);
+    const tipoPed = useReporte('reportes/tipo-pedido', params);
 
     // ── Valores derivados ──────────────────────────────────────────────────────
-    const totalVentas  = ventas.data?.total_ventas   ?? 0;
-    const totalPedidos = ventas.data?.total_pedidos  ?? 0;
-    const ticketProm   = ventas.data?.promedio_pedido ?? 0;
-    const totalNeto    = metodos.data?.metodos?.reduce((s, m) => s + (+m.total_neto || 0), 0) ?? 0;
-    const comparativa  = ventas.data?.comparativa    ?? {};
+    const totalVentas = ventas.data?.total_ventas ?? 0;
+    const totalPedidos = ventas.data?.total_pedidos ?? 0;
+    const ticketProm = ventas.data?.promedio_pedido ?? 0;
+    const totalNeto = metodos.data?.metodos?.reduce((s, m) => s + (+m.total_neto || 0), 0) ?? 0;
+    const comparativa = ventas.data?.comparativa ?? {};
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div className="min-h-screen  mx-auto bg-gray-50">
+            <div className="max-w-7xl mx-auto xl:px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
+                <div className="flex flex-col justify-center items-center sm:flex-row lg:items-start lg:justify-between gap-4">
+                    <div className='flex-1'>
+                        <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                            <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
+                            </svg>
 
-                {/* Encabezado + selector de período */}
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard de Reportes</h1>
-                        <p className="text-sm text-gray-500 mt-0.5">Métricas y análisis del restaurante</p>
+                            Métrica de Reportes
+                        </h1>
+                        <p className="text-gray-600 text-center lg:text-start lg:mt-1 text-sm lg:text-md">Métricas y análisis del restaurante</p>
                     </div>
                     <SelectorPeriodo
                         periodo={periodo}
@@ -104,19 +127,52 @@ export default function Reportes() {
                 </div>
 
                 {/* Tarjetas de métricas principales */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4 w-full">
                     {ventas.loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm h-24 animate-pulse" />
-                        ))
+                            <div
+                                key={i}
+                                className="bg-white rounded-2xl border border-gray-100 shadow-sm h-24 animate-pulse w-full"
+                            />
+                        )
+                        )
                     ) : ventas.error ? (
-                        <div className="col-span-4"><ErrorCard msg={ventas.error} onRetry={ventas.recargar} /></div>
+                        <div className="col-span-full w-full">
+                            <ErrorCard msg={ventas.error} onRetry={ventas.recargar} />
+                        </div>
                     ) : (
                         <>
-                            <CardMetric label="Total ventas"    value={fmtQ(totalVentas)}  icon="coins"   variant="blue"   sub="Pedidos completados" trend={comparativa.total_ventas} />
-                            <CardMetric label="Pedidos"         value={totalPedidos}        icon="receipt" variant="green"  sub="En el período"       trend={comparativa.total_pedidos} />
-                            <CardMetric label="Ticket promedio" value={fmtQ(ticketProm)}   icon="chart"   variant="amber"  sub="Por pedido"           trend={comparativa.promedio_pedido} />
-                            <CardMetric label="Ingreso neto"    value={fmtQ(totalNeto)}    icon="check"   variant="purple" sub="Efectivo recibido" />
+                            <CardMetric
+                                label="Total ventas"
+                                value={fmtQ(totalVentas)}
+                                icon="coins"
+                                variant="blue"
+                                sub="Pedidos completados"
+                                trend={comparativa.total_ventas}
+                            />
+                            <CardMetric
+                                label="Pedidos"
+                                value={totalPedidos}
+                                icon="receipt"
+                                variant="green"
+                                sub="En el período"
+                                trend={comparativa.total_pedidos}
+                            />
+                            <CardMetric
+                                label="Ticket promedio"
+                                value={fmtQ(ticketProm)}
+                                icon="chart"
+                                variant="amber"
+                                sub="Por pedido"
+                                trend={comparativa.promedio_pedido}
+                            />
+                            <CardMetric
+                                label="Ingreso neto"
+                                value={fmtQ(totalNeto)}
+                                icon="check"
+                                variant="purple"
+                                sub="Efectivo recibido"
+                            />
                         </>
                     )}
                 </div>
@@ -124,22 +180,22 @@ export default function Reportes() {
                 {/* Gráfica de evolución de ventas */}
                 <SectionCard title="Ventas por día" subtitle="Evolución de ingresos en el período seleccionado">
                     {fechas.loading ? <Spinner /> :
-                     fechas.error   ? <ErrorCard msg={fechas.error} onRetry={fechas.recargar} /> :
-                     <GraficaLinea data={fechas.data?.serie ?? []} xKey="fecha" yKey="total" label="Ventas (COP)" />}
+                        fechas.error ? <ErrorCard msg={fechas.error} onRetry={fechas.recargar} /> :
+                            <GraficaLinea data={fechas.data?.serie ?? []} xKey="fecha" yKey="total" label="Ventas (COP)" />}
                 </SectionCard>
 
                 {/* Productos + Métodos de pago */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <SectionCard title="Productos más vendidos" subtitle="Por unidades vendidas">
                         {productos.loading ? <Spinner /> :
-                         productos.error   ? <ErrorCard msg={productos.error} onRetry={productos.recargar} /> :
-                         <GraficaBarra data={productos.data?.productos ?? []} xKey="nombre" yKey="cantidad_vendida" label="Unidades" color="#10b981" />}
+                            productos.error ? <ErrorCard msg={productos.error} onRetry={productos.recargar} /> :
+                                <GraficaBarra data={productos.data?.productos ?? []} xKey="nombre" yKey="cantidad_vendida" label="Unidades" color="#10b981" />}
                     </SectionCard>
 
                     <SectionCard title="Métodos de pago" subtitle="Distribución de pagos en el período">
                         {metodos.loading ? <Spinner /> :
-                         metodos.error   ? <ErrorCard msg={metodos.error} onRetry={metodos.recargar} /> :
-                         <GraficaPie data={metodos.data?.metodos ?? []} nameKey="metodo_pago" valueKey="total_neto" />}
+                            metodos.error ? <ErrorCard msg={metodos.error} onRetry={metodos.recargar} /> :
+                                <GraficaPie data={metodos.data?.metodos ?? []} nameKey="metodo_pago" valueKey="total_neto" />}
                     </SectionCard>
                 </div>
 
@@ -163,11 +219,10 @@ export default function Reportes() {
                         subtitle="Balance estimado del período"
                         action={
                             !gastos.loading && !ventas.loading && (
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                                    (totalVentas - (gastos.data?.total ?? 0)) >= 0
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-red-100 text-red-600'
-                                }`}>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${(totalVentas - (gastos.data?.total ?? 0)) >= 0
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-red-100 text-red-600'
+                                    }`}>
                                     {(totalVentas - (gastos.data?.total ?? 0)) >= 0 ? 'Positivo' : 'Negativo'}
                                 </span>
                             )
@@ -188,23 +243,46 @@ export default function Reportes() {
                     <SectionCard
                         title="Ganancia estimada"
                         subtitle="Ingreso − costo de insumos utilizado en producción"
-                        action={<span className="text-xs text-gray-400 italic">Solo productos con insumos configurados</span>}
+                        action={
+                            <span className="text-[11px] sm:text-xs text-gray-400 italic block text-right sm:inline">
+                                Solo productos con insumos configurados
+                            </span>
+                        }
                     >
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Ingreso bruto</p>
-                                <p className="text-xl font-bold text-gray-800 mt-1">{fmtQ(ganancias.data?.ingreso ?? 0)}</p>
+
+                        <div className="flex flex-col divide-y divide-gray-100 gap-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:divide-y-0 sm:divide-x text-center">
+
+                            {/* Bloque: Ingreso Bruto */}
+                            <div className="pt-0 sm:pt-0 sm:px-2">
+                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
+                                    Ingreso bruto
+                                </p>
+                                <p className="text-lg sm:text-xl font-bold text-gray-800 mt-0.5 sm:mt-1 truncate" title={fmtQ(ganancias.data?.ingreso ?? 0)}>
+                                    {fmtQ(ganancias.data?.ingreso ?? 0)}
+                                </p>
                             </div>
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Costo insumos</p>
-                                <p className="text-xl font-bold text-red-500 mt-1">{fmtQ(ganancias.data?.costo_estimado ?? 0)}</p>
+
+                            {/* Bloque: Costo Insumos */}
+
+                            <div className="pt-3 sm:pt-0 sm:px-2">
+                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
+                                    Costo insumos
+                                </p>
+                                <p className="text-lg sm:text-xl font-bold text-red-500 mt-0.5 sm:mt-1 truncate" title={fmtQ(ganancias.data?.costo_estimado ?? 0)}>
+                                    {fmtQ(ganancias.data?.costo_estimado ?? 0)}
+                                </p>
                             </div>
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wide">Ganancia</p>
-                                <p className={`text-xl font-bold mt-1 ${(ganancias.data?.ganancia ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+
+                            {/* Bloque: Ganancia */}
+                            <div className="pt-3 sm:pt-0 sm:px-2">
+                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
+                                    Ganancia
+                                </p>
+                                <p className={`text-lg sm:text-xl font-black mt-0.5 sm:mt-1 truncate ${(ganancias.data?.ganancia ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`} title={fmtQ(ganancias.data?.ganancia ?? 0)}>
                                     {fmtQ(ganancias.data?.ganancia ?? 0)}
                                 </p>
                             </div>
+
                         </div>
                     </SectionCard>
                 )}
@@ -216,9 +294,10 @@ export default function Reportes() {
                     action={<span className="text-xs text-gray-400 font-medium">{productos.data?.productos?.length ?? 0} productos</span>}
                 >
                     {productos.loading ? <Spinner /> :
-                     productos.error   ? <ErrorCard msg={productos.error} onRetry={productos.recargar} /> :
-                     <TablaReportes rows={productos.data?.productos ?? []} />}
+                        productos.error ? <ErrorCard msg={productos.error} onRetry={productos.recargar} /> :
+                            <TablaReportes rows={productos.data?.productos ?? []} />}
                 </SectionCard>
+
 
             </div>
         </div>

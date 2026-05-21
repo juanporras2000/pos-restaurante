@@ -115,7 +115,7 @@ export default function GestionAdiciones() {
         fetch('/api/adiciones?todas=1')
             .then((r) => r.json())
             .then(setAdiciones)
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => setCargando(false));
     };
 
@@ -175,12 +175,12 @@ export default function GestionAdiciones() {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            {/* Cabecera */}
-            <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 w-full min-w-0">
+            {/* Cabecera Adaptativa */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <svg className="h-5 w-5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg className="h-5 w-5 text-purple-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
                         Adiciones
@@ -190,80 +190,94 @@ export default function GestionAdiciones() {
                 <button
                     type="button"
                     onClick={abrirNueva}
-                    className="flex items-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                 >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 4v16m8-8H4" />
                     </svg>
                     Nueva adición
                 </button>
             </div>
 
-            {/* Lista */}
+            {/* Lista de Adiciones */}
             {cargando ? (
-                <div className="py-8 text-center text-gray-400 text-sm">Cargando...</div>
+                <div className="flex items-center justify-center py-12">
+                    <svg className="animate-spin h-6 w-6 text-purple-500" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                </div>
             ) : adiciones.length === 0 ? (
-                <div className="py-10 text-center">
-                    <svg className="h-10 w-10 text-gray-200 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <div className="text-center py-12 text-gray-500">
+                    <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
-                    <p className="text-sm text-gray-500">Aún no hay adiciones creadas.</p>
+                    <p className="text-sm">Aún no hay adiciones creadas.</p>
                 </div>
             ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-100 border-t border-gray-50">
                     {adiciones.map((adicion) => (
-                        <div key={adicion.id} className="flex items-center justify-between py-3">
+                        <div key={adicion.id} className="flex items-center justify-between py-3.5 px-1 gap-2">
+
+                            {/* Sección Izquierda: Toggle + Nombre */}
                             <div className="flex items-center gap-3 min-w-0">
-                                {/* Toggle activo */}
+                                {/* Toggle optimizado para mejor respuesta táctil en móviles */}
                                 <button
                                     type="button"
                                     onClick={() => toggleActivo(adicion)}
                                     title={adicion.activo ? 'Desactivar' : 'Activar'}
-                                    className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 focus:outline-none ${
-                                        adicion.activo ? 'bg-purple-500' : 'bg-gray-200'
-                                    }`}
+                                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 touch-manipulation ${adicion.activo ? 'bg-purple-500' : 'bg-gray-200'
+                                        }`}
                                 >
-                                    <span className={`inline-block h-4 w-4 mt-0.5 rounded-full bg-white shadow transform transition-transform duration-200 ${
-                                        adicion.activo ? 'translate-x-4' : 'translate-x-0.5'
-                                    }`} />
+                                    <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ${adicion.activo ? 'translate-x-6' : 'translate-x-1'
+                                        }`} />
                                 </button>
+
                                 <div className="min-w-0">
-                                    <p className={`text-sm font-medium truncate ${adicion.activo ? 'text-gray-900' : 'text-gray-400 line-through'}`}>
+                                    <p className={`text-sm font-medium truncate transition-all ${adicion.activo ? 'text-gray-900' : 'text-gray-400 line-through'
+                                        }`}>
                                         {adicion.nombre}
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0 ml-4">
-                                <span className="text-sm font-semibold text-gray-700">
+
+                            {/* Sección Derecha: Precio + Acciones */}
+                            <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+                                <span className={`text-sm font-semibold ${adicion.activo ? 'text-gray-700' : 'text-gray-400'}`}>
                                     {fmtCOP(adicion.precio)}
                                 </span>
-                                <button
-                                    type="button"
-                                    onClick={() => abrirEditar(adicion)}
-                                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                                    title="Editar"
-                                >
-                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => eliminar(adicion)}
-                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                    title="Eliminar"
-                                >
-                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+
+                                <div className="flex items-center gap-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => abrirEditar(adicion)}
+                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors touch-manipulation"
+                                        title="Editar"
+                                    >
+                                        <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => eliminar(adicion)}
+                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-manipulation"
+                                        title="Eliminar"
+                                    >
+                                        <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
+
                         </div>
                     ))}
                 </div>
             )}
 
+            {/* Ventana Modal */}
             {modalAbierto && (
                 <ModalAdicion
                     adicion={adicionEditar}

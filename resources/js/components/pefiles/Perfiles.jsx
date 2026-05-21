@@ -69,19 +69,19 @@ export const Perfiles = () => {
     };
 
     return (
-        <div className="w-full h-screen flex flex-col items-center">
+        <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50">
 
+            <h1 className="text-gray-700 font-bold text-center text-3xl md:text-4xl lg:text-6xl my-6 md:mb-10">
+                ¿Quién usará el sistema?
+            </h1>
 
-            <div className="w-[90%] max-w-[1920px] mx-auto flex flex-col flex-grow justify-center items-center mb-[200px]">
-                <h1 className="text-gray-700 font-bold text-center text-6xl mb-10">
-                    ¿Quién usará el sistema?
-                </h1>
-                <div className="flex justify-center gap-5">
+            <div className="w-full max-w-[1920px] mx-auto flex flex-col justify-center items-center mb-10 md:mb-[100px]">
+                <div className="flex flex-wrap justify-center gap-6 w-full max-w-5xl px-4">
                     {perfiles.map((p) => (
                         <div
                             key={p.id_perfil}
                             onClick={() => handleCardClick(p)}
-                            className="hover:bg-gray-200 transition ease-in p-4 rounded-md"
+                            className="lg:hover:bg-gray-200 transition ease-in duration-300  p-4 rounded-md cursor-pointer flex justify-center items-center shadow-lg"
                         >
                             <CardPerfil {...p} />
                         </div>

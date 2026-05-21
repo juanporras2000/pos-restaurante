@@ -102,7 +102,7 @@ export default function Productos() {
         formData.append('precio', data.precio);
         formData.append('categoria_id', data.categoria_id);
         formData.append('es_domicilio', data.es_domicilio ? '1' : '0');
-        
+
         // Imagen desde la variable global temporal
         if (window._tmp_img) {
             formData.append('imagen_producto', window._tmp_img);
@@ -208,31 +208,31 @@ export default function Productos() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-gray-50 lg:p-6">
             {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-center justify-between">
+            <div className="mb-6">
+                <div className="flex flex-col lg:flex-row items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                            <svg className="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <h1 className="text-lg sm:xl md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                            <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                             </svg>
                             Gestión de Productos
                         </h1>
-                        <p className="text-gray-600 mt-1">Administra el catálogo de productos</p>
+                        <p className="text-gray-600 lg:mt-1 text-sm lg:text-md">Administra el catálogo de productos</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center flex-col-reverse gap-2 md:flex-row md:gap-4 mt-4 lg:mt-0">
                         <input
                             type="text"
                             value={buscar}
                             onChange={(e) => setBuscar(e.target.value)}
                             placeholder="Buscar productos..."
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="px-2 py-1 lg:px-4 lg:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         <button
                             type="button"
                             onClick={abrirCrear}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2 shrink-0"
+                            className="w-full bg-blue-600 lg:hover:bg-blue-700 text-white font-medium lg:mt-0 py-1 px-2  lg:py-2 lg:px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 4v16m8-8H4"></path>

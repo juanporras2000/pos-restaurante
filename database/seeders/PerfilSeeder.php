@@ -15,23 +15,11 @@ class PerfilSeeder extends Seeder
     public function run(): void
     {
         DB::table('perfil')->insert([
-            'nombre'        => 'Gonzalo Taborda',
+            'nombre'        => 'Administrador',
             'pin'           => Hash::make('1234'),
             'id_imagen'     => 1,
             'id_user'       => 1,
             'id_rol'        => 1,
-            'created_at'    => now(),
-            'updated_at'    => now(),
-            'tenant_id'     => 1,
-        ]);
-
-        // Registro 2
-        DB::table('perfil')->insert([
-            'nombre'        => 'Juan José',
-            'pin'           => Hash::make('4321'),
-            'id_imagen'     => 2,
-            'id_user'       => 1,
-            'id_rol'        => 2,
             'created_at'    => now(),
             'updated_at'    => now(),
             'tenant_id'     => 1,

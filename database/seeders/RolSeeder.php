@@ -12,13 +12,25 @@ class RolSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('rol')->insert([ // Ajusta 'roles' al nombre exacto de tu tabla
+        DB::table('rol')->insert([
         [
             'nombre' => 'Administrador',
             'created_at' => now(),
         ],
         [
             'nombre' => 'Mesero',
+            'created_at' => now(),
+        ],
+        [
+            'nombre' => 'Cocinero',
+            'created_at' => now(),
+        ],
+        [
+            'nombre' => 'Cajero',
+            'created_at' => now(),
+        ],
+        [
+            'nombre' => 'Domiciliario',
             'created_at' => now(),
         ]
     ]);

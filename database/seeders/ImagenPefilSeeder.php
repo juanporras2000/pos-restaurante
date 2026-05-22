@@ -15,14 +15,7 @@ class ImagenPefilSeeder extends Seeder
     {
         DB::table('imagenes_perfil')->updateOrInsert([
             'id_imagen'     => 1,
-            'path'          => 'gonzalo-taborda-profile',
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
-
-        DB::table('imagenes_perfil')->updateOrInsert([
-            'id_imagen'            => 2,
-            'path'          => 'juan-jose-profile',
+            'path'          => 'perfil-001',
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);

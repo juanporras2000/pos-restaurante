@@ -9,13 +9,13 @@ use App\Models\Producto;
 use App\Models\Receta;
 use App\Http\Requests\ProductoRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+
 
 class ProductoController extends Controller
 {
-    /**
-     * Normaliza el campo receta/insumos sin importar si llega como JSON string
-     * (FormData multipart) o como array (JSON body).
-     */
     private function parseInsumos(Request $request): ?array
     {
         $raw = $request->input('receta') ?? $request->input('insumos');
@@ -51,7 +51,7 @@ class ProductoController extends Controller
             }
             $producto->insumos()->sync($sync);
 
-            // ── 2. Receta canónica 
+            // ── 2. Receta canónica
             $receta = Receta::firstOrCreate(
                 ['producto_id' => $producto->id],
                 ['tenant_id'   => $producto->tenant_id]
@@ -67,7 +67,7 @@ class ProductoController extends Controller
                 ]);
             }
 
-            // ── 3. Persistir costo_calculado 
+            // ── 3. Persistir costo_calculado
             $producto->load('receta.detalles.insumo');
             DB::table('productos')
                 ->where('id', $producto->id)
@@ -86,7 +86,7 @@ class ProductoController extends Controller
         $producto->insumosDomicilio()->sync($sync);
     }
 
-    // ─── Endpoints 
+    // ─── Endpoints
 
     public function index(Request $request)
     {
@@ -104,8 +104,8 @@ class ProductoController extends Controller
         if ($request->boolean('todos')) {
             return response()->json(
                 Producto::with('categoria', 'insumos')
-                    ->when($request->filled('buscar'), fn ($q) =>
-                        $q->where('nombre', 'like', '%' . $request->buscar . '%'))
+                    ->when($request->filled('buscar'), fn($q) =>
+                    $q->where('nombre', 'like', '%' . $request->buscar . '%'))
                     ->get()
             );
         }
@@ -125,8 +125,21 @@ class ProductoController extends Controller
         $data = $request->except('imagen_producto');
 
         if ($request->hasFile('imagen_producto')) {
-            $data['imagen_producto'] = $request->file('imagen_producto')
-                ->store('productos', 'public');
+            $file = $request->file('imagen_producto');
+
+            $nombreImagen = time() . '_' . $file->getClientOriginalName();
+            $rutaDestino = public_path('assets/productos');
+
+            if (!File::exists($rutaDestino)) {
+                File::makeDirectory($rutaDestino, 0755, true);
+            }
+
+            $manager = new ImageManager(new Driver());
+            $manager->decodePath($file->getRealPath())
+                ->scaleDown(width: 600)
+                ->save($rutaDestino . '/' . $nombreImagen, quality: 60);
+
+            $data['imagen_producto'] = 'assets/productos/' . $nombreImagen;
         }
 
         $producto = Producto::create($data);
@@ -139,6 +152,7 @@ class ProductoController extends Controller
         );
     }
 
+
     public function update(ProductoRequest $request, $id)
     {
         $producto = Producto::findOrFail($id);
@@ -146,10 +160,26 @@ class ProductoController extends Controller
 
         if ($request->hasFile('imagen_producto')) {
             if ($producto->imagen_producto) {
-                Storage::disk('public')->delete($producto->imagen_producto);
+                $rutaAnterior = public_path($producto->imagen_producto);
+                if (File::exists($rutaAnterior)) {
+                    File::delete($rutaAnterior);
+                }
             }
-            $data['imagen_producto'] = $request->file('imagen_producto')
-                ->store('productos', 'public');
+
+            $file = $request->file('imagen_producto');
+            $nombreImagen = time() . '_' . $file->getClientOriginalName();
+            $rutaDestino = public_path('assets/productos');
+
+            if (!File::exists($rutaDestino)) {
+                File::makeDirectory($rutaDestino, 0755, true);
+            }
+
+            $manager = new ImageManager(new Driver());
+            $manager->decodePath($file->getRealPath())
+                ->scaleDown(width: 600)
+                ->save($rutaDestino . '/' . $nombreImagen, quality: 60);
+
+            $data['imagen_producto'] = 'assets/productos/' . $nombreImagen;
         }
 
         $producto->update($data);

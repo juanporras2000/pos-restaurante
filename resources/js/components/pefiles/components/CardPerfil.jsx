@@ -9,7 +9,7 @@ export const CardPerfil = ({ imagen, nombre, rol }) => {
         >
             <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-xl overflow-hidden">
                 <img
-                    src={`${import.meta.env.VITE_URL_IMAGEN}imagenes-perfiles/${imagen.path}.webp`}
+                    src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${imagen.path}.webp`}
                     alt={nombre}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

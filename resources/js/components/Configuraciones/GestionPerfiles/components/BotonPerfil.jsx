@@ -27,11 +27,11 @@ export const BotonPerfil = ({
                     rutaImagen
                         ?
                         (
-                            <img className='object-cover w-full h-full' src={`${import.meta.env.VITE_URL_IMAGEN}imagenes-perfiles/${rutaImagen}.webp`} alt="" />
+                            <img className='object-cover w-full h-full' src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${rutaImagen}.jpeg`} alt="" />
                         )
                         :
                         (
-                            <img className='object-cover w-full h-full' src={`${import.meta.env.VITE_URL_IMAGEN}imagenes-perfiles/${imagen}.webp`} alt="" />
+                            <img className='object-cover w-full h-full' src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${imagen}.jpeg`} alt="" />
                         )
                 }
 

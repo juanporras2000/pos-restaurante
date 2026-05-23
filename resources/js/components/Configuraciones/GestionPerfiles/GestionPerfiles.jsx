@@ -245,7 +245,7 @@ export const GestionPerfiles = () => {
                                         <div className="w-9 h-9 rounded-full border border-gray-100 overflow-hidden bg-gray-100 flex-shrink-0">
                                             <img
                                                 className="object-cover w-full h-full"
-                                                src={`${import.meta.env.VITE_URL_IMAGEN}imagenes-perfiles/${p.rutaImagen || p.imagen}.webp`}
+                                                src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${p.rutaImagen || p.imagen}.jpeg`}
                                                 alt=""
                                                 loading="lazy"
                                             />

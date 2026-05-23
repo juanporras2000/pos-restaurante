@@ -8,7 +8,7 @@ export const ModalAvatar = ({
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[120] p-4">
             <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
                 <div className="p-5 flex justify-between items-center border-b">
-                    <h3 className="font-bold text-gray-800 text-sm font-black uppercase">Selecciona un Avatar</h3>
+                    <h3 className="font-bold text-gray-800 text-sm uppercase">Selecciona un Avatar</h3>
                     <button
                         type="button"
                         onClick={onClose}
@@ -37,7 +37,7 @@ export const ModalAvatar = ({
                                     }`}
                             >
                                 <img
-                                    src={`${import.meta.env.VITE_URL_IMAGEN}imagenes-perfiles/${avatar.path}.webp`}
+                                    src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${avatar.path}.jpeg`}
                                     alt="Opción de Avatar"
                                     className="w-full h-full object-cover"
                                 />

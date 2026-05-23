@@ -138,7 +138,7 @@ export const ActualizarEliminarPerfil = ({
                     <select
                         value={editRol}
                         onChange={(e) => setEditRol(e.target.value)}
-                        className="w-full h-11 px-3.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-transparent focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700 bg-white"
+                        className="w-full h-11 px-3.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-transparent focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700"
                     >
                         {roles.map(rol => (
                             <option key={rol.id_rol} value={rol.id_rol}>{rol.nombre}</option>

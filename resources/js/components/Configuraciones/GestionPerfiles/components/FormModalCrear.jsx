@@ -11,7 +11,7 @@ export const FormModalCrear = ({
     roles
 }) => {
 
-    
+
     return (
         <form onSubmit={handleCrearPerfil} className="p-6 space-y-4">
             {/* Selector Visual de Avatar */}
@@ -23,7 +23,7 @@ export const FormModalCrear = ({
                 >
                     {createAvatar ? (
                         <img
-                            src={`${import.meta.env.VITE_URL_IMAGEN}imagenes-perfiles/${createAvatar.path}.webp`}
+                            src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${createAvatar.path}.jpeg`}
                             alt="Previsualizar"
                             className="w-20 h-20 object-cover"
                         />

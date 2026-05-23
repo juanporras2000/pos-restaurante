@@ -128,7 +128,7 @@ class ProductoController extends Controller
             $file = $request->file('imagen_producto');
 
             $nombreImagen = time() . '_' . $file->getClientOriginalName();
-            $rutaDestino = public_path('assets/productos');
+            $rutaDestino = public_path('storage/productos');
 
             if (!File::exists($rutaDestino)) {
                 File::makeDirectory($rutaDestino, 0755, true);
@@ -139,7 +139,7 @@ class ProductoController extends Controller
                 ->scaleDown(width: 600)
                 ->save($rutaDestino . '/' . $nombreImagen, quality: 60);
 
-            $data['imagen_producto'] = 'assets/productos/' . $nombreImagen;
+            $data['imagen_producto'] = 'storage/productos/' . $nombreImagen;
         }
 
         $producto = Producto::create($data);
@@ -168,7 +168,7 @@ class ProductoController extends Controller
 
             $file = $request->file('imagen_producto');
             $nombreImagen = time() . '_' . $file->getClientOriginalName();
-            $rutaDestino = public_path('assets/productos');
+            $rutaDestino = public_path('storage/productos');
 
             if (!File::exists($rutaDestino)) {
                 File::makeDirectory($rutaDestino, 0755, true);
@@ -179,7 +179,7 @@ class ProductoController extends Controller
                 ->scaleDown(width: 600)
                 ->save($rutaDestino . '/' . $nombreImagen, quality: 60);
 
-            $data['imagen_producto'] = 'assets/productos/' . $nombreImagen;
+            $data['imagen_producto'] = 'storage/productos/' . $nombreImagen;
         }
 
         $producto->update($data);

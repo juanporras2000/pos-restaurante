@@ -162,7 +162,9 @@ class ReporteController extends Controller
         $limit           = (int) $request->query('limit', 10);
 
         $productos = PedidoDetalle::whereBetween('pedido_detalles.created_at', [$desde, $hasta])
+            ->join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
             ->join('productos', 'pedido_detalles.producto_id', '=', 'productos.id')
+            ->when(app()->has('tenant_id'), fn($q) => $q->where('pedidos.tenant_id', app('tenant_id')))
             ->select(
                 'productos.id',
                 'productos.nombre',
@@ -205,13 +207,13 @@ class ReporteController extends Controller
 
         // Detalles de pedidos en el rango con insumos y sus costos
         $detalles = PedidoDetalle::whereBetween('pedido_detalles.created_at', [$desde, $hasta])
+            ->join('pedidos', 'pedido_detalles.pedido_id', '=', 'pedidos.id')
             ->join('productos', 'pedido_detalles.producto_id', '=', 'productos.id')
             ->leftJoin('producto_insumo', 'productos.id', '=', 'producto_insumo.producto_id')
             ->leftJoin('insumos', 'producto_insumo.insumo_id', '=', 'insumos.id')
+            ->when(app()->has('tenant_id'), fn($q) => $q->where('pedidos.tenant_id', app('tenant_id')))
             ->select(
                 DB::raw('SUM(pedido_detalles.subtotal) as ingreso'),
-                // costo estimado = cantidad_insumo_por_producto * costo_unitario_insumo * unidades_vendidas
-                // Se usa 0 si no hay costo_unitario registrado en insumos
                 DB::raw('SUM(COALESCE(producto_insumo.cantidad, 0) * COALESCE(insumos.costo_unitario, 0) * pedido_detalles.cantidad) as costo_estimado')
             )
             ->first();

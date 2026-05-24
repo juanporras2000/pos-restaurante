@@ -13,7 +13,7 @@ export default function Pedidos() {
     const [filtroTipo, setFiltroTipo] = useState('todos');
 
     const dataPerfilActivo = JSON.parse(localStorage.getItem('perfil_activo'))
-    const permisosPerfilActivo = dataPerfilActivo.permisos;
+    const permisosPerfilActivo = dataPerfilActivo?.permisos ?? [];
     const permiso = permisosPerfilActivo.find(p => p.descripcion == 'Historial del día')
 
         const cargarProductos = useCallback(() => {

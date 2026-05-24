@@ -130,8 +130,12 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                             <input
                                 {...register('stock_actual')}
                                 type="number" step="0.01" placeholder="0"
-                                readOnly
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-600 cursor-not-allowed"
+                                readOnly={!!insumo.id}
+                                className={`w-full px-3 py-2 border rounded-lg text-sm ${
+                                    insumo.id
+                                        ? 'border-gray-200 bg-gray-100 text-gray-600 cursor-not-allowed'
+                                        : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                                }`}
                             />
                             {errors.stock_actual && <p className="mt-1 text-xs text-red-500">{errors.stock_actual.message}</p>}
                         </div>

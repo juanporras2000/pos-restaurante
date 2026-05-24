@@ -3,6 +3,8 @@ import Swal from 'sweetalert2';
 import { useImprimir } from '../../hooks/useImprimir';
 import { ModalPagoPropTypes } from '../../propTypes';
 
+const MILES = 1000;
+
 export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
     const [metodoPago, setMetodoPago] = useState('efectivo');
     const [recibido, setRecibido] = useState('');
@@ -10,7 +12,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
     const { imprimir } = useImprimir();
 
     const total = pedido ? parseFloat(pedido.total) : 0;
-    const recibidoNum = (parseFloat(recibido) || 0) * 1000;
+    const recibidoNum = (parseFloat(recibido) || 0) * MILES;
     const cambio = recibidoNum - total;
 
     const cerrar = () => {
@@ -46,6 +48,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                     recibido: metodoPago === 'efectivo' ? recibidoNum : total,
                     metodo_pago: metodoPago,
                 }),
+
             });
 
             const data = await res.json();
@@ -62,25 +65,16 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                 return;
             }
 
-            if (metodoPago === 'efectivo') {
-                Swal.fire({
-                    icon: 'success',
-                    title: `Pago procesado. Cambio: $${parseFloat(data.cambio).toLocaleString('es-CO')}`,
-                    timer: 2500,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
-            } else {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Pago procesado exitosamente',
-                    timer: 1800,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
-            }
+            Swal.fire({
+                icon: 'success',
+                title: metodoPago === 'efectivo'
+                    ? `Pago procesado. Cambio: $${parseFloat(data.cambio).toLocaleString('es-CO')}`
+                    : 'Pago procesado exitosamente',
+                timer: metodoPago === 'efectivo' ? 2500 : 1800,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end',
+            });
 
             // Construir pedido enriquecido con los datos del pago recién creado
             // para que el recibo incluya método, recibido y cambio.
@@ -181,7 +175,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                                 {recibido !== '' && !isNaN(parseFloat(recibido)) && (
-                                    <p className="mt-0.5 text-xs text-gray-400">= ${(parseFloat(recibido) * 1000).toLocaleString('es-CO')}</p>
+                                    <p className="mt-0.5 text-xs text-gray-400">= ${(parseFloat(recibido) * MILES).toLocaleString('es-CO')}</p>
                                 )}
                                 {recibidoNum > 0 && (
                                     <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import ResumenDia    from './ResumenDia';
 import TarjetaPedido from './TarjetaPedido';
@@ -6,11 +6,11 @@ import SeccionGastos from './SeccionGastos';
 import CierreCaja    from './CierreCaja';
 
 export default function HistorialPedidos() {
-    const [pedidos, setPedidos]     = useState([]);
-    const [gastos, setGastos]       = useState([]);
-    const [apertura, setApertura]   = useState(null);
-    const [cargando, setCargando]   = useState(false);
-    const [error, setError]         = useState(null);
+    const [pedidos, setPedidos]   = useState([]);
+    const [gastos, setGastos]     = useState([]);
+    const [apertura, setApertura] = useState(null);
+    const [cargando, setCargando] = useState(false);
+    const [error, setError]       = useState(null);
 
     const cargar = useCallback(() => {
         setCargando(true);
@@ -38,9 +38,17 @@ export default function HistorialPedidos() {
         cargar();
     }, [cargar]);
 
-    const hoy = new Date().toLocaleDateString('es-ES', {
+    // useMemo: hoy es constante por sesión — no recalcular en cada render
+    const hoy = useMemo(() => new Date().toLocaleDateString('es-ES', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    });
+    }), []);
+
+    // Actualiza el pago de un pedido en el estado local sin recargar todo
+    const handlePagoActualizado = useCallback((pedidoId, pagoActualizado) => {
+        setPedidos((prev) =>
+            prev.map((p) => p.id === pedidoId ? { ...p, pago: pagoActualizado } : p)
+        );
+    }, []);
 
     return (
         <div>
@@ -94,7 +102,11 @@ export default function HistorialPedidos() {
                     {pedidos.length > 0 && (
                         <div className="space-y-3 mb-6">
                             {pedidos.map((pedido) => (
-                                <TarjetaPedido key={pedido.id} pedido={pedido} />
+                                <TarjetaPedido
+                                    key={pedido.id}
+                                    pedido={pedido}
+                                    onPagoActualizado={handlePagoActualizado}
+                                />
                             ))}
                         </div>
                     )}

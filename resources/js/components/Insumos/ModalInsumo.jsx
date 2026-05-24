@@ -160,13 +160,16 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                         <input
                             value={valorLoteDisplay}
                             onChange={(e) => {
-                                const raw = e.target.value.replace(/[^0-9]/g, '');
-                                setValorLoteDisplay(raw);
-                                setValue('valor_producto', raw === '' ? '' : Number(raw) * 1000);
+                                const sanitized = e.target.value
+                                    .replace(/[^0-9.]/g, '')
+                                    .replace(/^(\d*\.?\d*).*$/, '$1');
+                                setValorLoteDisplay(sanitized);
+                                const num = parseFloat(sanitized);
+                                setValue('valor_producto', sanitized === '' || isNaN(num) ? '' : num * 1000);
                             }}
                             type="text"
-                            inputMode="numeric"
-                            placeholder="Ej: 5"
+                            inputMode="decimal"
+                            placeholder="Ej: 3.1"
                             className={`w-full pl-7 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.valor_producto ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                         />
                     </div>

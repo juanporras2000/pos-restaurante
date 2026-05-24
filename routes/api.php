@@ -21,6 +21,7 @@ use App\Http\Controllers\PerfilController;
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('pagos', [PagoController::class, 'store']);
+    Route::patch('pagos/{pago}', [PagoController::class, 'update']);
     Route::get('pedidos/pendientes', [PedidoController::class, 'pendientes']);
     Route::get('pedidos/cerrados-hoy', [PedidoController::class, 'cerradosHoy']);
     Route::post('pedidos', [PedidoController::class, 'store']);

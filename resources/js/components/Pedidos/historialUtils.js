@@ -15,12 +15,14 @@ export const TIPOS_GASTO = {
 export const METODO_ETIQUETA = {
     efectivo:      'Efectivo',
     tarjeta:       'Tarjeta',
+    nequi:         'Nequi',
     transferencia: 'Transferencia',
 };
 
 export const METODO_COLOR = {
     efectivo:      { dot: 'bg-green-500',  text: 'text-green-700',  badge: 'bg-green-50 border-green-200' },
     tarjeta:       { dot: 'bg-blue-500',   text: 'text-blue-700',   badge: 'bg-blue-50 border-blue-200' },
+    nequi:         { dot: 'bg-purple-500', text: 'text-purple-700', badge: 'bg-purple-50 border-purple-200' },
     transferencia: { dot: 'bg-purple-500', text: 'text-purple-700', badge: 'bg-purple-50 border-purple-200' },
 };
 

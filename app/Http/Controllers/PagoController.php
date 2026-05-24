@@ -67,4 +67,15 @@ class PagoController extends Controller
             'cambio' => $cambio
         ], 201);
     }
+
+    public function update(Request $request, Pago $pago)
+    {
+        $request->validate([
+            'metodo_pago' => 'required|string|in:efectivo,nequi,tarjeta,transferencia',
+        ]);
+
+        $pago->update(['metodo_pago' => $request->metodo_pago]);
+
+        return response()->json(['pago' => $pago]);
+    }
 }

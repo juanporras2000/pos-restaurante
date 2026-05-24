@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { CardPerfil } from "./components/CardPerfil";
 import { ModalPinPerfil } from "./components/ModalPinPerfil";
+import { PrimerPerfilForm } from "./components/PrimerPerfilForm";
 
 export const Perfiles = () => {
     const [perfiles, setPerfiles] = useState([]);
+    const [cargando, setCargando] = useState(true);
     const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [pin, setPin] = useState(["", "", "", ""]);
@@ -16,7 +18,8 @@ export const Perfiles = () => {
             .then((res) => {
                 setPerfiles(res.data);
             })
-            .catch((err) => console.error(err));
+            .catch((err) => console.error(err))
+            .finally(() => setCargando(false));
     }, []);
 
     const handleCardClick = (perfil) => {
@@ -67,6 +70,18 @@ export const Perfiles = () => {
                 if (firstInput) firstInput.focus();
             });
     };
+
+    if (cargando) {
+        return (
+            <div className="w-full min-h-screen flex items-center justify-center bg-gray-50">
+                <p className="text-gray-400 text-xl">Cargando...</p>
+            </div>
+        );
+    }
+
+    if (perfiles.length === 0) {
+        return <PrimerPerfilForm />;
+    }
 
     return (
         <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50">

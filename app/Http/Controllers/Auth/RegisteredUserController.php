@@ -69,32 +69,32 @@ class RegisteredUserController extends Controller
         ]);
 
         // 4. Sembrar datos iniciales del tenant (roles y configuraciones)
-        $this->seedTenantDefaults($tenant->id);
+        $this->seedTenantDefaults($tenant);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect('/perfiles');
     }
 
     /**
      * Crea los datos mínimos que necesita un tenant recién creado:
      * roles base y configuraciones por defecto.
      */
-    private function seedTenantDefaults(int $tenantId): void
+    private function seedTenantDefaults(Tenant $tenant): void
     {
         // Roles por defecto
         Rol::insert([
-            ['nombre' => 'Administrador', 'tenant_id' => $tenantId, 'created_at' => now(), 'updated_at' => now()],
-            ['nombre' => 'Mesero',        'tenant_id' => $tenantId, 'created_at' => now(), 'updated_at' => now()],
+            ['nombre' => 'Administrador', 'tenant_id' => $tenant->id, 'created_at' => now(), 'updated_at' => now()],
+            ['nombre' => 'Mesero',        'tenant_id' => $tenant->id, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // Configuraciones por defecto
-        Configuracion::set('recargo_domicilio',  0,              'Recargo fijo (en pesos) que se suma al costo de todo pedido a domicilio.');
-        Configuracion::set('hora_cierre',        5,              'Hora (0-23) a la que se cierra la jornada del día anterior.');
+        Configuracion::set('recargo_domicilio',  0,               'Recargo fijo (en pesos) que se suma al costo de todo pedido a domicilio.');
+        Configuracion::set('hora_cierre',        5,               'Hora (0-23) a la que se cierra la jornada del día anterior.');
         Configuracion::set('nombre_negocio',     $tenant->nombre, 'Nombre del negocio que aparece en los recibos.');
-        Configuracion::set('telefono_negocio',   '',             'Teléfono de contacto que aparece en los recibos.');
-        Configuracion::set('direccion_negocio',  '',             'Dirección del negocio que aparece en los recibos.');
+        Configuracion::set('telefono_negocio',   '',              'Teléfono de contacto que aparece en los recibos.');
+        Configuracion::set('direccion_negocio',  '',              'Dirección del negocio que aparece en los recibos.');
     }
 }

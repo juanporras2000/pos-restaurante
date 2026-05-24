@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Perfil;
+use App\Models\Permiso;
+use App\Models\Rol;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -150,6 +152,38 @@ class PerfilController extends Controller
         return response()->json([
             'success' => true,
             'perfil'  => $perfil
+        ], 201);
+    }
+
+    public function storePrimerPerfil(Request $request)
+    {
+        if (Perfil::where('id_user', Auth::id())->exists()) {
+            return response()->json(['error' => 'El usuario ya tiene perfiles creados.'], 422);
+        }
+
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'pin'    => 'required|numeric|digits:4',
+        ]);
+
+        $rol = Rol::where('nombre', 'Administrador')->firstOrFail();
+
+        $perfil = new Perfil();
+        $perfil->id_user   = Auth::id();
+        $perfil->nombre    = $request->nombre;
+        $perfil->pin       = Hash::make($request->pin);
+        $perfil->id_rol    = $rol->id_rol;
+        $perfil->id_imagen = 1;
+        $perfil->save();
+
+        $perfil->permisos()->sync(Permiso::pluck('id_permiso'));
+
+        session(['id_perfil'     => $perfil->id_perfil]);
+        session(['nombre_perfil' => $perfil->nombre]);
+
+        return response()->json([
+            'success' => true,
+            'perfil'  => $perfil->load(['rol', 'permisos']),
         ], 201);
     }
 

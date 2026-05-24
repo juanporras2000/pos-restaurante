@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\Proyecto restaurante\\\\pos-restaurante\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(xargs grep -l \"guest.perfil\\\\|check.perfil\")"
+    ]
+  }
+}

@@ -79,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/perfiles', [PerfilController::class, 'index']);
     Route::post('/verificar-perfil-pin', [PerfilController::class, 'verificarPin']);
     Route::get('/perfiles-admin', [PerfilController::class, 'indexAdmin']);
+    Route::post('/primer-perfil', [PerfilController::class, 'storePrimerPerfil']);
     Route::post('/perfiles', [PerfilController::class, 'store']);
     Route::put('/perfiles/{id}', [PerfilController::class, 'update']);
     Route::delete('/perfiles/{id}', [PerfilController::class, 'destroy']);

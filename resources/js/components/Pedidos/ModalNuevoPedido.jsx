@@ -11,7 +11,7 @@ const PEDIDO_VACIO = {
     nombre_cliente: '',
 };
 
-export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerrar, pedidoEditar = null }) {
+export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerrar, pedidoEditar = null, setActualizado, actualizado }) {
     const esEdicion = Boolean(pedidoEditar);
 
     const [pedido, setPedido] = useState(PEDIDO_VACIO);
@@ -242,6 +242,11 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     title: esEdicion ? 'Pedido actualizado exitosamente' : 'Pedido creado exitosamente',
                     timer: 1800, showConfirmButton: false, toast: true, position: 'top-end',
                 });
+
+                if (esEdicion) {
+                    setActualizado(!actualizado);
+                }
+                
                 cerrar();
                 onCreado();
             } else {

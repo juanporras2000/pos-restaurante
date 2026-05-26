@@ -15,8 +15,6 @@ class PedidoController extends Controller
 {
     public function pendientes()
     {
-        // El global scope de BelongsToTenant ya filtra por tenant_id.
-        // Mantenemos where('user_id') para que cada empleado vea solo sus pedidos.
         $pedidos = Pedido::where('user_id', Auth::id())
             ->whereDoesntHave('pago')
             ->with(['detalles.producto', 'perfil'])
@@ -31,9 +29,6 @@ class PedidoController extends Controller
         $inicio = now()->startOfDay()->utc();
         $fin    = now()->endOfDay()->utc();
 
-        // El global scope se encarga del tenant_id automáticamente.
-        // Filtramos por created_at para que el pedido aparezca en el día en que fue creado,
-        // no en el día en que fue cerrado.
         $pedidos = Pedido::where('estado', 'pagado')
             ->whereBetween('created_at', [$inicio, $fin])
             ->with(['detalles.producto', 'pago', 'perfil'])
@@ -167,6 +162,7 @@ class PedidoController extends Controller
                     'motivo'        => "Venta - Pedido #{$pedido->id}",
                 ]);
             }
+
             event(new \App\Events\PedidoCreado($pedido));
 
             return $pedido;
@@ -243,6 +239,8 @@ class PedidoController extends Controller
             'total'          => $total,
         ]);
 
+        event(new \App\Events\PedidoActualizado($pedido));
+
         return response()->json([
             'mensaje' => 'Pedido actualizado correctamente',
             'pedido'  => $pedido->load('detalles.producto', 'perfil'),
@@ -263,7 +261,9 @@ class PedidoController extends Controller
 
         // Eliminado lógico: guarda la razón y hace soft delete
         $pedido->update(['razon_eliminacion' => $request->razon_eliminacion]);
-        $pedido->delete(); // SoftDeletes: setea deleted_at
+        $pedido->delete();
+
+        event(new \App\Events\PedidoEliminado($pedido));
 
         return response()->json(['mensaje' => 'Pedido eliminado correctamente']);
     }

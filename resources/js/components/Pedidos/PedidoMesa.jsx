@@ -1,7 +1,8 @@
 import PedidoCard from "./PedidoCard"
 
 
-export const PedidoMesa = ({ pedidosPendientes, cargarPendientes, productos }) => {
+export const PedidoMesa = ({ pedidosPendientes, cargarPendientes, productos, setEliminado, eliminado, setPagado, pagado, setActualizado, actualizado }) => {
+
 
 
     return (
@@ -24,6 +25,12 @@ export const PedidoMesa = ({ pedidosPendientes, cargarPendientes, productos }) =
                         pedido={pedido}
                         productos={productos}
                         onActualizado={cargarPendientes}
+                        setEliminado={setEliminado}
+                        eliminado={eliminado}
+                        setPagado={setPagado}
+                        pagado={pagado}
+                        setActualizado={setActualizado}
+                        actualizado={actualizado}
                     />
                 ))}
             </div>

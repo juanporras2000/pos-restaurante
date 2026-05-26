@@ -15,7 +15,7 @@ class PagoController extends Controller
         $request->validate([
             'pedido_id' => 'required|integer',
             'recibido' => 'required|numeric|min:0',
-            'metodo_pago' => 'required|string' 
+            'metodo_pago' => 'required|string'
         ]);
 
         // Buscar pedido (sin lanzar excepción automática)
@@ -56,10 +56,12 @@ class PagoController extends Controller
         // tenant_id lo inyecta automáticamente el trait BelongsToTenant
         ]);
 
-        // Actualizar estado del pedido
+
         $pedido->update([
             'estado' => 'pagado'
         ]);
+
+        event(new \App\Events\PedidoPagado($pedido));
 
         return response()->json([
             'mensaje' => 'Pago realizado correctamente',

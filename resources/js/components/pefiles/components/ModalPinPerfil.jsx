@@ -1,5 +1,22 @@
+import { useRef } from "react";
+
 export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error, setShowModal }) => {
 
+    const inputRefs = useRef([]);
+
+    const handleChange = (value, index) => {
+        handlePinChange(value, index);
+
+        if (value && index < pin.length - 1) {
+            inputRefs.current[index + 1]?.focus();
+        }
+    };
+
+    const handleKeyDown = (e, index) => {
+        if (e.key === "Backspace" && !pin[index] && index > 0) {
+            inputRefs.current[index - 1]?.focus();
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
@@ -14,12 +31,14 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
                         <input
                             key={index}
                             id={`pin-${index}`}
+                            ref={(el) => (inputRefs.current[index] = el)}
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             type="password"
                             maxLength="1"
                             value={digit}
-                            onChange={(e) =>
-                                handlePinChange(e.target.value, index)
-                            }
+                            onChange={(e) => handleChange(e.target.value, index)}
+                            onKeyDown={(e) => handleKeyDown(e, index)}
                             className={`w-12 h-16 text-center text-3xl font-bold border-2 rounded-lg focus:border-blue-500 focus:outline-none transition-all ${error ? "border-red-500 animate-shake" : "border-gray-300"}`}
                         />
                     ))}

@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>POS - Sistema de Punto de Venta</title>
+    <title>{{ config('app.name', 'Laravel') }}</title>
+    <link rel="icon" type="image/webp" href="{{ asset('logo-postaurante-favicon.webp') }}?v={{ time() }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @livewireStyles
     @viteReactRefresh
@@ -16,44 +17,29 @@
 
     <div x-data="{ open: false }" class="flex h-screen overflow-hidden">
 
-        <!-- OVERLAY backdrop (solo móvil) -->
-        <div
-            x-show="open"
-            x-transition:enter="transition-opacity ease-linear duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition-opacity ease-linear duration-300"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="open = false"
-            class="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
-            aria-hidden="true"
-            style="display:none"
-        ></div>
+        <div x-show="open" x-transition:enter="transition-opacity ease-linear duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" @click="open = false"
+            class="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden" aria-hidden="true" style="display:none"></div>
 
-        <!-- SIDEBAR -->
-        <aside
-            :class="open ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed inset-y-0 left-0 lg:static lg:inset-auto lg:translate-x-0 z-30 w-64 h-full overflow-y-auto bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out"
-        >
+        <aside :class="open ? 'translate-x-0' : '-translate-x-full'"
+            class="fixed inset-y-0 left-0 lg:static lg:inset-auto lg:translate-x-0 z-30 w-64 h-full overflow-y-auto bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out">
 
-            <div class="pl-2 pr-16 py-2 border-b border-gray-200 flex items-center justify-around">
+            <div class="border-b py-3 border-gray-200 flex items-center justify-center gap-1">
                 <img src="/assets/logo-postaurante.webp" alt="Logo Postaurante" class="w-10 h-10">
                 <p class="font-bold text-lg text-gray-700">POSTAURANTE</p>
                 <!-- Botón cerrar (solo móvil) -->
-                <button
-                    @click="open = false"
+                <button @click="open = false"
                     class="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                    aria-label="Cerrar menú"
-                >
+                    aria-label="Cerrar menú">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 18L18 6M6 6l12 12"/>
+                        <path d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
             @php
-
                 $perfilActivo = \App\Models\Perfil::with('permisos')->find(session('id_perfil'));
                 $permisosIds = $perfilActivo ? $perfilActivo->permisos->pluck('id_permiso')->toArray() : [];
             @endphp
@@ -174,10 +160,27 @@
             @endif
 
             <div class="p-4 border-t border-gray-200">
+                @if (session()->has('id_perfil'))
+                    <form id="form-logout-perfil" method="POST" action="/logout-perfil">
+                        @csrf
+                        <button type="button" onclick="cerrarPerfilFronend()"
+                            class="w-full flex items-center px-2 py-3 text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors duration-200 group">
+                            <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-orange-600"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                aria-hidden="true">
+                                <path d="M16 17l5-5-5-5"></path>
+                                <path d="M21 12H9"></path>
+                                <rect x="3" y="4" width="6" height="16" rx="1"></rect>
+                            </svg>
+                            Cerrar perfil
+                        </button>
+                    </form>
+                @endif
+
                 <form method="POST" action="/logout">
                     @csrf
                     <button
-                        class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors duration-200 group">
+                        class="w-full flex items-center px-2 py-3 text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors duration-200 group">
                         <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-red-600"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
@@ -185,7 +188,7 @@
                             <path d="M15 12H3"></path>
                             <path d="M20 4v16"></path>
                         </svg>
-                        Salir
+                        Cerrar cuenta
                     </button>
                 </form>
             </div>
@@ -198,13 +201,12 @@
             <!-- TOPBAR -->
             <header class="bg-white shadow-sm px-4 py-3 flex items-center gap-3 border-b border-gray-200">
                 <!-- Botón hamburguesa (solo móvil) -->
-                <button
-                    @click="open = true"
+                <button @click="open = true"
                     class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
-                    aria-label="Abrir menú"
-                >
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path d="M4 6h16M4 12h16M4 18h16"/>
+                    aria-label="Abrir menú">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
                 <div class="flex items-center gap-3 flex-1 min-w-0">
@@ -216,7 +218,8 @@
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name ?? 'Usuario' }}</p>
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name ?? 'Usuario' }}
+                        </p>
                         <p class="text-xs text-gray-500">Bienvenido al sistema</p>
                     </div>
                 </div>
@@ -262,6 +265,12 @@
             cargarAlertas();
             setInterval(cargarAlertas, 60000);
         })();
+
+        function cerrarPerfilFronend() {
+            localStorage.removeItem('perfil_activo');
+
+            document.getElementById('form-logout-perfil').submit();
+        }
     </script>
 
 </body>

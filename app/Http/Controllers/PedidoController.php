@@ -9,7 +9,7 @@ use App\Models\Producto;
 use App\Models\Insumo;
 use App\Models\MovimientoInventario;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PedidoController extends Controller
 {
@@ -17,7 +17,7 @@ class PedidoController extends Controller
     {
         // El global scope de BelongsToTenant ya filtra por tenant_id.
         // Mantenemos where('user_id') para que cada empleado vea solo sus pedidos.
-        $pedidos = Pedido::where('user_id', auth()->id())
+        $pedidos = Pedido::where('user_id', Auth::id())
             ->whereDoesntHave('pago')
             ->with(['detalles.producto', 'perfil'])
             ->orderBy('created_at', 'asc')
@@ -95,7 +95,7 @@ class PedidoController extends Controller
             }
 
             $pedido = Pedido::create([
-                'user_id'        => auth()->id(),
+                'user_id'        => Auth::id(),
                 'tipo'           => $request->tipo,
                 'numero_mesa'    => $request->numero_mesa,
                 'direccion'      => $request->direccion,
@@ -158,7 +158,7 @@ class PedidoController extends Controller
 
                 MovimientoInventario::create([
                     'insumo_id'     => $insumoId,
-                    'user_id'       => auth()->id(),
+                    'user_id'       => Auth::id(),
                     'pedido_id'     => $pedido->id,
                     'tipo'          => 'salida',
                     'cantidad'      => $cantidad,
@@ -167,6 +167,7 @@ class PedidoController extends Controller
                     'motivo'        => "Venta - Pedido #{$pedido->id}",
                 ]);
             }
+            event(new \App\Events\PedidoCreado($pedido));
 
             return $pedido;
         });
@@ -183,7 +184,7 @@ class PedidoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $pedido = Pedido::where('user_id', auth()->id())->findOrFail($id);
+        $pedido = Pedido::where('user_id', Auth::id())->findOrFail($id);
 
         if ($pedido->pago) {
             return response()->json(['error' => 'No se puede editar un pedido que ya tiene pago'], 400);
@@ -250,7 +251,7 @@ class PedidoController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $pedido = Pedido::where('user_id', auth()->id())->findOrFail($id);
+        $pedido = Pedido::where('user_id', Auth::id())->findOrFail($id);
 
         if ($pedido->pago) {
             return response()->json(['error' => 'No se puede eliminar un pedido que ya tiene pago'], 400);

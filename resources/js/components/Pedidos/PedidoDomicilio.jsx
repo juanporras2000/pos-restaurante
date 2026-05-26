@@ -1,6 +1,6 @@
 import PedidoCard from "./PedidoCard"
 
-export const PedidoDomicilio = ({pedidosPendientes, productos, cargarPendientes}) => {
+export const PedidoDomicilio = ({pedidosPendientes, productos, cargarPendientes, setEliminado, eliminado, setPagado, pagado, setActualizado, actualizado}) => {
 
 
     return (
@@ -15,13 +15,19 @@ export const PedidoDomicilio = ({pedidosPendientes, productos, cargarPendientes}
                     {pedidosPendientes.filter((p) => p.tipo === 'domicilio').length}
                 </span>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
                 {pedidosPendientes.filter((p) => p.tipo === 'domicilio').map((pedido) => (
                     <PedidoCard
                         key={pedido.id}
                         pedido={pedido}
                         productos={productos}
                         onActualizado={cargarPendientes}
+                        setEliminado={setEliminado}
+                        eliminado={eliminado}
+                        setPagado={setPagado}
+                        pagado={pagado}
+                        setActualizado={setActualizado}
+                        actualizado={actualizado}
                     />
                 ))}
             </div>

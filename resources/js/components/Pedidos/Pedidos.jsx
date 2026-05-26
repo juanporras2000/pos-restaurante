@@ -12,6 +12,9 @@ export default function Pedidos() {
     const [productos, setProductos] = useState([]);
     const [pedidosPendientes, setPedidosPendientes] = useState([]);
     const [modalNuevoAbierto, setModalNuevoAbierto] = useState(false);
+    const [eliminado, setEliminado] = useState(false);
+    const [pagado, setPagado] = useState(false);
+    const [actualizado, setActualizado] = useState(false);
     const [filtroTipo, setFiltroTipo] = useState('todos');
 
     const dataPerfilActivo = JSON.parse(localStorage.getItem('perfil_activo'))
@@ -33,10 +36,12 @@ export default function Pedidos() {
             .catch(() => { });
     }, []);
 
+
     useEffect(() => {
         cargarProductos();
         cargarPendientes();
     }, [cargarProductos, cargarPendientes]);
+
 
     useEffect(() => {
         if (typeof window.Echo !== 'undefined') {
@@ -51,7 +56,16 @@ export default function Pedidos() {
                                 console.log("El navegador bloqueó la reproducción automática del audio hasta que haya interacción:", error);
                             });
                     }
-                });
+                })
+                .listen('.PedidoEliminadoEvent', (e) => {
+                    cargarPendientes();
+                })
+                .listen('.PedidoPagadoEvent', (e) => {
+                    cargarPendientes();
+                })
+                .listen('.PedidoActualizadoEvent', (e) => {
+                    cargarPendientes();
+                })
         }
 
         return () => {
@@ -59,7 +73,7 @@ export default function Pedidos() {
                 window.Echo.leaveChannel('pedidos-canal');
             }
         };
-    }, [cargarPendientes]);
+    }, [cargarPendientes, eliminado, pagado, actualizado]);
 
 
     useEffect(() => {
@@ -200,6 +214,12 @@ export default function Pedidos() {
                         pedidosPendientes={pedidosPendientes}
                         cargarPendientes={cargarPendientes}
                         productos={productos}
+                        setEliminado={setEliminado}
+                        eliminado={eliminado}
+                        setPagado={setPagado}
+                        pagado={pagado}
+                        setActualizado={setActualizado}
+                        actualizado={actualizado}
                     />
                 )}
 
@@ -210,6 +230,12 @@ export default function Pedidos() {
                         pedidosPendientes={pedidosPendientes}
                         cargarPendientes={cargarPendientes}
                         productos={productos}
+                        setEliminado={setEliminado}
+                        eliminado={eliminado}
+                        setPagado={setPagado}
+                        pagado={pagado}
+                        setActualizado={setActualizado}
+                        actualizado={actualizado}
                     />
                 )}
 
@@ -220,6 +246,12 @@ export default function Pedidos() {
                         pedidosPendientes={pedidosPendientes}
                         cargarPendientes={cargarPendientes}
                         productos={productos}
+                        setEliminado={setEliminado}
+                        eliminado={eliminado}
+                        setPagado={setPagado}
+                        pagado={pagado}
+                        setActualizado={setActualizado}
+                        actualizado={actualizado}
                     />
                 )}
 

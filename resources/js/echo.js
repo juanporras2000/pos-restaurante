@@ -3,7 +3,6 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
-// Detectamos dinámicamente si estamos en producción (SSL / HTTPS) o local
 const isProduction = window.location.protocol === 'https:';
 
 window.Echo = new Echo({

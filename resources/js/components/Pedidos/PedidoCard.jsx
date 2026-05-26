@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
@@ -13,12 +13,14 @@ function formatDate(dateString) {
     });
 }
 
-export default function PedidoCard({ pedido, productos, onActualizado }) {
+export default function PedidoCard({ pedido, productos, onActualizado, setEliminado, eliminado, setPagado, pagado, setActualizado, actualizado }) {
     const [modalPagoAbierto, setModalPagoAbierto] = useState(false);
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
     const { imprimir } = useImprimir();
 
-    // Calcular subtotal (suma de items) para ver si hay recargo
+    
+
+
     const subtotalItems = pedido.detalles?.reduce((acc, d) => acc + parseFloat(d.subtotal), 0) || 0;
     const tieneRecargo = pedido.tipo === 'domicilio' && parseFloat(pedido.total) > subtotalItems;
     const valorRecargo = parseFloat(pedido.total) - subtotalItems;
@@ -58,6 +60,7 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
             if (res.ok) {
                 Swal.fire({ icon: 'success', title: 'Pedido eliminado correctamente', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
                 onActualizado?.();
+                setEliminado(!eliminado);
             } else {
                 const data = await res.json();
                 Swal.fire({ icon: 'error', title: data.error || 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
@@ -66,6 +69,8 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
             Swal.fire({ icon: 'error', title: 'Error al eliminar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         }
     };
+
+
     return (
         <>
             <div className="bg-white rounded-xl shadow-md border border-gray-100 flex flex-col justify-between overflow-hidden hover:shadow-lg transition-all duration-200 min-h-[320px] md:min-h-[340px] w-full max-w-full md:max-w-[350px] mx-auto">
@@ -74,8 +79,8 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
                 <div>
                     {/* Banner de tipo de pedido */}
                     <div className={`px-4 py-1.5 flex justify-between items-center text-xs font-bold uppercase tracking-wider ${pedido.tipo === 'mesa' ? 'bg-blue-50 text-blue-700 border-b border-blue-100'
-                            : pedido.tipo === 'domicilio' ? 'bg-green-50 text-green-700 border-b border-green-100'
-                                : 'bg-orange-50 text-orange-700 border-b border-orange-100'
+                        : pedido.tipo === 'domicilio' ? 'bg-green-50 text-green-700 border-b border-green-100'
+                            : 'bg-orange-50 text-orange-700 border-b border-orange-100'
                         }`}>
                         <span>Pedido #{pedido.numero_dia || pedido.id}</span>
                         <span>{pedido.tipo === 'mesa' ? 'Mesa' : pedido.tipo === 'domicilio' ? 'Domicilio' : 'Recoger'}</span>
@@ -214,8 +219,29 @@ export default function PedidoCard({ pedido, productos, onActualizado }) {
                 </div>
             </div>
 
-            <ModalNuevoPedido abierto={modalEditarAbierto} productos={productos} pedidoEditar={pedido} onCreado={() => { setModalEditarAbierto(false); onActualizado?.(); }} onCerrar={() => setModalEditarAbierto(false)} />
-            <ModalPago abierto={modalPagoAbierto} pedido={pedido} onPagado={() => { setModalPagoAbierto(false); onActualizado?.(); }} onCerrar={() => setModalPagoAbierto(false)} />
+            <ModalNuevoPedido
+                abierto={modalEditarAbierto}
+                productos={productos}
+                pedidoEditar={pedido}
+                onCreado={() => {
+                    setModalEditarAbierto(false);
+                    onActualizado?.();
+                }}
+                onCerrar={() => setModalEditarAbierto(false)}
+                actualizado={actualizado}
+                setActualizado={setActualizado}
+            />
+
+            <ModalPago
+                abierto={modalPagoAbierto}
+                pedido={pedido}
+                onPagado={() => {
+                    setModalPagoAbierto(false);
+                    onActualizado?.();
+                    setPagado(!pagado);
+                }}
+                onCerrar={() => setModalPagoAbierto(false)}
+            />
         </>
     );
 }

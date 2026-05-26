@@ -9,6 +9,8 @@ export const ActualizarEliminarPerfil = ({
     setEditPin,
     editRol,
     setEditRol,
+    editAvatar,
+    setEditAvatar,
     roles,
     onShowModalAvatar,
     perfiles,
@@ -24,7 +26,7 @@ export const ActualizarEliminarPerfil = ({
                 nombre: editNombre,
                 pin: editPin,
                 id_rol: editRol,
-                id_imagen: perfilSeleccionado.id_imagen,
+                id_imagen: editAvatar ? editAvatar.id_imagen : perfilSeleccionado.id_imagen,
                 permisos: perfilSeleccionado.permisos
             };
 
@@ -41,7 +43,7 @@ export const ActualizarEliminarPerfil = ({
                         id_rol: editRol,
                         nombre_rol: rolSeleccionadoObj ? rolSeleccionadoObj.nombre : p.nombre_rol,
                         id_imagen: perfilSeleccionado.id_imagen,
-                        path: perfilSeleccionado.path,// Mantener la URL local del avatar
+                        path: editAvatar ? editAvatar.path : p.path,
                         permisos: perfilSeleccionado.permisos
                     }
                     : p
@@ -51,6 +53,7 @@ export const ActualizarEliminarPerfil = ({
             setEditNombre("");
             setEditRol("");
             setEditPin("");
+            setEditAvatar(null);
 
             Swal.fire('¡Éxito!', 'Perfil actualizado correctamente', 'success');
         } catch (error) {

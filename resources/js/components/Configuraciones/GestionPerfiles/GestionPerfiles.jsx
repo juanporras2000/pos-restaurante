@@ -19,6 +19,7 @@ export const GestionPerfiles = () => {
     const [galeriaAvatares, setGaleriaAvatares] = useState([]);
     const [showModalAvatar, setShowModalAvatar] = useState(false);
     const [editRol, setEditRol] = useState("");
+    const [editAvatar, setEditAvatar] = useState(null);
 
     const [editNombre, setEditNombre] = useState("");
     const [editPin, setEditPin] = useState("");
@@ -88,6 +89,7 @@ export const GestionPerfiles = () => {
         setEditNombre(perfil.nombre);
         setEditRol(perfil.id_rol);
         setEditPin("");
+        setEditAvatar({ id_imagen: perfil.id_imagen, path: perfil.path });
     };
 
     const handleTogglePermiso = (idPermiso) => {
@@ -174,8 +176,6 @@ export const GestionPerfiles = () => {
     };
 
 
-
-
     if (loading) return (
         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
             <p className="font-medium">Cargando perfiles y permisos...</p>
@@ -228,6 +228,7 @@ export const GestionPerfiles = () => {
                     {
                         perfiles.map(p => {
                             const esElActivo = perfilSeleccionado?.id_perfil === p.id_perfil;
+                            const rutaImagen = esElActivo ? perfilSeleccionado.path : p.path;
 
                             return (
                                 <button
@@ -243,12 +244,17 @@ export const GestionPerfiles = () => {
                                     <div className="flex items-center gap-3 min-w-0 w-full">
                                         {/* Mini Avatar circular */}
                                         <div className="w-9 h-9 rounded-full border border-gray-100 overflow-hidden bg-gray-100 flex-shrink-0">
-                                            <img
-                                                className="object-cover w-full h-full"
-                                                src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${p.rutaImagen || p.imagen}.jpeg`}
-                                                alt=""
-                                                loading="lazy"
-                                            />
+                                            {
+                                                rutaImagen
+                                                    ?
+                                                    (
+                                                        <img className='object-cover w-full h-full' src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${rutaImagen}.jpeg`} alt="" />
+                                                    )
+                                                    :
+                                                    (
+                                                        <img className='object-cover w-full h-full' src={`${import.meta.env.VITE_URL_IMAGEN}assets/imagenes-perfiles/${p.imagen}.jpeg`} alt="" />
+                                                    )
+                                            }
                                         </div>
 
                                         {/* Textos: Nombre arriba y Rol abajo */}
@@ -284,6 +290,8 @@ export const GestionPerfiles = () => {
                             perfilSeleccionado={perfilSeleccionado}
                             setPerfilSeleccionado={setPerfilSeleccionado}
                             perfiles={perfiles}
+                            editAvatar={editAvatar}
+                            setEditAvatar={setEditAvatar}
                             setPerfiles={setPerfiles} />
 
                         <GestionarPermisos
@@ -330,13 +338,14 @@ export const GestionPerfiles = () => {
                 <ModalAvatar
                     onClose={() => setShowModalAvatar(false)}
                     galeriaAvatares={galeriaAvatares}
-                    avatarActivoId={perfilSeleccionado?.id_imagen}
+                    avatarActivoId={editAvatar?.id_imagen}
                     onSelectAvatar={(avatar) => {
                         setPerfilSeleccionado({
                             ...perfilSeleccionado,
                             id_imagen: avatar.id_imagen,
                             path: avatar.path
                         });
+                        setEditAvatar(avatar);
                         setShowModalAvatar(false);
                     }}
                 />

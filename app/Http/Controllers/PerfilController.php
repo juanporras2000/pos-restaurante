@@ -75,22 +75,23 @@ class PerfilController extends Controller
 
     public function update(Request $request, int $id)
     {
+
+
+
         $request->validate([
             'nombre'   => 'required|string|max:255',
             'pin'      => 'nullable|numeric|digits:4',
             'permisos' => 'array',
             'id_rol'   => 'required|integer',
-            'id_imagen' => 'nullable|integer',
+            'id_imagen' => 'required|integer',
         ]);
 
         $perfil = Perfil::findOrFail($id);
 
         $perfil->nombre = $request->nombre;
         $perfil->id_rol = $request->id_rol;
+        $perfil->id_imagen = $request->id_imagen;
 
-        if ($request->filled('id_imagen_perfil')) {
-            $perfil->id_imagen_perfil = $request->id_imagen_perfil;
-        }
 
         if ($request->filled('pin')) {
             $perfil->pin = Hash::make($request->pin);

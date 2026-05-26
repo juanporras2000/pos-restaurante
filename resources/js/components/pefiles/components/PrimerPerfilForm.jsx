@@ -193,11 +193,10 @@ export const PrimerPerfilForm = () => {
                             {[0, 1, 2, 3].map((i) => (
                                 <div
                                     key={i}
-                                    className={`rounded-full transition-all duration-200 ${
-                                        i < pinFilled
+                                    className={`rounded-full transition-all duration-200 ${i < pinFilled
                                             ? "w-3 h-3 bg-blue-600"
                                             : "w-2 h-2 bg-gray-200 mt-0.5"
-                                    }`}
+                                        }`}
                                 />
                             ))}
                         </div>
@@ -210,19 +209,19 @@ export const PrimerPerfilForm = () => {
                                     ref={pinRefs[index]}
                                     type={pinVisible ? "text" : "password"}
                                     inputMode="numeric"
+                                    pattern="[0-9]*"
                                     maxLength="1"
                                     value={digit}
                                     onChange={(e) => handlePinChange(e.target.value, index)}
                                     onKeyDown={(e) => handlePinKeyDown(e, index)}
                                     onPaste={index === 0 ? handlePinPaste : undefined}
                                     aria-label={`Dígito ${index + 1} del PIN`}
-                                    className={`w-14 h-16 text-center text-2xl font-bold border-2 rounded-xl focus:outline-none transition-all duration-150 ${
-                                        shakingPin
+                                    className={`w-14 h-16 text-center text-2xl font-bold border-2 rounded-xl focus:outline-none transition-all duration-150 ${shakingPin
                                             ? "border-red-500 bg-red-50 text-red-600"
                                             : digit
-                                            ? "border-blue-500 bg-blue-50 text-blue-700"
-                                            : "border-gray-300 bg-gray-50 text-gray-800 focus:border-blue-500 focus:bg-white"
-                                    }`}
+                                                ? "border-blue-500 bg-blue-50 text-blue-700"
+                                                : "border-gray-300 bg-gray-50 text-gray-800 focus:border-blue-500 focus:bg-white"
+                                        }`}
                                 />
                             ))}
                         </div>

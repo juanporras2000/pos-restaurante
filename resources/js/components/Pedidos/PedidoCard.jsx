@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
@@ -11,6 +11,13 @@ function formatDate(dateString) {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit',
     });
+}
+
+function timeAgo(dateString) {
+    const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
+    if (diff < 60) return `${diff}s`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} min`;
+    return `${Math.floor(diff / 3600)}h ${Math.floor((diff % 3600) / 60)}min`;
 }
 
 export default function PedidoCard({ pedido, productos, onActualizado, setEliminado, eliminado, setPagado, pagado, setActualizado, actualizado }) {
@@ -142,9 +149,18 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
 
                 {/* BLOQUE INFERIOR */}
                 <div className="p-4 md:p-4.5 pt-0 mt-2">
-                    {/* Metadata: Fecha y relación Perfil */}
+                    {/* Metadata: Tiempo transcurrido y perfil */}
                     <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
-                        <span>{formatDate(pedido.created_at)}</span>
+                        <span
+                            title={formatDate(pedido.created_at)}
+                            className="inline-flex items-center gap-1"
+                        >
+                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Hace {timeAgo(pedido.created_at)}
+                        </span>
                         {pedido.perfil?.nombre && (
                             <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium border border-gray-200">
                                 <svg className="h-2.5 w-2.5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

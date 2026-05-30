@@ -275,7 +275,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
 
     return (
         <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="modal-overlay"
             onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}
         >
             <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
@@ -288,7 +288,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                             </svg>
                             {esEdicion ? `Editar Pedido #${pedidoEditar.numero_dia || pedidoEditar.id}` : 'Crear Nuevo Pedido'}
                         </h2>
-                        <button type="button" onClick={cerrar} className="text-gray-400 hover:text-gray-600">
+                        <button type="button" onClick={cerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -296,52 +296,88 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Tipo de Pedido */}
+                        {/* Tipo de Pedido — card selectors */}
                         <div className="lg:col-span-1">
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h3 className="font-medium text-gray-900 mb-4">Tipo de Pedido</h3>
-                                <div className="space-y-3">
-                                    <label className="flex items-center cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="tipo"
-                                            value="mesa"
-                                            checked={pedido.tipo === 'mesa'}
-                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
-                                            className="text-blue-600 focus:ring-blue-500"
-                                        />
-                                        <span className="ml-2 text-sm font-medium text-gray-700">Para llevar a mesa</span>
-                                    </label>
+                            <div className="border border-gray-200 rounded-xl p-4">
+                                <h3 className="font-semibold text-gray-500 mb-3 text-sm uppercase tracking-wide">Tipo de Pedido</h3>
+                                <div className="space-y-2">
+
+                                    {/* MESA */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                                            pedido.tipo === 'mesa'
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                            pedido.tipo === 'mesa' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
+                                        }`}>
+                                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <rect x="3" y="8" width="18" height="4" rx="1"></rect>
+                                                <path d="M6 12v4m12-4v4M4 19h16"></path>
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className={`text-sm font-semibold ${pedido.tipo === 'mesa' ? 'text-blue-700' : 'text-gray-800'}`}>Mesa</p>
+                                            <p className="text-xs text-gray-500">Consumo en el local</p>
+                                        </div>
+                                        {pedido.tipo === 'mesa' && (
+                                            <svg className="h-5 w-5 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path d="M20 6L9 17l-5-5"></path>
+                                            </svg>
+                                        )}
+                                    </button>
 
                                     {pedido.tipo === 'mesa' && (
-                                        <div className="ml-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Número de mesa</label>
+                                        <div className="px-1 pt-1">
+                                            <label className="form-label">Número de mesa</label>
                                             <input
                                                 type="number"
                                                 value={pedido.numero_mesa}
                                                 onChange={(e) => setPedido((p) => ({ ...p, numero_mesa: e.target.value }))}
                                                 placeholder="Ej: 5"
                                                 min="1"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                autoFocus
+                                                className="form-input"
                                             />
                                         </div>
                                     )}
 
-                                    <label className="flex items-center cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="tipo"
-                                            value="domicilio"
-                                            checked={pedido.tipo === 'domicilio'}
-                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
-                                            className="text-blue-600 focus:ring-blue-500"
-                                        />
-                                        <span className="ml-2 text-sm font-medium text-gray-700">Para domicilio</span>
-                                    </label>
+                                    {/* DOMICILIO */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                                            pedido.tipo === 'domicilio'
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                            pedido.tipo === 'domicilio' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500'
+                                        }`}>
+                                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className={`text-sm font-semibold ${pedido.tipo === 'domicilio' ? 'text-green-700' : 'text-gray-800'}`}>Domicilio</p>
+                                            <p className="text-xs text-gray-500">Entrega a dirección</p>
+                                        </div>
+                                        {pedido.tipo === 'domicilio' && (
+                                            <svg className="h-5 w-5 text-green-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path d="M20 6L9 17l-5-5"></path>
+                                            </svg>
+                                        )}
+                                    </button>
 
                                     {pedido.tipo === 'domicilio' && (
-                                        <div className="ml-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Dirección de entrega</label>
+                                        <div className="px-1 pt-1">
+                                            <label className="form-label">Dirección de entrega</label>
                                             <textarea
                                                 value={pedido.direccion}
                                                 onChange={(e) => {
@@ -350,35 +386,55 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                                 }}
                                                 placeholder="Ej: calle 23 #11-21 apto 101"
                                                 rows="3"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                autoFocus
+                                                className="form-input resize-none"
                                             />
-                                            {direccionError && (
-                                                <p className="mt-1 text-sm text-red-600">{direccionError}</p>
-                                            )}
+                                            {direccionError && <p className="form-error">{direccionError}</p>}
                                         </div>
                                     )}
 
-                                    <label className="flex items-center cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="tipo"
-                                            value="recoger"
-                                            checked={pedido.tipo === 'recoger'}
-                                            onChange={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
-                                            className="text-blue-600 focus:ring-blue-500"
-                                        />
-                                        <span className="ml-2 text-sm font-medium text-gray-700">El cliente pasa a recoger</span>
-                                    </label>
+                                    {/* RECOGER */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                                            pedido.tipo === 'recoger'
+                                                ? 'border-orange-500 bg-orange-50'
+                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                            pedido.tipo === 'recoger' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'
+                                        }`}>
+                                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
+                                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                                <path d="M16 10a4 4 0 01-8 0"></path>
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className={`text-sm font-semibold ${pedido.tipo === 'recoger' ? 'text-orange-600' : 'text-gray-800'}`}>Recoger</p>
+                                            <p className="text-xs text-gray-500">El cliente pasa a buscar</p>
+                                        </div>
+                                        {pedido.tipo === 'recoger' && (
+                                            <svg className="h-5 w-5 text-orange-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path d="M20 6L9 17l-5-5"></path>
+                                            </svg>
+                                        )}
+                                    </button>
 
                                     {pedido.tipo === 'recoger' && (
-                                        <div className="ml-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del cliente <span className="text-gray-400 font-normal">(opcional)</span></label>
+                                        <div className="px-1 pt-1">
+                                            <label className="form-label">
+                                                Nombre del cliente <span className="text-gray-400 font-normal">(opcional)</span>
+                                            </label>
                                             <input
                                                 type="text"
                                                 value={pedido.nombre_cliente}
                                                 onChange={(e) => setPedido((p) => ({ ...p, nombre_cliente: e.target.value }))}
                                                 placeholder="Ej: Juan Pérez"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                autoFocus
+                                                className="form-input"
                                             />
                                         </div>
                                     )}
@@ -409,18 +465,14 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
 
                     {/* Acciones */}
                     <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-                        <button
-                            type="button"
-                            onClick={cerrar}
-                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
+                        <button type="button" onClick={cerrar} className="btn-secondary">
                             Cancelar
                         </button>
                         <button
                             type="button"
                             onClick={guardar}
                             disabled={!puedeCrear() || enviando}
-                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
+                            className="btn-primary px-6"
                         >
                             {enviando ? 'Guardando...' : (esEdicion ? 'Guardar Cambios' : 'Crear Pedido')}
                         </button>

@@ -30,7 +30,7 @@ function labelMargen(margen) {
 export default function TablaProductos({ productos, onEditar, onEliminar }) {
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 borderborder-black">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {productos.map((producto) => {
                 const precio = Number.parseFloat(producto.precio) || 0;
                 const costo = Number.parseFloat(producto.costo) || 0;
@@ -47,7 +47,7 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                 return (
                     <div
                         key={producto.id}
-                        className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow flex flex-col justify-between h-full min-w-0 max-w-[350px]"
+                        className="card p-4 md:p-6 hover:shadow-md transition-shadow flex flex-col justify-between h-full min-w-0 max-w-[350px]"
                     >
                         {/* Bloque de Contenido Superior */}
                         <div className="min-w-0">
@@ -168,8 +168,12 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
             })}
 
             {productos.length === 0 && (
-                <div className="col-span-full text-center py-12 text-gray-500 font-medium bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    No se encontraron productos.
+                <div className="col-span-full card p-12 text-center">
+                    <svg className="h-16 w-16 text-gray-300 mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                        <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron productos</h3>
+                    <p className="text-gray-500 text-sm">Ajusta el filtro o crea un nuevo producto</p>
                 </div>
             )}
         </div>

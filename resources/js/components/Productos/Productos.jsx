@@ -227,12 +227,12 @@ export default function Productos() {
                             value={buscar}
                             onChange={(e) => setBuscar(e.target.value)}
                             placeholder="Buscar productos..."
-                            className="px-2 py-1 lg:px-4 lg:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="form-input"
                         />
                         <button
                             type="button"
                             onClick={abrirCrear}
-                            className="w-full bg-blue-600 lg:hover:bg-blue-700 text-white font-medium lg:mt-0 py-1 px-2  lg:py-2 lg:px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                            className="btn-primary w-full flex items-center justify-center gap-2"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 4v16m8-8H4"></path>

@@ -48,7 +48,14 @@ export default function Pedidos() {
 
             window.Echo.channel('pedidos-canal')
                 .listen('.PedidoCreadoEvent', (e) => {
+
                     cargarPendientes();
+
+                    const idPerfil = dataPerfilActivo.id_perfil;
+
+                    if (e.pedido && e.pedido.id_perfil === idPerfil) {
+                        return;
+                    }
 
                     if (audioNotificacion.current) {
                         audioNotificacion.current.play()

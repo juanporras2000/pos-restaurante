@@ -163,7 +163,8 @@ class PedidoController extends Controller
                 ]);
             }
 
-            event(new \App\Events\PedidoCreado($pedido));
+            // event(new \App\Events\PedidoCreado($pedido));
+            broadcast(new \App\Events\PedidoCreado($pedido))->toOthers();
 
             return $pedido;
         });

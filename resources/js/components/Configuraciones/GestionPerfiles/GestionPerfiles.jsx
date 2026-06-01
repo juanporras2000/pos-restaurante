@@ -45,7 +45,10 @@ export const GestionPerfiles = () => {
 
                 setPermisosDisponibles(resPermisos.data);
                 setPerfiles(resPerfiles.data);
-                setRoles(resDataInicial.data.roles);
+
+                const rolesFiltrados = resDataInicial.data.roles.filter( rol => rol.id_rol != 1)
+                setRoles(rolesFiltrados);
+                
                 setGaleriaAvatares(resDataInicial.data.galeria);
 
             } catch (error) {
@@ -57,6 +60,7 @@ export const GestionPerfiles = () => {
         fetchDatos();
     }, [recargar]);
 
+
     const cambiarDePerfilConValidacion = async (nuevoPerfil) => {
 
         if (perfilSeleccionado?.id_perfil === nuevoPerfil.id_perfil) return;
@@ -67,10 +71,10 @@ export const GestionPerfiles = () => {
                 text: `Tienes cambios sin guardar en el perfil "${perfilSeleccionado.nombre}". Si cambias de perfil, se perderán.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Sí, descartar',
-                cancelButtonText: 'Permanecer aquí'
+                cancelButtonText: 'Seguir editando'
             });
 
             // Si el usuario cancela, frenamos el cambio de perfil
@@ -111,6 +115,7 @@ export const GestionPerfiles = () => {
             Swal.fire('Atención', 'Por favor, completa todos los campos obligatorios.', 'warning');
             return;
         }
+
 
         try {
             const data = {

@@ -63,36 +63,50 @@ export default function ListaProductos({ productos, carrito, onIncrementar, onDe
 
             {/* Grid de productos */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-                {productosFiltrados.map((producto) => (
-                    <div
-                        key={producto.id}
-                        className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
-                    >
-                        <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 truncate">{producto.nombre}</h4>
-                            <p className="text-sm text-gray-500">{fmtCOP(producto.precio)}</p>
+                {productosFiltrados.map((producto) => {
+                    const cantidad = getCantidad(producto.id);
+                    const enCarrito = cantidad > 0;
+                    return (
+                        <div
+                            key={producto.id}
+                            className={`flex items-center justify-between p-3 border-2 rounded-lg transition-all ${
+                                enCarrito
+                                    ? 'border-blue-400 bg-blue-50'
+                                    : 'border-gray-200 hover:border-blue-300'
+                            }`}
+                        >
+                            <div className="flex-1 min-w-0">
+                                <h4 className={`font-medium truncate ${enCarrito ? 'text-blue-800' : 'text-gray-900'}`}>
+                                    {producto.nombre}
+                                </h4>
+                                <p className="text-sm text-gray-500">{fmtCOP(producto.precio)}</p>
+                            </div>
+                            <div className="flex items-center gap-2 ml-2">
+                                <button
+                                    type="button"
+                                    onClick={() => onDecrementar(producto)}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                                        enCarrito
+                                            ? 'bg-blue-200 hover:bg-blue-300 text-blue-800'
+                                            : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+                                    }`}
+                                >
+                                    −
+                                </button>
+                                <span className={`w-8 text-center text-sm font-bold ${enCarrito ? 'text-blue-700' : 'text-gray-500'}`}>
+                                    {cantidad}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => onIncrementar(producto)}
+                                    className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-sm font-bold transition-colors"
+                                >
+                                    +
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 ml-2">
-                            <button
-                                type="button"
-                                onClick={() => onDecrementar(producto)}
-                                className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm font-medium"
-                            >
-                                -
-                            </button>
-                            <span className="w-8 text-center text-sm font-medium">
-                                {getCantidad(producto.id)}
-                            </span>
-                            <button
-                                type="button"
-                                onClick={() => onIncrementar(producto)}
-                                className="w-8 h-8 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 flex items-center justify-center text-sm font-medium"
-                            >
-                                +
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 {productosFiltrados.length === 0 && (
                     <p className="col-span-2 text-center text-gray-500 py-6">

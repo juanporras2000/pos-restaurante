@@ -133,17 +133,17 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col">
+        <div className="modal-overlay">
+            <div className="modal-panel-lg max-h-[90vh] flex flex-col">
                 {/* Header */}
-                <div className="p-6 border-b border-gray-200 flex items-center justify-between shrink-0">
+                <div className="modal-header shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                         <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                         </svg>
                         {producto.id ? 'Editar Producto' : 'Crear Producto'}
                     </h2>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
+                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -156,7 +156,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Nombre */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                                <label className="form-label">Nombre</label>
                                 <input
                                     {...register('nombre')}
                                     ref={(e) => {
@@ -164,40 +164,40 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                         nombreRef.current = e;
                                     }}
                                     type="text"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                    className={`form-input ${errors.nombre ? 'border-red-500 bg-red-50' : ''}`}
                                 />
-                                {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
+                                {errors.nombre && <p className="form-error">{errors.nombre.message}</p>}
                             </div>
 
                             {/* Precio */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                                <label className="form-label">Precio</label>
                                 <input
                                     {...register('precio')}
                                     type="number"
                                     step="0.001"
                                     placeholder="Ej: 15"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.precio ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                    className={`form-input ${errors.precio ? 'border-red-500 bg-red-50' : ''}`}
                                 />
                                 {precioWatch !== '' && !isNaN(Number(precioWatch)) && Number(precioWatch) > 0 && (
                                     <p className="mt-0.5 text-xs text-gray-400">= ${(Number(precioWatch) * 1000).toLocaleString('es-CO')}</p>
                                 )}
-                                {errors.precio && <p className="mt-1 text-xs text-red-500">{errors.precio.message}</p>}
+                                {errors.precio && <p className="form-error">{errors.precio.message}</p>}
                             </div>
 
                             {/* Categoría */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                                <label className="form-label">Categoría</label>
                                 <select
                                     {...register('categoria_id')}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.categoria_id ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                    className={`form-input ${errors.categoria_id ? 'border-red-500 bg-red-50' : ''}`}
                                 >
                                     <option value="">Seleccionar categoría</option>
                                     {categorias.map((cat) => (
                                         <option key={cat.id} value={cat.id}>{cat.nombre}</option>
                                     ))}
                                 </select>
-                                {errors.categoria_id && <p className="mt-1 text-xs text-red-500">{errors.categoria_id.message}</p>}
+                                {errors.categoria_id && <p className="form-error">{errors.categoria_id.message}</p>}
                             </div>
 
                             {/* Disponible a domicilio */}
@@ -220,16 +220,14 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
 
                             {/* Imagen */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
+                                <label className="form-label">Imagen</label>
                                 <input
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) => {
-                                        // Manejo manual de la imagen ya que react-hook-form no maneja File nativamente bien sin configuración extra
-                                        // Pero como el onGuardar recibe los datos del form, agregaremos la imagen manualmente en el submit del padre
                                         window._tmp_img = e.target.files[0] || null;
                                     }}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="form-input"
                                 />
                             </div>
                         </div>
@@ -415,19 +413,15 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                 </div>
 
                 {/* Footer fijo */}
-                <div className="p-6 border-t border-gray-200 flex justify-end gap-3 shrink-0">
-                    <button
-                        type="button"
-                        onClick={onCerrar}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
+                <div className="modal-footer shrink-0">
+                    <button type="button" onClick={onCerrar} className="btn-secondary">
                         Cancelar
                     </button>
                     <button
                         type="submit"
                         form="form-producto"
                         disabled={guardando}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
+                        className="btn-primary px-6"
                     >
                         {guardando ? 'Guardando...' : (producto.id ? 'Actualizar' : 'Crear')}
                     </button>

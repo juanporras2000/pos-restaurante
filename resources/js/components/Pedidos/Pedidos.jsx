@@ -107,7 +107,7 @@ export default function Pedidos() {
                         <button
                             type="button"
                             onClick={() => setModalNuevoAbierto(true)}
-                            className="bg-blue-600 lg:hover:bg-blue-700 text-white font-medium mt-4 lg:mt-0 py-1 px-2  lg:py-2 lg:px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                            className="btn-primary mt-4 lg:mt-0 flex items-center gap-2"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 4v16m8-8H4"></path>
@@ -132,6 +132,13 @@ export default function Pedidos() {
                                 <path d="M9 8h6M9 12h6M9 16h4"></path>
                             </svg>
                             Pendientes
+                            {pedidosPendientes.length > 0 && (
+                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                                    tab === 'pedidos' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'
+                                }`}>
+                                    {pedidosPendientes.length}
+                                </span>
+                            )}
                         </button>
                         {permiso && (<button
                             type="button"
@@ -203,7 +210,7 @@ export default function Pedidos() {
 
             {/* Tab: Pedidos pendientes */}
             {tab === 'pedidos' && pedidosPendientes.length === 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center mb-8">
+                <div className="card p-12 text-center mb-8">
                     <svg className="h-16 w-16 text-gray-300 mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>

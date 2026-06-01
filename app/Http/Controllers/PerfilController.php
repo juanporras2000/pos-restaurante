@@ -76,8 +76,6 @@ class PerfilController extends Controller
     public function update(Request $request, int $id)
     {
 
-
-
         $request->validate([
             'nombre'   => 'required|string|max:255',
             'pin'      => 'nullable|numeric|digits:4',
@@ -124,6 +122,7 @@ class PerfilController extends Controller
                     'id_rol'    => $perfil->id_rol,
                     'nombre_rol'    => $perfil->rol->nombre ?? 'Sin Rol', // Nombre del rol para el UI
                     'imagen' => $perfil->imagen->path,
+                    'id_imagen' => $perfil->imagen->id_imagen,
                     'permisos'  => $perfil->permisos->pluck('id_permiso')
                 ];
             });

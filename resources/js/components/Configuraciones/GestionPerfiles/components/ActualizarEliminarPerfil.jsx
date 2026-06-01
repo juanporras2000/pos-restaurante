@@ -19,7 +19,6 @@ export const ActualizarEliminarPerfil = ({
     setPerfilSeleccionado
 }) => {
 
-
     const handleGuardar = async () => {
         try {
             const data = {
@@ -30,8 +29,9 @@ export const ActualizarEliminarPerfil = ({
                 permisos: perfilSeleccionado.permisos
             };
 
-            await axios.put(`/api/perfiles/${perfilSeleccionado.id_perfil}`, data);
+            console.log(data);
 
+            await axios.put(`/api/perfiles/${perfilSeleccionado.id_perfil}`, data);
 
             const rolSeleccionadoObj = roles.find(r => r.id_rol === parseInt(editRol));
 
@@ -63,6 +63,11 @@ export const ActualizarEliminarPerfil = ({
 
     const handleEliminar = async () => {
         if (!perfilSeleccionado) return;
+
+        if (perfilSeleccionado.id_rol == 1){
+            Swal.fire('Acción denegada', 'No se puede eliminar el perfil administrador.', "info");
+            return;
+        }
 
         const resultado = await Swal.fire({
             title: '¿Estás seguro?',

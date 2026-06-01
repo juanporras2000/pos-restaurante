@@ -227,11 +227,11 @@ export default function GestionCategorias() {
                             {/* Botones de acción optimizados:
                         - Siempre visibles en smartphones para permitir el toque directo.
                         - Ocultos por defecto (`md:opacity-0`) y visibles en hover (`md:group-hover:opacity-100`) solo en pantallas grandes con mouse. */}
-                            <div className="flex items-center gap-1 ml-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
+                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                                 <button
                                     type="button"
                                     onClick={() => abrirEditar(cat)}
-                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors touch-manipulation"
+                                    className="p-2 w-8 h-8 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors touch-manipulation"
                                     title="Editar"
                                 >
                                     <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -242,7 +242,7 @@ export default function GestionCategorias() {
                                 <button
                                     type="button"
                                     onClick={() => eliminar(cat)}
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-manipulation"
+                                    className="p-2 w-8 h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors touch-manipulation"
                                     title="Eliminar"
                                 >
                                     <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

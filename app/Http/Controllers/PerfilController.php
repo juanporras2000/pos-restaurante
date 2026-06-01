@@ -157,6 +157,7 @@ class PerfilController extends Controller
 
     public function storePrimerPerfil(Request $request)
     {
+
         if (Perfil::where('id_user', Auth::id())->exists()) {
             return response()->json(['error' => 'El usuario ya tiene perfiles creados.'], 422);
         }

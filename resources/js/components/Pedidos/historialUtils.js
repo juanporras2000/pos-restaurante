@@ -17,13 +17,15 @@ export const METODO_ETIQUETA = {
     tarjeta:       'Tarjeta',
     nequi:         'Nequi',
     transferencia: 'Transferencia',
+    mixto:         'Pago dividido',
 };
 
 export const METODO_COLOR = {
     efectivo:      { dot: 'bg-green-500',  text: 'text-green-700',  badge: 'bg-green-50 border-green-200' },
     tarjeta:       { dot: 'bg-blue-500',   text: 'text-blue-700',   badge: 'bg-blue-50 border-blue-200' },
     nequi:         { dot: 'bg-purple-500', text: 'text-purple-700', badge: 'bg-purple-50 border-purple-200' },
-    transferencia: { dot: 'bg-purple-500', text: 'text-purple-700', badge: 'bg-purple-50 border-purple-200' },
+    transferencia: { dot: 'bg-indigo-500', text: 'text-indigo-700', badge: 'bg-indigo-50 border-indigo-200' },
+    mixto:         { dot: 'bg-orange-500', text: 'text-orange-700', badge: 'bg-orange-50 border-orange-200' },
 };
 
 /** Formatea una fecha/hora como HH:MM */
@@ -52,8 +54,18 @@ export function formatFecha(dateString) {
  */
 export function calcularVentasPorMetodo(pedidos) {
     return pedidos.reduce((acc, p) => {
-        const m = p.pago?.metodo_pago ?? 'otro';
-        acc[m] = (acc[m] ?? 0) + Number.parseFloat(p.total || 0);
+        if (!p.pago) return acc;
+
+        const detalles = p.pago.detalles ?? [];
+        if (detalles.length > 0) {
+            detalles.forEach((d) => {
+                acc[d.metodo_pago] = (acc[d.metodo_pago] ?? 0) + Number.parseFloat(d.monto || 0);
+            });
+        } else {
+            const m = p.pago.metodo_pago ?? 'otro';
+            acc[m] = (acc[m] ?? 0) + Number.parseFloat(p.total || 0);
+        }
+
         return acc;
     }, {});
 }

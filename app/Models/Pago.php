@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Traits\BelongsToTenant;
 
 class Pago extends Model
@@ -12,17 +14,21 @@ class Pago extends Model
     protected $table = 'pagos';
 
     protected $fillable = [
-    'pedido_id',
-    'total',
-    'recibido',
-    'cambio',
-    'metodo_pago',
-    'tenant_id',
-];
+        'pedido_id',
+        'total',
+        'recibido',
+        'cambio',
+        'metodo_pago',
+        'tenant_id',
+    ];
 
-    // Relación
-    public function pedido()
+    public function pedido(): BelongsTo
     {
         return $this->belongsTo(Pedido::class);
+    }
+
+    public function detalles(): HasMany
+    {
+        return $this->hasMany(PagoDetalle::class);
     }
 }

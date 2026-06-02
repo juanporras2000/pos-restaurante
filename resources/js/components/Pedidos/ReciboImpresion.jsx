@@ -25,8 +25,10 @@ const TIPO_LABEL = {
 
 const METODO_LABEL = {
     efectivo:      'Efectivo',
+    nequi:         'Nequi',
     tarjeta:       'Tarjeta',
     transferencia: 'Transferencia',
+    mixto:         'Pago dividido',
 };
 
 // ── Sub-componentes internos (OCP: cada sección es independiente) ────────────
@@ -139,8 +141,8 @@ function ItemsPedido({ detalles }) {
                     </div>
 
                     {/* Adiciones */}
-                    {d.adiciones?.map((a, i) => (
-                        <div key={i} style={{
+                    {d.adiciones?.map((a) => (
+                        <div key={`${d.id}-${a.nombre}`} style={{
                             display: 'flex',
                             justifyContent: 'space-between',
                             paddingLeft: '10px',
@@ -191,16 +193,40 @@ Totales.propTypes = {
 /** Información de pago (solo cuando el pedido ya está pagado) */
 function InfoPago({ pago }) {
     if (!pago) return null;
+
+    const detalles = pago.detalles ?? [];
+    const esMixto  = detalles.length > 1;
+
     return (
         <>
             <Divisor />
             <div>
-                <FilaDetalle label="Método" valor={METODO_LABEL[pago.metodo_pago] ?? pago.metodo_pago} />
-                {pago.metodo_pago === 'efectivo' && (
+                {esMixto ? (
                     <>
-                        <FilaDetalle label="Recibido" valor={fmtMoneda(pago.recibido)} />
-                        {parseFloat(pago.cambio) > 0 && (
-                            <FilaDetalle label="Cambio" valor={fmtMoneda(pago.cambio)} negrita />
+                        <FilaDetalle label="Método" valor="Pago dividido" />
+                        {detalles.map((d) => (
+                            <React.Fragment key={d.id ?? d.metodo_pago}>
+                                <FilaDetalle
+                                    label={`  ${METODO_LABEL[d.metodo_pago] ?? d.metodo_pago}`}
+                                    valor={fmtMoneda(d.monto)}
+                                    pequeno
+                                />
+                                {d.metodo_pago === 'efectivo' && Number.parseFloat(d.cambio) > 0 && (
+                                    <FilaDetalle label="  Cambio" valor={fmtMoneda(d.cambio)} pequeno />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </>
+                ) : (
+                    <>
+                        <FilaDetalle label="Método" valor={METODO_LABEL[pago.metodo_pago] ?? pago.metodo_pago} />
+                        {pago.metodo_pago === 'efectivo' && (
+                            <>
+                                <FilaDetalle label="Recibido" valor={fmtMoneda(pago.recibido)} />
+                                {Number.parseFloat(pago.cambio) > 0 && (
+                                    <FilaDetalle label="Cambio" valor={fmtMoneda(pago.cambio)} negrita />
+                                )}
+                            </>
                         )}
                     </>
                 )}
@@ -225,8 +251,8 @@ InfoPago.propTypes = { pago: PropTypes.object };
  */
 export default function ReciboImpresion({ pedido, configuracion }) {
     const pago          = pedido.pago;
-    const subtotalItems = pedido.detalles?.reduce((s, d) => s + parseFloat(d.subtotal ?? 0), 0) ?? 0;
-    const totalNum      = parseFloat(pedido.total ?? 0);
+    const subtotalItems = pedido.detalles?.reduce((s, d) => s + Number.parseFloat(d.subtotal ?? 0), 0) ?? 0;
+    const totalNum      = Number.parseFloat(pedido.total ?? 0);
     const tieneRecargo  = pedido.tipo === 'domicilio' && totalNum > subtotalItems;
     const recargo       = totalNum - subtotalItems;
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import { METODO_ETIQUETA } from './historialUtils';
 
@@ -6,13 +7,13 @@ const METODOS = [
     { value: 'efectivo', label: 'Efectivo' },
     { value: 'nequi',    label: 'Nequi' },
     { value: 'tarjeta',  label: 'Tarjeta de crédito/débito' },
+    { value: 'transferencia', label: 'Transferencia' },
 ];
 
 export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerrar }) {
     const [metodoPago, setMetodoPago] = useState('efectivo');
     const [guardando, setGuardando]   = useState(false);
 
-    // Sincronizar con el método actual del pedido al abrir
     useEffect(() => {
         if (abierto && pedido?.pago?.metodo_pago) {
             setMetodoPago(pedido.pago.metodo_pago);
@@ -80,11 +81,16 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
     if (!abierto || !pedido) return null;
 
     const metodoActual = pedido.pago?.metodo_pago;
+    const esMixto      = metodoActual === 'mixto';
 
     return (
         <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            role="dialog"
+            aria-modal="true"
             onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
+            onKeyDown={(e) => { if (e.key === 'Escape') onCerrar(); }}
+            tabIndex={-1}
         >
             <div className="bg-white rounded-xl shadow-xl max-w-sm w-full">
                 <div className="p-6">
@@ -113,21 +119,30 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                         )}
                     </div>
 
-                    {/* Selector */}
-                    <div className="mb-5">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nuevo método de pago
-                        </label>
-                        <select
-                            value={metodoPago}
-                            onChange={(e) => setMetodoPago(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            {METODOS.map((m) => (
-                                <option key={m.value} value={m.value}>{m.label}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {esMixto ? (
+                        <div className="mb-5 flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-700">
+                            <svg className="h-4 w-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            </svg>
+                            Este pedido fue pagado con múltiples métodos. No es posible cambiar el método de forma individual.
+                        </div>
+                    ) : (
+                        <div className="mb-5">
+                            <label htmlFor="metodo-pago-select" className="block text-sm font-medium text-gray-700 mb-2">
+                                Nuevo método de pago
+                            </label>
+                            <select
+                                id="metodo-pago-select"
+                                value={metodoPago}
+                                onChange={(e) => setMetodoPago(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                {METODOS.map((m) => (
+                                    <option key={m.value} value={m.value}>{m.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     {/* Acciones */}
                     <div className="flex gap-3">
@@ -136,19 +151,35 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                             onClick={onCerrar}
                             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                         >
-                            Cancelar
+                            {esMixto ? 'Cerrar' : 'Cancelar'}
                         </button>
-                        <button
-                            type="button"
-                            onClick={confirmar}
-                            disabled={guardando || metodoPago === metodoActual}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm disabled:cursor-not-allowed"
-                        >
-                            {guardando ? 'Guardando...' : 'Guardar cambio'}
-                        </button>
+                        {!esMixto && (
+                            <button
+                                type="button"
+                                onClick={confirmar}
+                                disabled={guardando || metodoPago === metodoActual}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm disabled:cursor-not-allowed"
+                            >
+                                {guardando ? 'Guardando...' : 'Guardar cambio'}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
+ModalEditarPago.propTypes = {
+    abierto:       PropTypes.bool.isRequired,
+    pedido:        PropTypes.shape({
+        id:          PropTypes.number,
+        numero_dia:  PropTypes.number,
+        pago:        PropTypes.shape({
+            id:          PropTypes.number,
+            metodo_pago: PropTypes.string,
+        }),
+    }),
+    onActualizado: PropTypes.func.isRequired,
+    onCerrar:      PropTypes.func.isRequired,
+};

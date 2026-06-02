@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pedido;
 use App\Models\PedidoDetalle;
 use App\Models\Pago;
+use App\Models\PagoDetalle;
 use App\Models\Gasto;
 use App\Models\Insumo;
 use App\Models\MovimientoInventario;
@@ -236,11 +237,11 @@ class ReporteController extends Controller
     {
         [$desde, $hasta] = $this->rango($request);
 
-        $metodos = Pago::whereBetween('created_at', [$desde, $hasta])
+        $metodos = PagoDetalle::whereBetween('created_at', [$desde, $hasta])
             ->select(
                 'metodo_pago',
                 DB::raw('COUNT(*) as cantidad'),
-                DB::raw('SUM(recibido - cambio) as total_neto')
+                DB::raw('SUM(monto) as total_neto')
             )
             ->groupBy('metodo_pago')
             ->orderByDesc('total_neto')

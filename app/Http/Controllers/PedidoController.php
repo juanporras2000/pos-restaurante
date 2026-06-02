@@ -31,7 +31,7 @@ class PedidoController extends Controller
 
         $pedidos = Pedido::where('estado', 'pagado')
             ->whereBetween('created_at', [$inicio, $fin])
-            ->with(['detalles.producto', 'pago', 'perfil'])
+            ->with(['detalles.producto', 'pago.detalles', 'perfil'])
             ->orderBy('created_at', 'asc')
             ->get();
 

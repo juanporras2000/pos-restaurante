@@ -69,14 +69,17 @@ export default function AjustesGenerales() {
 
     if (cargando) {
         return (
-            <div className="flex items-center justify-center h-24 text-gray-500 text-sm">
-                Cargando...
+            <div className="flex items-center justify-center py-16">
+                <svg className="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 w-full min-w-0">
+        <div className="card p-4 sm:p-6 w-full min-w-0">
             <h2 className="text-lg font-semibold text-gray-900 mb-1">Ajustes generales</h2>
             <p className="text-sm text-gray-500 mb-6">Configuraciones globales que aplican a todo el sistema.</p>
 
@@ -99,7 +102,7 @@ export default function AjustesGenerales() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="form-label">
                             Nombre del negocio
                         </label>
                         <input
@@ -109,14 +112,14 @@ export default function AjustesGenerales() {
                             onChange={(e) => setNombreNegocio(e.target.value)}
                             placeholder="Mi Restaurante"
                             enterKeyHint="next"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                            className="form-input"
                         />
                     </div>
 
                     {/* Cambiado a stack vertical en móvil y grid de 2 columnas en sm: */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="form-label">
                                 Teléfono
                             </label>
                             <input
@@ -126,11 +129,11 @@ export default function AjustesGenerales() {
                                 onChange={(e) => setTelefonoNegocio(e.target.value)}
                                 placeholder="300 123 4567"
                                 enterKeyHint="next"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                                className="form-input"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="form-label">
                                 Dirección
                             </label>
                             <input
@@ -140,7 +143,7 @@ export default function AjustesGenerales() {
                                 onChange={(e) => setDireccionNegocio(e.target.value)}
                                 placeholder="Cra 5 # 10-20, Ciudad"
                                 enterKeyHint="done"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                                className="form-input"
                             />
                         </div>
                     </div>
@@ -148,7 +151,7 @@ export default function AjustesGenerales() {
 
                 {/* ── Recargo domicilio ─────────────────────────────────────── */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="form-label">
                         Recargo fijo por domicilio
                     </label>
                     <p className="text-xs text-gray-400 mb-2">
@@ -166,7 +169,7 @@ export default function AjustesGenerales() {
                             inputMode="decimal"
                             value={recargoDomicilio}
                             onChange={(e) => setRecargoDomicilio(e.target.value)}
-                            className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                            className="form-input pl-7"
                         />
                     </div>
                     {recargoDomicilio !== '' && !isNaN(parseFloat(recargoDomicilio)) && (
@@ -178,7 +181,7 @@ export default function AjustesGenerales() {
 
                 {/* ── Hora de reinicio ──────────────────────────────────────── */}
                 <div className="border-t border-gray-100 pt-5">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="form-label">
                         Hora de reinicio de pedidos
                     </label>
                     <p className="text-xs text-gray-400 mb-2">
@@ -187,7 +190,7 @@ export default function AjustesGenerales() {
                     <select
                         value={horaCierre}
                         onChange={(e) => setHoraCierre(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm h-10"
+                        className="form-input h-10"
                     >
                         {[...Array(13).keys()].map(h => (
                             <option key={h} value={h}>{h === 0 ? '12:00 AM (Medianoche)' : `${h}:00 AM`}</option>
@@ -200,7 +203,7 @@ export default function AjustesGenerales() {
                     <button
                         type="submit"
                         disabled={guardando}
-                        className="w-full sm:w-auto px-6 py-3 sm:py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium text-sm rounded-lg transition-colors shadow-sm"
+                        className="btn-primary px-6 w-full sm:w-auto"
                     >
                         {guardando ? 'Guardando...' : 'Guardar cambios'}
                     </button>

@@ -36,13 +36,13 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="modal-overlay">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                     <h3 className="font-semibold text-gray-900">
                         {esEdicion ? 'Editar adición' : 'Nueva adición'}
                     </h3>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
+                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
@@ -51,19 +51,19 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
 
                 <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <label className="form-label">Nombre</label>
                         <input
                             type="text"
                             value={nombre}
                             onChange={(e) => setNombre(e.target.value)}
                             placeholder="Ej: Queso extra, Salsa picante..."
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            className="form-input"
                             required
                             autoFocus
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                        <label className="form-label">Precio</label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm">$</span>
                             <input
@@ -83,11 +83,7 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
                     </div>
 
                     <div className="flex gap-2 pt-1">
-                        <button
-                            type="button"
-                            onClick={onCerrar}
-                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
-                        >
+                        <button type="button" onClick={onCerrar} className="btn-secondary flex-1">
                             Cancelar
                         </button>
                         <button
@@ -175,7 +171,7 @@ export default function GestionAdiciones() {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 w-full min-w-0">
+        <div className="card p-4 sm:p-6 w-full min-w-0">
             {/* Cabecera Adaptativa */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>

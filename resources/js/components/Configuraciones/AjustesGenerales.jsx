@@ -10,6 +10,7 @@ export default function AjustesGenerales() {
     const [direccionNegocio, setDireccionNegocio] = useState('');
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
+    const [errores, setErrores] = useState({});
 
     useEffect(() => {
         fetch('/api/configuraciones')
@@ -25,8 +26,26 @@ export default function AjustesGenerales() {
             .finally(() => setCargando(false));
     }, []);
 
+    const validar = () => {
+        const e = {};
+        if (!nombreNegocio.trim()) e.nombreNegocio = 'El nombre del negocio es obligatorio';
+        if (!telefonoNegocio.trim()) e.telefonoNegocio = 'El teléfono es obligatorio';
+        if (!direccionNegocio.trim()) e.direccionNegocio = 'La dirección es obligatoria';
+        if (recargoDomicilio === '' || isNaN(parseFloat(recargoDomicilio)) || parseFloat(recargoDomicilio) < 0) {
+            e.recargoDomicilio = 'Ingresa un valor válido (mínimo 0)';
+        }
+        return e;
+    };
+
     const guardar = async (e) => {
         e.preventDefault();
+
+        const nuevosErrores = validar();
+        if (Object.keys(nuevosErrores).length > 0) {
+            setErrores(nuevosErrores);
+            return;
+        }
+        setErrores({});
         setGuardando(true);
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -103,48 +122,51 @@ export default function AjustesGenerales() {
 
                     <div>
                         <label className="form-label">
-                            Nombre del negocio
+                            Nombre del negocio <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
                             maxLength={120}
                             value={nombreNegocio}
-                            onChange={(e) => setNombreNegocio(e.target.value)}
+                            onChange={(e) => { setNombreNegocio(e.target.value); setErrores((p) => ({ ...p, nombreNegocio: '' })); }}
                             placeholder="Mi Restaurante"
                             enterKeyHint="next"
-                            className="form-input"
+                            className={`form-input ${errores.nombreNegocio ? 'border-red-500 bg-red-50' : ''}`}
                         />
+                        {errores.nombreNegocio && <p className="form-error">{errores.nombreNegocio}</p>}
                     </div>
 
                     {/* Cambiado a stack vertical en móvil y grid de 2 columnas en sm: */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="form-label">
-                                Teléfono
+                                Teléfono <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="tel"
                                 maxLength={30}
                                 value={telefonoNegocio}
-                                onChange={(e) => setTelefonoNegocio(e.target.value)}
+                                onChange={(e) => { setTelefonoNegocio(e.target.value); setErrores((p) => ({ ...p, telefonoNegocio: '' })); }}
                                 placeholder="300 123 4567"
                                 enterKeyHint="next"
-                                className="form-input"
+                                className={`form-input ${errores.telefonoNegocio ? 'border-red-500 bg-red-50' : ''}`}
                             />
+                            {errores.telefonoNegocio && <p className="form-error">{errores.telefonoNegocio}</p>}
                         </div>
                         <div>
                             <label className="form-label">
-                                Dirección
+                                Dirección <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 maxLength={255}
                                 value={direccionNegocio}
-                                onChange={(e) => setDireccionNegocio(e.target.value)}
+                                onChange={(e) => { setDireccionNegocio(e.target.value); setErrores((p) => ({ ...p, direccionNegocio: '' })); }}
                                 placeholder="Cra 5 # 10-20, Ciudad"
                                 enterKeyHint="done"
-                                className="form-input"
+                                className={`form-input ${errores.direccionNegocio ? 'border-red-500 bg-red-50' : ''}`}
                             />
+                            {errores.direccionNegocio && <p className="form-error">{errores.direccionNegocio}</p>}
                         </div>
                     </div>
                 </div>
@@ -168,11 +190,12 @@ export default function AjustesGenerales() {
                             step="0.001"
                             inputMode="decimal"
                             value={recargoDomicilio}
-                            onChange={(e) => setRecargoDomicilio(e.target.value)}
-                            className="form-input pl-7"
+                            onChange={(e) => { setRecargoDomicilio(e.target.value); setErrores((p) => ({ ...p, recargoDomicilio: '' })); }}
+                            className={`form-input pl-7 ${errores.recargoDomicilio ? 'border-red-500 bg-red-50' : ''}`}
                         />
                     </div>
-                    {recargoDomicilio !== '' && !isNaN(parseFloat(recargoDomicilio)) && (
+                    {errores.recargoDomicilio && <p className="form-error">{errores.recargoDomicilio}</p>}
+                    {!errores.recargoDomicilio && recargoDomicilio !== '' && !isNaN(parseFloat(recargoDomicilio)) && (
                         <p className="mt-1 text-xs text-gray-400 font-mono">
                             = ${(parseFloat(recargoDomicilio) * 1000).toLocaleString('es-CO')}
                         </p>

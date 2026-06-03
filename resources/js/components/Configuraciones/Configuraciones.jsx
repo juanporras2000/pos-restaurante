@@ -80,7 +80,7 @@ export default function Configuraciones() {
                 ))}
             </div>
 
-            <div className="max-w-2xl w-full mx-auto lg:mx-0">
+            <div className="w-full mx-auto lg:mx-0">
                 {tab === 'general' && <AjustesGenerales />}
                 {tab === 'categorias' && <GestionCategorias />}
                 {tab === 'adiciones' && <GestionAdiciones />}

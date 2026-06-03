@@ -22,12 +22,18 @@ return new class extends Migration
             $table->index(['pago_id', 'tenant_id']);
         });
 
-        // Migrar pagos existentes: cada pago previo se convierte en un detalle único
+        // Migrar pagos existentes: resolver tenant_id desde pedidos (pagos previos al
+        // sistema multitenant tienen tenant_id = null, pedidos lo tiene correcto).
+        // Se omiten filas sin tenant resolvible (datos pre-multitenant sin propietario).
         DB::statement("
             INSERT INTO pago_detalles (pago_id, metodo_pago, monto, recibido, cambio, tenant_id, created_at, updated_at)
-            SELECT id, metodo_pago, total, recibido, cambio, tenant_id, created_at, updated_at
-            FROM pagos
-            WHERE metodo_pago IS NOT NULL
+            SELECT p.id, p.metodo_pago, p.total, p.recibido, p.cambio,
+                   COALESCE(p.tenant_id, ped.tenant_id),
+                   p.created_at, p.updated_at
+            FROM pagos p
+            JOIN pedidos ped ON ped.id = p.pedido_id
+            WHERE p.metodo_pago IS NOT NULL
+              AND COALESCE(p.tenant_id, ped.tenant_id) IS NOT NULL
         ");
     }
 

@@ -167,6 +167,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
 
             if (!res.ok) {
                 toast('error', data.error || 'Error al procesar el pago', 2500);
+                console.log(data);
                 return;
             }
 

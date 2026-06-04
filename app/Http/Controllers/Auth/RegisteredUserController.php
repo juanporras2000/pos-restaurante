@@ -84,12 +84,6 @@ class RegisteredUserController extends Controller
      */
     private function seedTenantDefaults(Tenant $tenant): void
     {
-        // Roles por defecto
-        Rol::insert([
-            ['nombre' => 'Administrador', 'tenant_id' => $tenant->id, 'created_at' => now(), 'updated_at' => now()],
-            ['nombre' => 'Mesero',        'tenant_id' => $tenant->id, 'created_at' => now(), 'updated_at' => now()],
-        ]);
-
         // Configuraciones por defecto
         Configuracion::set('recargo_domicilio',  0,               'Recargo fijo (en pesos) que se suma al costo de todo pedido a domicilio.');
         Configuracion::set('hora_cierre',        5,               'Hora (0-23) a la que se cierra la jornada del día anterior.');

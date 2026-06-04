@@ -33,7 +33,7 @@ class PagoController extends Controller
 
             $pago = $this->pagoService->registrar($pedido, $splits);
         } catch (\InvalidArgumentException $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json(['error' => $e->getMessage()], 400, $pedido);
         }
 
         return response()->json([

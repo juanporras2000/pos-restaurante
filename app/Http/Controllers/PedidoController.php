@@ -1,14 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\Pedido;
-use App\Models\PedidoDetalle;
-use App\Models\Producto;
-use App\Models\Insumo;
-use App\Models\MovimientoInventario;
-use Illuminate\Support\Facades\DB;
+use App\Services\PedidoService;
 use Illuminate\Support\Facades\Auth;
 
 class PedidoController extends Controller
@@ -38,148 +33,40 @@ class PedidoController extends Controller
         return response()->json($pedidos);
     }
 
-    public function store(Request $request)
+   public function store(Request $request, PedidoService $pedidoService)
     {
         $request->validate([
             'tipo'          => 'required|in:mesa,domicilio,recoger',
             'numero_mesa'   => 'nullable|integer|min:1',
             'direccion'     => 'nullable|string|max:1000',
-            'nombre_cliente' => 'nullable|string|max:100',
+            'nombre_cliente'=> 'nullable|string|max:100',
             'productos'     => 'required|array|min:1',
             'productos.*.producto_id' => 'required|exists:productos,id',
             'productos.*.cantidad'    => 'required|integer|min:1',
-            'id_perfil' => 'required|exists:perfil,id_perfil'
+            'id_perfil'     => 'required|exists:perfil,id_perfil'
         ]);
 
-        // --- Verificación de stock ---
-        // Acumular consumo total por insumo considerando todos los items del pedido
-        $consumo = []; // [ insumo_id => cantidad_total_requerida ]
-        $productos = [];
-
-        foreach ($request->productos as $item) {
-            $producto = Producto::with('insumos')->findOrFail($item['producto_id']);
-            $productos[] = ['producto' => $producto, 'cantidad' => $item['cantidad'], 'observacion' => $item['observacion'] ?? null, 'adiciones' => $item['adiciones'] ?? []];
-
-            foreach ($producto->insumos as $insumo) {
-                $id = $insumo->id;
-                $necesario = $insumo->pivot->cantidad * $item['cantidad'];
-                $consumo[$id] = ($consumo[$id] ?? 0) + $necesario;
-            }
-        }
-
-        // --- Crear pedido y descontar stock en una transacción ---
         try {
-            $pedido = DB::transaction(function () use ($request, $productos, $consumo) {
-            // Validar y bloquear stock dentro de la transacción (necesario para PostgreSQL)
-            if (!empty($consumo)) {
-                $insumosBloqueados = Insumo::whereIn('id', array_keys($consumo))->lockForUpdate()->get()->keyBy('id');
-                $faltantes = [];
-                foreach ($consumo as $insumoId => $necesario) {
-                    $ins = $insumosBloqueados->get($insumoId);
-                    if ($ins && $ins->stock_actual < $necesario) {
-                        $faltantes[] = "{$ins->nombre}: necesario {$necesario} {$ins->unidad_medida}, disponible {$ins->stock_actual} {$ins->unidad_medida}";
-                    }
-                }
-                if (!empty($faltantes)) {
-                    // Lanzar excepción para que el transaction haga rollback
-                    throw new \Illuminate\Validation\ValidationException(
-                        \Illuminate\Support\Facades\Validator::make([], []),
-                        response()->json(['error' => 'Stock insuficiente', 'faltantes' => $faltantes], 422)
-                    );
-                }
-            }
+            // Se delega toda la lógica de negocio al servicio
+            $pedido = $pedidoService->crearPedido($request->all());
 
-            $pedido = Pedido::create([
-                'user_id'        => Auth::id(),
-                'tipo'           => $request->tipo,
-                'numero_mesa'    => $request->numero_mesa,
-                'direccion'      => $request->direccion,
-                'nombre_cliente' => $request->nombre_cliente,
-                'total'          => 0,
-                'id_perfil'      => $request->id_perfil,
-                // tenant_id lo inyecta automáticamente el trait BelongsToTenant
-            ]);
-
-            $total = 0;
-            foreach ($productos as $item) {
-                $producto = $item['producto'];
-                $subtotal = $producto->precio * $item['cantidad'];
-
-                // Calcular subtotal de adiciones
-                $adicionesData = [];
-                foreach ($item['adiciones'] ?? [] as $adic) {
-                    $adicSubtotal = floatval($adic['precio']) * intval($adic['cantidad']);
-                    $subtotal += $adicSubtotal;
-                    $adicionesData[] = [
-                        'adicion_id' => $adic['adicion_id'],
-                        'nombre'     => $adic['nombre'],
-                        'precio'     => floatval($adic['precio']),
-                        'cantidad'   => intval($adic['cantidad']),
-                        'subtotal'   => $adicSubtotal,
-                    ];
-                }
-
-                PedidoDetalle::create([
-                    'pedido_id'       => $pedido->id,
-                    'producto_id'     => $producto->id,
-                    'cantidad'        => $item['cantidad'],
-                    'precio_unitario' => $producto->precio,
-                    'subtotal'        => $subtotal,
-                    'observacion'     => $item['observacion'],
-                    'adiciones'       => !empty($adicionesData) ? $adicionesData : null,
-                ]);
-
-                $total += $subtotal;
-            }
-
-            $pedido->update(['total' => $total]);
-
-            // Aplicar recargo de domicilio si corresponde
-            if ($pedido->tipo === 'domicilio') {
-                $recargo = (float) \App\Models\Configuracion::get('recargo_domicilio', 0);
-                if ($recargo > 0) {
-                    $pedido->increment('total', $recargo);
-                }
-            }
-
-            // Descontar stock de insumos y registrar movimientos
-            foreach ($consumo as $insumoId => $cantidad) {
-                $insumo = Insumo::find($insumoId);
-                if (!$insumo) continue;
-
-                $stockAntes = $insumo->stock_actual;
-                $insumo->decrement('stock_actual', $cantidad);
-                $insumo->refresh();
-
-                MovimientoInventario::create([
-                    'insumo_id'     => $insumoId,
-                    'user_id'       => Auth::id(),
-                    'pedido_id'     => $pedido->id,
-                    'tipo'          => 'salida',
-                    'cantidad'      => $cantidad,
-                    'stock_antes'   => $stockAntes,
-                    'stock_despues' => $insumo->stock_actual,
-                    'motivo'        => "Venta - Pedido #{$pedido->id}",
-                ]);
-            }
-
-            // event(new \App\Events\PedidoCreado($pedido));
-            broadcast(new \App\Events\PedidoCreado($pedido))->toOthers();
-
-            return $pedido;
-        });
+            return response()->json([
+                'mensaje' => 'Pedido creado correctamente',
+                'pedido'  => $pedido->load('perfil'),
+            ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            // Maneja la excepción de stock insuficiente retornando el error de validación 422
             return $e->getResponse();
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Hubo un problema al crear el pedido.',
+                'detalle' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'mensaje' => 'Pedido creado correctamente',
-            'pedido'  => $pedido->load('perfil'),
-        ], 201);
     }
 
-    public function update(Request $request, $id)
+   public function update(Request $request, $id, PedidoService $pedidoService)
     {
         $pedido = Pedido::where('user_id', Auth::id())->findOrFail($id);
 
@@ -197,58 +84,30 @@ class PedidoController extends Controller
             'productos.*.cantidad'    => 'required|integer|min:1',
         ]);
 
-        // Reemplazar detalles
-        $pedido->detalles()->delete();
+        try {
+            // Toda la lógica pesada ahora vive delegada en una sola línea del servicio
+            $pedidoActualizado = $pedidoService->actualizarPedido($pedido, $request->all());
 
-        $total = 0;
-        foreach ($request->productos as $item) {
-            $producto = Producto::findOrFail($item['producto_id']);
-            $subtotal = $producto->precio * $item['cantidad'];
+            event(new \App\Events\PedidoActualizado($pedidoActualizado));
 
-            // Calcular subtotal de adiciones
-            $adicionesData = [];
-            foreach ($item['adiciones'] ?? [] as $adic) {
-                $adicSubtotal = floatval($adic['precio']) * intval($adic['cantidad']);
-                $subtotal += $adicSubtotal;
-                $adicionesData[] = [
-                    'adicion_id' => $adic['adicion_id'],
-                    'nombre'     => $adic['nombre'],
-                    'precio'     => floatval($adic['precio']),
-                    'cantidad'   => intval($adic['cantidad']),
-                    'subtotal'   => $adicSubtotal,
-                ];
-            }
-
-            PedidoDetalle::create([
-                'pedido_id'       => $pedido->id,
-                'producto_id'     => $producto->id,
-                'cantidad'        => $item['cantidad'],
-                'precio_unitario' => $producto->precio,
-                'subtotal'        => $subtotal,
-                'observacion'     => $item['observacion'] ?? null,
-                'adiciones'       => !empty($adicionesData) ? $adicionesData : null,
+            return response()->json([
+                'mensaje' => 'Pedido actualizado correctamente',
+                'pedido'  => $pedidoActualizado->load('detalles.producto', 'perfil'),
             ]);
 
-            $total += $subtotal;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Retorna la respuesta HTTP de stock insuficiente (422) arrojada por el Service
+            return $e->getResponse();
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Hubo un problema al actualizar el pedido.',
+                'detalle' => $e->getMessage()
+            ], 500);
         }
-
-        $pedido->update([
-            'tipo'           => $request->tipo,
-            'numero_mesa'    => $request->numero_mesa,
-            'direccion'      => $request->direccion,
-            'nombre_cliente' => $request->nombre_cliente,
-            'total'          => $total,
-        ]);
-
-        event(new \App\Events\PedidoActualizado($pedido));
-
-        return response()->json([
-            'mensaje' => 'Pedido actualizado correctamente',
-            'pedido'  => $pedido->load('detalles.producto', 'perfil'),
-        ]);
     }
 
-    public function destroy(Request $request, $id)
+
+    public function destroy(Request $request, $id, PedidoService $pedidoService)
     {
         $pedido = Pedido::where('user_id', Auth::id())->findOrFail($id);
 
@@ -260,12 +119,19 @@ class PedidoController extends Controller
             'razon_eliminacion' => 'required|string|max:500',
         ]);
 
-        // Eliminado lógico: guarda la razón y hace soft delete
-        $pedido->update(['razon_eliminacion' => $request->razon_eliminacion]);
-        $pedido->delete();
+        try {
+            // Toda la lógica transaccional de inventario delegada al servicio
+            $pedidoService->eliminarPedido($pedido, $request->razon_eliminacion);
 
-        event(new \App\Events\PedidoEliminado($pedido));
+            event(new \App\Events\PedidoEliminado($pedido));
 
-        return response()->json(['mensaje' => 'Pedido eliminado correctamente']);
+            return response()->json(['mensaje' => 'Pedido eliminado correctamente y stock restaurado con éxito.']);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Hubo un problema al procesar la cancelación del pedido.',
+                'detalle' => $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -52,7 +52,9 @@ class ProductoController extends Controller
             $producto->insumos()->sync($sync);
 
             // ── 2. Receta canónica
-            $receta = Receta::firstOrCreate(
+            // withoutGlobalScopes() evita que BelongsToTenant filtre por tenant_id
+            // en el SELECT, permitiendo encontrar recetas pre-multitenant (tenant_id null).
+            $receta = Receta::withoutGlobalScopes()->updateOrCreate(
                 ['producto_id' => $producto->id],
                 ['tenant_id'   => $producto->tenant_id]
             );

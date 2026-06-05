@@ -3,6 +3,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ModalProductoPropTypes } from '../../propTypes';
+import { getUnidadesCompatibles, convertirUnidad } from '../../utils/unidades';
 
 const productoSchema = z.object({
     nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
@@ -25,8 +26,8 @@ const productoSchema = z.object({
 
 export default function ModalProducto({ abierto, producto, categorias, insumos = [], onGuardar, onCerrar, guardando }) {
     const nombreRef = useRef(null);
-    const [filaInsumo, setFilaInsumo] = useState({ insumo_id: '', cantidad: '' });
-    const [filaInsumoDom, setFilaInsumoDom] = useState({ insumo_id: '', cantidad: '' });
+    const [filaInsumo, setFilaInsumo] = useState({ insumo_id: '', cantidad: '', unidad_entrada: '' });
+    const [filaInsumoDom, setFilaInsumoDom] = useState({ insumo_id: '', cantidad: '', unidad_entrada: '' });
 
     const {
         register,
@@ -90,14 +91,19 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
         if (isNaN(cantidad) || cantidad <= 0) return;
         const insumo = insumos.find((i) => i.id === parseInt(filaInsumo.insumo_id));
         if (!insumo) return;
-        
-        append({ 
-            insumo_id: insumo.id, 
-            cantidad, 
-            nombre: insumo.nombre, 
-            unidad_medida: insumo.unidad_medida 
+
+        const unidadEntrada = filaInsumo.unidad_entrada || insumo.unidad_medida;
+        const cantidadBase = parseFloat(
+            convertirUnidad(cantidad, unidadEntrada, insumo.unidad_medida).toFixed(6)
+        );
+
+        append({
+            insumo_id: insumo.id,
+            cantidad: cantidadBase,
+            nombre: insumo.nombre,
+            unidad_medida: insumo.unidad_medida
         });
-        setFilaInsumo({ insumo_id: '', cantidad: '' });
+        setFilaInsumo({ insumo_id: '', cantidad: '', unidad_entrada: '' });
     };
 
     const agregarInsumoDom = () => {
@@ -107,13 +113,18 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
         const insumo = insumos.find((i) => i.id === parseInt(filaInsumoDom.insumo_id));
         if (!insumo) return;
 
+        const unidadEntrada = filaInsumoDom.unidad_entrada || insumo.unidad_medida;
+        const cantidadBase = parseFloat(
+            convertirUnidad(cantidad, unidadEntrada, insumo.unidad_medida).toFixed(6)
+        );
+
         appendDom({
             insumo_id: insumo.id,
-            cantidad,
+            cantidad: cantidadBase,
             nombre: insumo.nombre,
             unidad_medida: insumo.unidad_medida
         });
-        setFilaInsumoDom({ insumo_id: '', cantidad: '' });
+        setFilaInsumoDom({ insumo_id: '', cantidad: '', unidad_entrada: '' });
     };
 
     const handleFilaKeyDown = (e) => {
@@ -242,40 +253,83 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                             </h3>
 
                             {/* Fila para agregar */}
-                            <div className="flex gap-2 mb-3">
-                                <select
-                                    value={filaInsumo.insumo_id}
-                                    onChange={(e) => setFilaInsumo((f) => ({ ...f, insumo_id: e.target.value }))}
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                                >
-                                    <option value="">Seleccionar insumo</option>
-                                    {insumosSinUsar.map((ins) => (
-                                        <option key={ins.id} value={ins.id}>
-                                            {ins.nombre} ({ins.unidad_medida})
-                                        </option>
-                                    ))}
-                                </select>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="Cantidad"
-                                    value={filaInsumo.cantidad}
-                                    onChange={(e) => setFilaInsumo((f) => ({ ...f, cantidad: e.target.value }))}
-                                    onKeyDown={handleFilaKeyDown}
-                                    className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={agregarInsumo}
-                                    disabled={!filaInsumo.insumo_id || !filaInsumo.cantidad}
-                                    className="px-3 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white rounded-lg transition-colors"
-                                    title="Agregar insumo"
-                                >
-                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                            {(() => {
+                                const insumoActual = filaInsumo.insumo_id
+                                    ? insumos.find((i) => i.id === parseInt(filaInsumo.insumo_id))
+                                    : null;
+                                const unidsComp = getUnidadesCompatibles(insumoActual?.unidad_medida);
+                                const cantNum = parseFloat(filaInsumo.cantidad);
+                                const unidadEntrada = filaInsumo.unidad_entrada || insumoActual?.unidad_medida || '';
+                                const convirtiendo = insumoActual && !isNaN(cantNum) && cantNum > 0 && unidadEntrada !== insumoActual.unidad_medida;
+                                const cantidadConvertida = convirtiendo
+                                    ? convertirUnidad(cantNum, unidadEntrada, insumoActual.unidad_medida).toFixed(4)
+                                    : null;
+
+                                return (
+                                    <div className="mb-3 space-y-1">
+                                        <div className="flex gap-2">
+                                            <select
+                                                value={filaInsumo.insumo_id}
+                                                onChange={(e) => {
+                                                    const ins = insumos.find((i) => i.id === parseInt(e.target.value));
+                                                    setFilaInsumo((f) => ({
+                                                        ...f,
+                                                        insumo_id: e.target.value,
+                                                        unidad_entrada: ins?.unidad_medida ?? '',
+                                                    }));
+                                                }}
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                            >
+                                                <option value="">Seleccionar insumo</option>
+                                                {insumosSinUsar.map((ins) => (
+                                                    <option key={ins.id} value={ins.id}>
+                                                        {ins.nombre} ({ins.unidad_medida})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                type="number"
+                                                step="any"
+                                                placeholder="Cantidad"
+                                                value={filaInsumo.cantidad}
+                                                onChange={(e) => setFilaInsumo((f) => ({ ...f, cantidad: e.target.value }))}
+                                                onKeyDown={handleFilaKeyDown}
+                                                className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                            />
+                                            {insumoActual && unidsComp.length > 1 && (
+                                                <select
+                                                    value={unidadEntrada}
+                                                    onChange={(e) => setFilaInsumo((f) => ({ ...f, unidad_entrada: e.target.value }))}
+                                                    className="w-16 px-2 py-2 border border-orange-300 bg-orange-50 rounded-lg text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 text-orange-700 font-medium"
+                                                >
+                                                    {unidsComp.map((u) => (
+                                                        <option key={u} value={u}>{u}</option>
+                                                    ))}
+                                                </select>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={agregarInsumo}
+                                                disabled={!filaInsumo.insumo_id || !filaInsumo.cantidad}
+                                                className="px-3 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+                                                title="Agregar insumo"
+                                            >
+                                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        {convirtiendo && (
+                                            <p className="text-xs text-orange-600 flex items-center gap-1 pl-1">
+                                                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                                </svg>
+                                                {cantNum} {unidadEntrada} = <strong>{cantidadConvertida} {insumoActual.unidad_medida}</strong> (se guarda en {insumoActual.unidad_medida})
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            })()}
 
                             {/* Lista de insumos agregados */}
                             {fields.length === 0 ? (
@@ -332,40 +386,83 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                 </h3>
 
                                 {/* Fila para agregar insumo domicilio */}
-                                <div className="flex gap-2 mb-3">
-                                    <select
-                                        value={filaInsumoDom.insumo_id}
-                                        onChange={(e) => setFilaInsumoDom((f) => ({ ...f, insumo_id: e.target.value }))}
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                                    >
-                                        <option value="">Seleccionar insumo</option>
-                                        {insumos.map((ins) => (
-                                            <option key={ins.id} value={ins.id}>
-                                                {ins.nombre} ({ins.unidad_medida})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Cantidad"
-                                        value={filaInsumoDom.cantidad}
-                                        onChange={(e) => setFilaInsumoDom((f) => ({ ...f, cantidad: e.target.value }))}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregarInsumoDom(); } }}
-                                        className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={agregarInsumoDom}
-                                        disabled={!filaInsumoDom.insumo_id || !filaInsumoDom.cantidad}
-                                        className="px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg transition-colors"
-                                        title="Agregar insumo domicilio"
-                                    >
-                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M12 4v16m8-8H4"></path>
-                                        </svg>
-                                    </button>
-                                </div>
+                                {(() => {
+                                    const insumoActualDom = filaInsumoDom.insumo_id
+                                        ? insumos.find((i) => i.id === parseInt(filaInsumoDom.insumo_id))
+                                        : null;
+                                    const unidsCompDom = getUnidadesCompatibles(insumoActualDom?.unidad_medida);
+                                    const cantNumDom = parseFloat(filaInsumoDom.cantidad);
+                                    const unidadEntradaDom = filaInsumoDom.unidad_entrada || insumoActualDom?.unidad_medida || '';
+                                    const convirtiendoDom = insumoActualDom && !isNaN(cantNumDom) && cantNumDom > 0 && unidadEntradaDom !== insumoActualDom.unidad_medida;
+                                    const cantidadConvertidaDom = convirtiendoDom
+                                        ? convertirUnidad(cantNumDom, unidadEntradaDom, insumoActualDom.unidad_medida).toFixed(4)
+                                        : null;
+
+                                    return (
+                                        <div className="mb-3 space-y-1">
+                                            <div className="flex gap-2">
+                                                <select
+                                                    value={filaInsumoDom.insumo_id}
+                                                    onChange={(e) => {
+                                                        const ins = insumos.find((i) => i.id === parseInt(e.target.value));
+                                                        setFilaInsumoDom((f) => ({
+                                                            ...f,
+                                                            insumo_id: e.target.value,
+                                                            unidad_entrada: ins?.unidad_medida ?? '',
+                                                        }));
+                                                    }}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                                >
+                                                    <option value="">Seleccionar insumo</option>
+                                                    {insumos.map((ins) => (
+                                                        <option key={ins.id} value={ins.id}>
+                                                            {ins.nombre} ({ins.unidad_medida})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    placeholder="Cantidad"
+                                                    value={filaInsumoDom.cantidad}
+                                                    onChange={(e) => setFilaInsumoDom((f) => ({ ...f, cantidad: e.target.value }))}
+                                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregarInsumoDom(); } }}
+                                                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                                                />
+                                                {insumoActualDom && unidsCompDom.length > 1 && (
+                                                    <select
+                                                        value={unidadEntradaDom}
+                                                        onChange={(e) => setFilaInsumoDom((f) => ({ ...f, unidad_entrada: e.target.value }))}
+                                                        className="w-16 px-2 py-2 border border-blue-300 bg-blue-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-blue-700 font-medium"
+                                                    >
+                                                        {unidsCompDom.map((u) => (
+                                                            <option key={u} value={u}>{u}</option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={agregarInsumoDom}
+                                                    disabled={!filaInsumoDom.insumo_id || !filaInsumoDom.cantidad}
+                                                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+                                                    title="Agregar insumo domicilio"
+                                                >
+                                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            {convirtiendoDom && (
+                                                <p className="text-xs text-blue-600 flex items-center gap-1 pl-1">
+                                                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                                    </svg>
+                                                    {cantNumDom} {unidadEntradaDom} = <strong>{cantidadConvertidaDom} {insumoActualDom.unidad_medida}</strong> (se guarda en {insumoActualDom.unidad_medida})
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Lista insumos domicilio */}
                                 {fieldsDom.length === 0 ? (

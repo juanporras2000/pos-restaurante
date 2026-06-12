@@ -1,8 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Perfiles } from './components/pefiles/Perfiles';
+import { Landing } from './components/Landing/Landing';
 
 const container = document.getElementById('landing-app');
 if (container) {
-    createRoot(container).render(<Perfiles />);
+    createRoot(container).render(<Landing />);
 }

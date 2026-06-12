@@ -3,8 +3,13 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/login', function () {
     return redirect()->route('login');
+});
+
+
+Route::get('/', function () {
+    return view('landing');
 });
 
 Route::middleware('auth')->group(function () {

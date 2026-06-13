@@ -11,6 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
     channels: __DIR__.'/../routes/channels',
 )
     ->withMiddleware(function (Middleware $middleware){
+        $middleware->redirectUsersTo('/perfiles');
+
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);

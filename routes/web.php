@@ -4,8 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', function () {
-    return redirect()->route('login');
-});
+    return view('landing'); 
+})->middleware('guest')->name('login');
 
 
 Route::get('/', function () {

@@ -55,6 +55,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/configuraciones', function () {
             return view('configuraciones');
         })->middleware('permiso:6')->name('configuraciones');
+
+        Route::get('/nomina', function () {
+            return view('nomina');
+        })->middleware('permiso:8')->name('nomina');
     });
 });
 

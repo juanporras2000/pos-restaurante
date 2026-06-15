@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\GastoController;
 use App\Http\Controllers\Api\CajaAperturaController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\Api\TrabajadorController;
+use App\Http\Controllers\Api\AsistenciaController;
 
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
@@ -90,5 +92,17 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/perfiles-data-inicial', [PerfilController::class, 'dataInicialAdmin']);
+
+    // ── Nómina ──────────────────────────────────────────────────────────────
+    Route::get('/trabajadores', [TrabajadorController::class, 'index']);
+    Route::post('/trabajadores', [TrabajadorController::class, 'store']);
+    Route::put('/trabajadores/{trabajador}', [TrabajadorController::class, 'update']);
+    Route::delete('/trabajadores/{trabajador}', [TrabajadorController::class, 'destroy']);
+
+    Route::get('/asistencias', [AsistenciaController::class, 'porFecha']);
+    Route::post('/asistencias', [AsistenciaController::class, 'store']);
+    Route::delete('/asistencias/{asistencia}', [AsistenciaController::class, 'destroy']);
+
+    Route::get('/nomina/resumen', [AsistenciaController::class, 'resumen']);
 
 });

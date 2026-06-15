@@ -16,7 +16,8 @@ export default defineConfig({
                 'resources/js/configuraciones.jsx',
                 'resources/js/gastos.jsx',
                 'resources/js/perfiles.jsx',
-                'resources/js/landing.jsx'
+                'resources/js/landing.jsx',
+                'resources/js/nomina.jsx'
             ],
             refresh: true,
         }),

@@ -9,6 +9,7 @@ use App\Models\Rol;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 
 class PerfilController extends Controller
 {
@@ -19,6 +20,16 @@ class PerfilController extends Controller
             'pin'       => 'required|integer',
         ]);
 
+        $throttleKey = 'verify-pin:' . Auth::id() . ':' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, $perMinute = 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return response()->json([
+                'error' => 'Demasiados intentos.',
+                'retry_after' => $seconds
+            ], 429);
+        }
 
         $perfil = Perfil::where('id_perfil', $request->id_perfil)
             ->where('id_user', Auth::id())
@@ -31,6 +42,7 @@ class PerfilController extends Controller
 
         if (Hash::check($request->pin, $perfil->pin)) {
 
+            RateLimiter::clear($throttleKey);
             session(['id_perfil' => $perfil->id_perfil]);
             session(['nombre_perfil' => $perfil->nombre]);
 
@@ -46,7 +58,14 @@ class PerfilController extends Controller
             ], 200);
         }
 
-        return response()->json(['error' => 'El PIN es incorrecto'], 401);
+        RateLimiter::hit($throttleKey, $decaySeconds = 60);
+        $intentosRealizados = RateLimiter::attempts($throttleKey);
+        $intentosRestantes = max(0, 5 - $intentosRealizados);
+
+        return response()->json([
+            'error' => 'El PIN es incorrecto.',
+            'intentos_restantes' => $intentosRestantes
+        ], 401);
     }
 
     public function index()
@@ -84,7 +103,9 @@ class PerfilController extends Controller
             'id_imagen' => 'required|integer',
         ]);
 
-        $perfil = Perfil::findOrFail($id);
+        $perfil = Perfil::where('id_perfil', $id)
+            ->where('id_user', Auth::id())
+            ->firstOrFail();
 
         $perfil->nombre = $request->nombre;
         $perfil->id_rol = $request->id_rol;

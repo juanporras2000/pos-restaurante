@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error, setShowModal }) => {
+export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error, setShowModal, mensajeError, tiempoEspera }) => {
 
     const inputRefs = useRef([]);
 
@@ -14,7 +14,7 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
 
     const handleKeyDown = (e, index) => {
         if (e.key === "Backspace" && !pin[index] && index > 0) {
-            inputRefs.current[index - 1]?.focus();
+            inputRefs.current[index - 1]?.focus()
         }
     };
 
@@ -37,6 +37,7 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
                             type="password"
                             maxLength="1"
                             value={digit}
+                            disabled={tiempoEspera > 0}
                             onChange={(e) => handleChange(e.target.value, index)}
                             onKeyDown={(e) => handleKeyDown(e, index)}
                             className={`w-12 h-16 text-center text-3xl font-bold border-2 rounded-lg focus:border-blue-500 focus:outline-none transition-all ${error ? "border-red-500 animate-shake" : "border-gray-300"}`}
@@ -44,9 +45,9 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
                     ))}
                 </div>
 
-                {error && (
-                    <p className="text-red-500 text-sm mb-4">
-                        PIN incorrecto, intenta de nuevo.
+                {mensajeError && (
+                    <p className="text-red-500 text-sm mb-4 text-center">
+                        { mensajeError }
                     </p>
                 )}
 

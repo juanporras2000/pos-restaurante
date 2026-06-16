@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../services/axios.js";
 import { CardPerfil } from "./components/CardPerfil";
 import { ModalPinPerfil } from "./components/ModalPinPerfil";
 import { PrimerPerfilForm } from "./components/PrimerPerfilForm";
@@ -11,6 +11,9 @@ export const Perfiles = () => {
     const [showModal, setShowModal] = useState(false);
     const [pin, setPin] = useState(["", "", "", ""]);
     const [error, setError] = useState(false);
+    const [intentosRestantes, setIntentosRestantes] = useState(5);
+    const [tiempoEspera, setTiempoEspera] = useState(0);
+    const [mensajeError, setMensajeError] = useState("");
 
     useEffect(() => {
         axios
@@ -46,6 +49,9 @@ export const Perfiles = () => {
     };
 
     const verificarPin = (pinIngresado) => {
+
+        if (tiempoEspera > 0) return;
+
         axios
             .post("/api/verificar-perfil-pin", {
                 id_perfil: perfilSeleccionado.id_perfil,
@@ -66,6 +72,33 @@ export const Perfiles = () => {
                 setError(true);
                 setPin(["", "", "", ""]);
 
+                const errorResponse = err.response;
+
+                if (errorResponse) {
+                    if (errorResponse.status === 429) {
+                        // CASO 429: Superó el límite de intentos
+                        const segundos = errorResponse.data.retry_after;
+                        setIntentosRestantes(0);
+                        setMensajeError(`Demasiados intentos. Espera ${segundos} segundos.`);
+
+                        // Iniciar un temporizador visual en el frontend
+                        iniciarCuentaRegresiva(segundos);
+
+                    } else if (errorResponse.status === 401) {
+                        // CASO 401: PIN incorrecto, mostramos los intentos que le quedan
+                        const restantes = errorResponse.data.intentos_restantes;
+                        setIntentosRestantes(restantes);
+
+                        if (restantes === 0) {
+                            setMensajeError("Has agotado tus intentos. Perfil bloqueado temporalmente.");
+                        } else {
+                            setMensajeError(`PIN incorrecto. Te quedan ${restantes} ${restantes === 1 ? 'intento' : 'intentos'}.`);
+                        }
+                    } else {
+                        setMensajeError(errorResponse.data.error || "Ocurrió un error inesperado.");
+                    }
+                }
+
                 const firstInput = document.getElementById("pin-0");
                 if (firstInput) firstInput.focus();
             });
@@ -81,6 +114,25 @@ export const Perfiles = () => {
 
     if (perfiles.length === 0) {
         return <PrimerPerfilForm />;
+    }
+
+    const iniciarCuentaRegresiva = (segundosIniciales) => {
+        setTiempoEspera(segundosIniciales);
+
+        const interval = setInterval(() => {
+            setTiempoEspera((tiempoActual) => {
+                if (tiempoActual <= 1) {
+                    clearInterval(interval);
+                    setMensajeError("");
+                    setIntentosRestantes(5);
+                    setError(false);
+                    return 0;
+                }
+
+                setMensajeError(`Demasiados intentos. Espera ${tiempoActual - 1} segundos.`);
+                return tiempoActual - 1;
+            });
+        }, 1000)
     }
 
     return (
@@ -111,6 +163,8 @@ export const Perfiles = () => {
                     handlePinChange={handlePinChange}
                     error={error}
                     setShowModal={setShowModal}
+                    mensajeError={mensajeError}
+                    tiempoEspera={tiempoEspera}
                 />
             )}
         </div>

@@ -8,14 +8,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfPerfilActivo
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->session()->has('id_perfil')) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Ya cuentas con un perfil activo.',
+                    'perfil_activo' => true
+                ], 200);
+            }
             return redirect('/pedidos');
         }
 

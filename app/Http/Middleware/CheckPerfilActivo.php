@@ -8,14 +8,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckPerfilActivo
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->session()->has('id_perfil')) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => 'Debes seleccionar un perfil primero.'
+                ], 401);
+            }
+
             return redirect('/perfiles')->with('error', 'Debes seleccionar un perfil primero.');
         }
 

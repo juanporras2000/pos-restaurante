@@ -35,11 +35,15 @@ class ConfiguracionService
 
     public function actualizarConfiguraciones(array $datos)
     {
-        $tenantId = app()->has('tenant_id') ? app('tenant_id') : 'global';
-
         foreach ($datos as $clave => $valor) {
+            // 1. Guardamos en la base de datos
             Configuracion::set($clave, $valor);
-            Cache::forget("cfg_{$tenantId}_{$clave}");
+
+            // 2. Obtenemos la llave centralizada del modelo
+            $key = Configuracion::cacheKey($clave);
+
+            // 3. Olvidamos la caché de manera segura
+            Cache::forget($key);
         }
     }
 }

@@ -26,4 +26,12 @@ class Configuracion extends Model
             ['valor' => $valor, 'descripcion' => $descripcion]
         );
     }
+
+    public static function cacheKey(string $clave, ?string $tenantId = null): string
+    {
+        // Si no se pasa un tenant_id, intentamos resolverlo dinámicamente del contenedor
+        $tenant = $tenantId ?? (app()->has('tenant_id') ? app('tenant_id') : 'global');
+
+        return "cfg_{$tenant}_{$clave}";
+    }
 }

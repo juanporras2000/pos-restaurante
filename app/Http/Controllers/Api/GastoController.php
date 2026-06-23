@@ -4,29 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gasto;
+use App\Services\GastoService;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class GastoController extends Controller
 {
+    // Usamos inyección de dependencias en el constructor mediante propiedades promovidas de PHP 8
+    public function __construct(private readonly GastoService $gastoService) {}
+
     public function index(Request $request)
     {
-        $fecha = $request->query('fecha')
-            ? Carbon::parse($request->query('fecha'), 'America/Bogota')
-            : Carbon::now('America/Bogota');
+        $resultado = $this->gastoService->obtenerGastosPorFecha($request->query('fecha'));
 
-        $inicio = $fecha->copy()->startOfDay()->utc();
-        $fin    = $fecha->copy()->endOfDay()->utc();
-
-        $gastos = Gasto::with('user:id,name')
-            ->whereBetween('created_at', [$inicio, $fin])
-            ->orderByDesc('created_at')
-            ->get();
-
-        return response()->json([
-            'gastos' => $gastos,
-            'total'  => $gastos->sum('monto'),
-        ]);
+        return response()->json($resultado);
     }
 
     public function store(Request $request)
@@ -38,22 +28,13 @@ class GastoController extends Controller
             'nota'     => 'nullable|string|max:500',
         ]);
 
-        $gasto = Gasto::create([
-            ...$data,
-            'user_id' => auth()->id(),
-        ]);
+        $gasto = $this->gastoService->registrarGasto($data);
 
-        return response()->json($gasto->load('user:id,name'), 201);
+        return response()->json($gasto, 201);
     }
 
     public function update(Request $request, Gasto $gasto)
     {
-        $hoy = Carbon::now('America/Bogota')->toDateString();
-        $fechaGasto = Carbon::parse($gasto->created_at)->setTimezone('America/Bogota')->toDateString();
-        if ($fechaGasto !== $hoy) {
-            return response()->json(['message' => 'Solo se pueden modificar gastos del día actual.'], 422);
-        }
-
         $data = $request->validate([
             'concepto' => 'required|string|max:255',
             'tipo'     => 'required|in:insumos,gasolina,servicios,otro',
@@ -61,20 +42,21 @@ class GastoController extends Controller
             'nota'     => 'nullable|string|max:500',
         ]);
 
-        $gasto->update($data);
-
-        return response()->json($gasto->load('user:id,name'));
+        try {
+            $gastoActualizado = $this->gastoService->actualizarGasto($gasto, $data);
+            return response()->json($gastoActualizado);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     public function destroy(Gasto $gasto)
     {
-        $hoy = Carbon::now('America/Bogota')->toDateString();
-        $fechaGasto = Carbon::parse($gasto->created_at)->setTimezone('America/Bogota')->toDateString();
-        if ($fechaGasto !== $hoy) {
-            return response()->json(['message' => 'Solo se pueden eliminar gastos del día actual.'], 422);
+        try {
+            $this->gastoService->eliminarGasto($gasto);
+            return response()->json(['message' => 'Gasto eliminado']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         }
-
-        $gasto->delete();
-        return response()->json(['message' => 'Gasto eliminado']);
     }
 }

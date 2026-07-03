@@ -63,7 +63,7 @@ class PerfilService
         $perfil->id_user   = $userId;
         $perfil->nombre    = $datos['nombre'];
         $perfil->pin       = Hash::make($datos['pin']);
-        $perfil->id_role   = $datos['id_rol']; // Nota: en tu código usaste id_rol, asegúrate de mapear bien
+        $perfil->id_rol   = $datos['id_rol'];
         $perfil->id_imagen = $datos['id_imagen'];
         $perfil->save();
 

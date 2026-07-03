@@ -37,7 +37,6 @@ class PerfilController extends Controller
                     'permisos'      => $perfil->permisos
                 ]
             ], 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             $errors = $e->errors();
             if (isset($errors['throttle'])) {
@@ -49,13 +48,18 @@ class PerfilController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request) // Añadimos el objeto Request
     {
-        $perfiles = Perfil::with(['rol', 'imagen'])
-            ->where('id_user', Auth::id())
-            ->get();
+        $query = Perfil::with(['rol', 'imagen'])
+            ->where('id_user', Auth::id());
 
-        return response()->json($perfiles);
+
+        if (!$request->boolean('paginado')) {
+            return response()->json($query->get());
+        }
+
+        $perPage = $request->integer('per_page', 15);
+        return response()->json($query->paginate($perPage));
     }
 
     public function dataInicialAdmin()
@@ -87,12 +91,36 @@ class PerfilController extends Controller
         ]);
     }
 
-    public function indexAdmin()
+    public function indexAdmin(Request $request) // Añadimos el objeto Request
     {
-        return Perfil::where('id_user', Auth::id())
-            ->with('rol', 'imagen', 'permisos:id_permiso')
-            ->get()
-            ->map(function ($perfil) {
+        // 1. Definimos la consulta base con sus relaciones cargadas
+        $query = Perfil::where('id_user', Auth::id())
+            ->with('rol', 'imagen', 'permisos:id_permiso');
+
+        // Opción de compatibilidad: Si NO viene '?paginado=true', procesa el array plano clásico
+        if (!$request->boolean('paginado')) {
+            return response()->json(
+                $query->get()->map(function ($perfil) {
+                    return [
+                        'id_perfil'  => $perfil->id_perfil,
+                        'nombre'     => $perfil->nombre,
+                        'id_rol'     => $perfil->id_rol,
+                        'nombre_rol' => $perfil->rol->nombre ?? 'Sin Rol',
+                        'imagen'     => $perfil->imagen->path,
+                        'id_imagen'  => $perfil->imagen->id_imagen,
+                        'permisos'   => $perfil->permisos->pluck('id_permiso')
+                    ];
+                })
+            );
+        }
+
+        // 2. Si se activa la paginación real (?paginado=true)
+        $perPage = $request->integer('per_page', 15);
+        $paginador = $query->paginate($perPage);
+
+        // Transformamos los elementos dentro del objeto de paginación sin romper la estructura de Laravel
+        $paginador->setCollection(
+            $paginador->getCollection()->map(function ($perfil) {
                 return [
                     'id_perfil'  => $perfil->id_perfil,
                     'nombre'     => $perfil->nombre,
@@ -102,7 +130,10 @@ class PerfilController extends Controller
                     'id_imagen'  => $perfil->imagen->id_imagen,
                     'permisos'   => $perfil->permisos->pluck('id_permiso')
                 ];
-            });
+            })
+        );
+
+        return response()->json($paginador);
     }
 
     public function store(Request $request)

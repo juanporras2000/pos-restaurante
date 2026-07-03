@@ -27,6 +27,7 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
             });
             if (!res.ok) throw new Error();
             const data = await res.json();
+
             onGuardar(data);
         } catch {
             Swal.fire({ icon: 'error', title: 'Error al guardar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
@@ -106,11 +107,13 @@ export default function GestionAdiciones() {
     const [modalAbierto, setModalAbierto] = useState(false);
     const [adicionEditar, setAdicionEditar] = useState(null);
 
+
+
     const cargar = () => {
         setCargando(true);
         fetch('/api/adiciones?todas=1')
             .then((r) => r.json())
-            .then(setAdiciones)
+            .then((r) => setAdiciones(r.data))
             .catch(() => { })
             .finally(() => setCargando(false));
     };
@@ -250,7 +253,7 @@ export default function GestionAdiciones() {
                                         className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors touch-manipulation"
                                         title="Editar"
                                     >
-                                        <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                             <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                         </svg>
@@ -261,7 +264,7 @@ export default function GestionAdiciones() {
                                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-manipulation"
                                         title="Eliminar"
                                     >
-                                        <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>

@@ -14,7 +14,11 @@ class GastoController extends Controller
 
     public function index(Request $request)
     {
-        $resultado = $this->gastoService->obtenerGastosPorFecha($request->query('fecha'));
+        $resultado = $this->gastoService->obtenerGastosPorFecha(
+            $request->query('fecha'),
+            $request->boolean('paginado', false),
+            $request->integer('per_page', 15)
+        );
 
         return response()->json($resultado);
     }

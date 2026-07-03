@@ -12,7 +12,7 @@ class GastoService
     /**
      * Obtiene los gastos de una fecha específica con su sumatorio total.
      */
-    public function obtenerGastosPorFecha(?string $fechaQuery)
+    public function obtenerGastosPorFecha(?string $fechaQuery, bool $paginado = false, int $perPage = 15)
     {
         $fecha = $fechaQuery
             ? Carbon::parse($fechaQuery, 'America/Bogota')
@@ -21,14 +21,19 @@ class GastoService
         $inicio = $fecha->copy()->startOfDay()->utc();
         $fin    = $fecha->copy()->endOfDay()->utc();
 
-        $gastos = Gasto::with('user:id,name')
+        $query = Gasto::with('user:id,name')
             ->whereBetween('created_at', [$inicio, $fin])
-            ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('created_at');
+
+        $totalDelDia = (clone $query)->sum('monto');
+
+        $gastosResultado = $paginado
+            ? $query->paginate($perPage)
+            : $query->get();
 
         return [
-            'gastos' => $gastos,
-            'total'  => $gastos->sum('monto'),
+            'gastos' => $gastosResultado,
+            'total'  => $totalDelDia,
         ];
     }
 

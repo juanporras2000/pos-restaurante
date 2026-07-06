@@ -1,4 +1,4 @@
-import axios from 'axios';
+
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { BotonPerfil } from './components/BotonPerfil';
@@ -6,6 +6,7 @@ import { ActualizarEliminarPerfil } from './components/ActualizarEliminarPerfil'
 import { GestionarPermisos } from './components/GestionarPermisos';
 import { ModalCrear } from './components/ModalCrear';
 import { ModalAvatar } from './components/ModalAvatar';
+import axios from '../../../services/axios'
 
 export const GestionPerfiles = () => {
 
@@ -38,9 +39,9 @@ export const GestionPerfiles = () => {
                 setLoading(true);
 
                 const [resPermisos, resPerfiles, resDataInicial] = await Promise.all([
-                    axios.get('/api/permisos-lista'),
-                    axios.get('/api/perfiles-admin'),
-                    axios.get('/api/perfiles-data-inicial')
+                    axios.get('/permisos-lista'),
+                    axios.get('/perfiles-admin'),
+                    axios.get('/perfiles-data-inicial')
                 ]);
 
                 setPermisosDisponibles(resPermisos.data);
@@ -48,7 +49,7 @@ export const GestionPerfiles = () => {
 
                 const rolesFiltrados = resDataInicial.data.roles.filter( rol => rol.id_rol != 1)
                 setRoles(rolesFiltrados);
-                
+
                 setGaleriaAvatares(resDataInicial.data.galeria);
 
             } catch (error) {
@@ -125,7 +126,7 @@ export const GestionPerfiles = () => {
                 id_imagen: createAvatar.id_imagen
             };
 
-            const res = await axios.post('/api/perfiles', data);
+            const res = await axios.post('/perfiles', data);
 
             // CORRECCIÓN 1: Cambiar 'seleccionarPerfil' por la función real 'ejecutarSeleccionPerfil'
             // Pasamos el objeto combinado para asegurar que contenga '.path' y evitar el undefined.webp

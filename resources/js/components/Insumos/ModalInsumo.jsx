@@ -4,9 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ModalInsumosPropTypes } from '../../propTypes';
 
-const INSUMO_VACIO = { 
-    id: null, nombre: '', unidad_medida: '', 
-    stock_actual: '', stock_minimo: '', 
+const INSUMO_VACIO = {
+    id: null, nombre: '', unidad_medida: '',
+    stock_actual: '', stock_minimo: '',
     costo_unitario: '', valor_producto: ''
 };
 const UNIDADES = ['gr', 'kg', 'ml', 'lt', 'unidad', 'porción', 'oz', 'lb'];
@@ -43,15 +43,16 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
 
     const stockActual    = useWatch({ control, name: 'stock_actual' });
     const valorProducto  = useWatch({ control, name: 'valor_producto' });
+
     useEffect(() => {
-        // Solo recalcular cuando el usuario ingresó un valor_producto explícito.
-        // Si está vacío (modo edición sin modificar el campo), conservar el valor cargado.
         if (valorProducto === '' || valorProducto === null || valorProducto === undefined) return;
         const stock = Number.parseFloat(stockActual)  || 0;
         const valor = Number.parseFloat(valorProducto) || 0;
         const costo = stock > 0 ? Number.parseFloat((valor / stock).toFixed(4)) : 0;
         setValue('costo_unitario', costo);
     }, [stockActual, valorProducto, setValue]);
+
+
     useEffect(() => {
         if (abierto) {
             reset(insumo.id
@@ -179,7 +180,7 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
 
                 {/* Costo unitario — bloqueado, calculado automáticamente */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                    <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         Costo unitario
                         <svg className="h-3.5 w-3.5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>

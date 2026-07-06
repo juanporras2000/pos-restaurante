@@ -4,6 +4,7 @@ import HistorialPedidos from './HistorialPedidos';
 import { PedidoMesa } from './PedidoMesa';
 import { PedidoDomicilio } from './PedidoDomicilio';
 import { PedidoRecoger } from './PedidoRecoger';
+import axios from '../../services/axios'
 
 export default function Pedidos() {
     const audioNotificacion = useRef(new Audio('/sounds/notificacion-pedido.mp3'));
@@ -22,20 +23,16 @@ export default function Pedidos() {
     const permiso = permisosPerfilActivo.find(p => p.descripcion == 'Historial del día')
 
     const cargarProductos = useCallback(() => {
-        fetch('/api/productos?todos=1')
-            .then((r) => r.json())
-            .then((data) => setProductos(data.map((p) => ({ ...p, precio: parseFloat(p.precio) }))))
+        axios.get('/productos?todos=1')
+            .then((r) => setProductos(r.data.map((p) => ({ ...p, precio: parseFloat(p.precio) }))))
             .catch(() => { });
     }, []);
-
 
     const cargarPendientes = useCallback(() => {
-        fetch('/api/pedidos/pendientes')
-            .then((r) => r.json())
-            .then(setPedidosPendientes)
+        axios.get('/pedidos/pendientes')
+            .then((r) => setPedidosPendientes(r.data))
             .catch(() => { });
     }, []);
-
 
     useEffect(() => {
         cargarProductos();
@@ -133,9 +130,8 @@ export default function Pedidos() {
                             </svg>
                             Pendientes
                             {pedidosPendientes.length > 0 && (
-                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                                    tab === 'pedidos' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'
-                                }`}>
+                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${tab === 'pedidos' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'
+                                    }`}>
                                     {pedidosPendientes.length}
                                 </span>
                             )}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { fmtCOP } from '../../utils/format';
+import axios from '../../services/axios';
 
 function ModalAdicion({ adicion, onGuardar, onCerrar }) {
     const [nombre, setNombre] = useState(adicion?.nombre ?? '');
@@ -15,21 +16,19 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
         if (precio === '' || isNaN(parseFloat(precio)) || parseFloat(precio) < 0) return;
 
         setGuardando(true);
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        const url = esEdicion ? `/api/adiciones/${adicion.id}` : '/api/adiciones';
-        const method = esEdicion ? 'PUT' : 'POST';
+
+        const url = esEdicion ? `/adiciones/${adicion.id}` : '/adiciones';
+        const method = esEdicion ? 'put' : 'post';
 
         try {
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ nombre: nombre.trim(), precio: parseFloat(precio) * 1000 }),
+            const res = await axios[method](url, {
+                nombre: nombre.trim(),
+                precio: parseFloat(precio) * 1000
             });
-            if (!res.ok) throw new Error();
-            const data = await res.json();
 
-            onGuardar(data);
-        } catch {
+            // Axios ya parsea el JSON y lo entrega en res.data
+            onGuardar(res.data);
+        } catch (error) {
             Swal.fire({ icon: 'error', title: 'Error al guardar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setGuardando(false);
@@ -111,9 +110,11 @@ export default function GestionAdiciones() {
 
     const cargar = () => {
         setCargando(true);
-        fetch('/api/adiciones?todas=1')
-            .then((r) => r.json())
-            .then((r) => setAdiciones(r.data))
+        axios.get('/adiciones?todas=1')
+            .then((respuesta) => {
+                // Se usa respuesta.data para acceder al JSON que devuelve Laravel
+                setAdiciones(respuesta.data.data);
+            })
             .catch(() => { })
             .finally(() => setCargando(false));
     };
@@ -130,19 +131,24 @@ export default function GestionAdiciones() {
     };
 
     const toggleActivo = async (adicion) => {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/adiciones/${adicion.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ activo: !adicion.activo }),
+            // Axios se encarga de la baseURL, headers y parseo de JSON automáticamente
+            await axios.put(`/adiciones/${adicion.id}`, {
+                activo: !adicion.activo
             });
-            if (!res.ok) throw new Error();
+
             setAdiciones((prev) =>
                 prev.map((a) => (a.id === adicion.id ? { ...a, activo: !a.activo } : a))
             );
-        } catch {
-            Swal.fire({ icon: 'error', title: 'Error al actualizar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al actualizar',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
         }
     };
 
@@ -159,16 +165,13 @@ export default function GestionAdiciones() {
         });
         if (!isConfirmed) return;
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/adiciones/${adicion.id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken },
-            });
-            if (!res.ok) throw new Error();
+            // Axios usa .delete y maneja la baseURL y los headers automáticamente
+            await axios.delete(`/adiciones/${adicion.id}`);
+
             Swal.fire({ icon: 'success', title: 'Adición eliminada', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
             setAdiciones((prev) => prev.filter((a) => a.id !== adicion.id));
-        } catch {
+        } catch (error) {
             Swal.fire({ icon: 'error', title: 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         }
     };

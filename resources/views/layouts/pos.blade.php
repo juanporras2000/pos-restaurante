@@ -241,34 +241,37 @@
     @stack('scripts')
 
     <script>
-        (function() {
-            function cargarAlertas() {
-                fetch('/api/inventario/alertas')
-                    .then(function(r) {
-                        return r.json();
-                    })
-                    .then(function(data) {
-                        var caja = document.getElementById('stock-alertas');
-                        var texto = document.getElementById('stock-alertas-texto');
-                        if (!caja || !texto) return;
-                        if (data.length > 0) {
-                            texto.textContent = data.length === 1 ?
-                                data[0].nombre + ': stock bajo' :
-                                data.length + ' insumos con stock bajo';
-                            caja.classList.remove('hidden');
-                        } else {
-                            caja.classList.add('hidden');
-                        }
-                    })
-                    .catch(function() {});
-            }
-            cargarAlertas();
-            setInterval(cargarAlertas, 60000);
-        })();
+        // Envolvemos todo para esperar a que carguen los scripts de Vite
+        document.addEventListener('DOMContentLoaded', function() {
+            (function() {
+                function cargarAlertas() {
+                    axios.get('/inventario/alertas')
+                        .then(function(r) {
+                            return r.data;
+                        })
+                        .then(function(data) {
+                            var caja = document.getElementById('stock-alertas');
+                            var texto = document.getElementById('stock-alertas-texto');
+                            if (!caja || !texto) return;
+                            if (data.length > 0) {
+                                texto.textContent = data.length === 1 ?
+                                    data[0].nombre + ': stock bajo' :
+                                    data.length + ' insumos con stock bajo';
+                                caja.classList.remove('hidden');
+                            } else {
+                                caja.classList.add('hidden');
+                            }
+                        })
+                        .catch(function() {});
+                }
+                cargarAlertas();
+                setInterval(cargarAlertas, 60000);
+            })();
+        });
 
+        // Esta función puede quedar afuera porque solo se ejecuta al hacer click
         function cerrarPerfilFronend() {
             localStorage.removeItem('perfil_activo');
-
             document.getElementById('form-logout-perfil').submit();
         }
     </script>

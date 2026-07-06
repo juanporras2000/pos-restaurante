@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import ListaProductos from './ListaProductos';
 import Carrito from './Carrito';
 import { ModalNuevoPedidoPropTypes } from '../../propTypes';
+import axios from '../../services/axios'
 
 const PEDIDO_VACIO = {
     tipo: 'mesa',
@@ -24,15 +25,13 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
     // Cargar configuraciones y adiciones
     useEffect(() => {
         if (abierto) {
-            fetch('/api/configuraciones')
-                .then((r) => r.json())
-                .then(setConfiguraciones)
-                .catch(() => {});
+            axios.get('/configuraciones')
+                .then((r) => setConfiguraciones(r.data))
+                .catch(() => { });
 
-            fetch('/api/adiciones')
-                .then((r) => r.json())
-                .then(setAdicionesDisponibles)
-                .catch(() => {});
+            axios.get('/adiciones')
+                .then((r) => setAdicionesDisponibles(r.data))
+                .catch(() => { });
         }
     }, [abierto]);
 
@@ -92,20 +91,20 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 const existe = adiciones.find((a) => a.adicion_id === adicion.id);
                 const nuevasAdiciones = existe
                     ? adiciones.map((a) =>
-                          a.adicion_id === adicion.id
-                              ? { ...a, cantidad: a.cantidad + 1, subtotal: (a.cantidad + 1) * a.precio }
-                              : a
-                      )
+                        a.adicion_id === adicion.id
+                            ? { ...a, cantidad: a.cantidad + 1, subtotal: (a.cantidad + 1) * a.precio }
+                            : a
+                    )
                     : [
-                          ...adiciones,
-                          {
-                              adicion_id: adicion.id,
-                              nombre: adicion.nombre,
-                              precio: parseFloat(adicion.precio),
-                              cantidad: 1,
-                              subtotal: parseFloat(adicion.precio),
-                          },
-                      ];
+                        ...adiciones,
+                        {
+                            adicion_id: adicion.id,
+                            nombre: adicion.nombre,
+                            precio: parseFloat(adicion.precio),
+                            cantidad: 1,
+                            subtotal: parseFloat(adicion.precio),
+                        },
+                    ];
                 return { ...item, adiciones: nuevasAdiciones };
             })
         );
@@ -122,10 +121,10 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     existe.cantidad === 1
                         ? adiciones.filter((a) => a.adicion_id !== adicion.id)
                         : adiciones.map((a) =>
-                              a.adicion_id === adicion.id
-                                  ? { ...a, cantidad: a.cantidad - 1, subtotal: (a.cantidad - 1) * a.precio }
-                                  : a
-                          );
+                            a.adicion_id === adicion.id
+                                ? { ...a, cantidad: a.cantidad - 1, subtotal: (a.cantidad - 1) * a.precio }
+                                : a
+                        );
                 return { ...item, adiciones: nuevasAdiciones };
             })
         );
@@ -206,53 +205,53 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         setEnviando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
-        const body = JSON.stringify({
-            tipo: pedido.tipo,
-            numero_mesa: pedido.numero_mesa || null,
-            direccion: pedido.direccion || null,
-            nombre_cliente: pedido.nombre_cliente?.trim() || null,
-            id_perfil: idPerfil,
-            productos: carrito.map((item) => ({
-                producto_id: item.id,
-                cantidad: item.cantidad,
-                precio: item.precio,
-                observacion: item.nota?.trim() || null,
-                adiciones: (item.adiciones ?? []).map((a) => ({
-                    adicion_id: a.adicion_id,
-                    nombre: a.nombre,
-                    precio: a.precio,
-                    cantidad: a.cantidad,
-                })),
-            })),
-        });
-
-        const url = esEdicion ? `/api/pedidos/${pedidoEditar.id}` : '/api/pedidos';
-        const method = esEdicion ? 'PUT' : 'POST';
+        const url = esEdicion ? `/pedidos/${pedidoEditar.id}` : '/pedidos';
+        const method = esEdicion ? 'put' : 'post';
 
         try {
-            const res = await fetch(url, {
+            await axios({
                 method,
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body,
+                url,
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                data: {
+                    tipo: pedido.tipo,
+                    numero_mesa: pedido.numero_mesa || null,
+                    direccion: pedido.direccion || null,
+                    nombre_cliente: pedido.nombre_cliente?.trim() || null,
+                    id_perfil: idPerfil,
+                    productos: carrito.map((item) => ({
+                        producto_id: item.id,
+                        cantidad: item.cantidad,
+                        precio: item.precio,
+                        observacion: item.nota?.trim() || null,
+                        adiciones: (item.adiciones ?? []).map((a) => ({
+                            adicion_id: a.adicion_id,
+                            nombre: a.nombre,
+                            precio: a.precio,
+                            cantidad: a.cantidad,
+                        })),
+                    })),
+                },
             });
 
-            if (res.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: esEdicion ? 'Pedido actualizado exitosamente' : 'Pedido creado exitosamente',
-                    timer: 1800, showConfirmButton: false, toast: true, position: 'top-end',
-                });
+            Swal.fire({
+                icon: 'success',
+                title: esEdicion ? 'Pedido actualizado exitosamente' : 'Pedido creado exitosamente',
+                timer: 1800, showConfirmButton: false, toast: true, position: 'top-end',
+            });
 
-                if (esEdicion) {
-                    setActualizado(!actualizado);
-                }
-                
-                cerrar();
-                onCreado();
-            } else {
-                const data = await res.json();
-                if (res.status === 422 && data.faltantes?.length) {
-                    // Stock insuficiente — mostrar detalle de insumos faltantes
+            if (esEdicion) {
+                setActualizado(!actualizado);
+            }
+
+            cerrar();
+            onCreado();
+        } catch (error) {
+            if (error.response) {
+                const data = error.response.data;
+
+                // Stock insuficiente — mostrar detalle de insumos faltantes
+                if (error.response.status === 422 && data.faltantes?.length) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Stock insuficiente',
@@ -260,11 +259,15 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                         confirmButtonText: 'Entendido',
                         confirmButtonColor: '#dc2626',
                     });
-                } else {
-                    Swal.fire({ icon: 'error', title: data.error || 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                    return;
                 }
+
+                // Otro tipo de error controlado devuelto por el servidor
+                Swal.fire({ icon: 'error', title: data.error || 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                return;
             }
-        } catch {
+
+            // Error de red o conexión sin respuesta
             Swal.fire({ icon: 'error', title: 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setEnviando(false);
@@ -306,15 +309,13 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                     <button
                                         type="button"
                                         onClick={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                            pedido.tipo === 'mesa'
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                                        }`}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${pedido.tipo === 'mesa'
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                            }`}
                                     >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'mesa' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
-                                        }`}>
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${pedido.tipo === 'mesa' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
+                                            }`}>
                                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <rect x="3" y="8" width="18" height="4" rx="1"></rect>
                                                 <path d="M6 12v4m12-4v4M4 19h16"></path>
@@ -350,15 +351,13 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                     <button
                                         type="button"
                                         onClick={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                            pedido.tipo === 'domicilio'
-                                                ? 'border-green-500 bg-green-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                                        }`}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${pedido.tipo === 'domicilio'
+                                            ? 'border-green-500 bg-green-50'
+                                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                            }`}
                                     >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'domicilio' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500'
-                                        }`}>
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${pedido.tipo === 'domicilio' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500'
+                                            }`}>
                                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                                                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -397,15 +396,13 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                     <button
                                         type="button"
                                         onClick={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                            pedido.tipo === 'recoger'
-                                                ? 'border-orange-500 bg-orange-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                                        }`}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${pedido.tipo === 'recoger'
+                                            ? 'border-orange-500 bg-orange-50'
+                                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                            }`}
                                     >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'recoger' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'
-                                        }`}>
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${pedido.tipo === 'recoger' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'
+                                            }`}>
                                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
                                                 <line x1="3" y1="6" x2="21" y2="6"></line>

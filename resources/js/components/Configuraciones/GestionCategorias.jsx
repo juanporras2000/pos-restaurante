@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import axios from '../../services/axios'
 
 function ModalCategoria({ categoria, onGuardar, onCerrar }) {
     const [nombre, setNombre] = useState(categoria?.nombre ?? '');
@@ -14,28 +15,24 @@ function ModalCategoria({ categoria, onGuardar, onCerrar }) {
         setError('');
         setGuardando(true);
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        const url = esEdicion ? `/api/categorias/${categoria.id}` : '/api/categorias';
-        const method = esEdicion ? 'PUT' : 'POST';
+        const url = esEdicion ? `/categorias/${categoria.id}` : '/categorias';
+        const method = esEdicion ? 'put' : 'post';
 
         try {
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ nombre: nombre.trim() }),
+            const res = await axios[method](url, {
+                nombre: nombre.trim()
             });
 
-            if (res.status === 422) {
-                const data = await res.json();
+            onGuardar(res.data);
+        } catch (error) {
+            // Axios maneja los códigos de estado de error (como el 422) en el bloque catch
+            if (error.response && error.response.status === 422) {
+                const data = error.response.data;
                 const msg = Object.values(data.errors ?? {}).flat()[0] ?? 'Error de validación';
                 setError(msg);
                 return;
             }
 
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            onGuardar(data);
-        } catch {
             Swal.fire({ icon: 'error', title: 'Error al guardar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setGuardando(false);
@@ -98,9 +95,10 @@ export default function GestionCategorias() {
 
     const cargar = () => {
         setCargando(true);
-        fetch('/api/categorias')
-            .then((r) => r.json())
-            .then(setCategorias)
+        axios.get('/categorias')
+            .then((respuesta) => {
+                setCategorias(respuesta.data);
+            })
             .catch(() => { })
             .finally(() => setCargando(false));
     };
@@ -129,7 +127,7 @@ export default function GestionCategorias() {
             text: cat.productos_count > 0
                 ? `Tiene ${cat.productos_count} producto(s) asignado(s). No se puede eliminar.`
                 : 'Esta acción no se puede deshacer.',
-            icon: cat.productos_count > 0 ? 'warning' : 'warning',
+            icon: 'warning',
             showCancelButton: cat.productos_count === 0,
             confirmButtonText: cat.productos_count > 0 ? 'Entendido' : 'Eliminar',
             cancelButtonText: 'Cancelar',
@@ -139,24 +137,20 @@ export default function GestionCategorias() {
 
         if (!isConfirmed || cat.productos_count > 0) return;
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/categorias/${cat.id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken },
-            });
+            // Pasamos a usar la instancia de axios con la URL limpia
+            await axios.delete(`/categorias/${cat.id}`);
 
-            if (res.status === 409) {
-                const data = await res.json();
+            Swal.fire({ icon: 'success', title: 'Categoría eliminada', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
+            setCategorias((prev) => prev.filter((c) => c.id !== cat.id));
+        } catch (error) {
+            // Capturamos el error 409 de conflicto enviado por Laravel
+            if (error.response && error.response.status === 409) {
+                const data = error.response.data;
                 Swal.fire({ icon: 'warning', title: 'No se puede eliminar', text: data.error, confirmButtonColor: '#6b7280' });
                 return;
             }
 
-            if (!res.ok) throw new Error();
-
-            Swal.fire({ icon: 'success', title: 'Categoría eliminada', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
-            setCategorias((prev) => prev.filter((c) => c.id !== cat.id));
-        } catch {
             Swal.fire({ icon: 'error', title: 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         }
     };

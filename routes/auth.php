@@ -58,7 +58,7 @@ Route::middleware('auth')->group(function () {
         ->name('logout');
 
     Route::post('/logout-perfil', function () {
-        session()->forget('id_perfil');
+        session()->forget('id_perfil', 'permisos_ids');
         return redirect('/perfiles');
     })->name('logout.perfil');
 });

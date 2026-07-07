@@ -40,9 +40,10 @@
             </div>
 
             @php
-                $perfilActivo = \App\Models\Perfil::with('permisos')->find(session('id_perfil'));
-                $permisosIds = $perfilActivo ? $perfilActivo->permisos->pluck('id_permiso')->toArray() : [];
+                $permisosIds = session('permisos_ids', []);
             @endphp
+
+
 
             <nav class="mt-6 space-y-1 flex-1 px-4">
 

@@ -4,7 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', function () {
-    return view('landing'); 
+    return view('landing');
 })->middleware('guest')->name('login');
 
 
@@ -27,6 +27,10 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['check.perfil'])->group(function () {
+
+        Route::get('/sin-permisos', function () {
+            return view('sin-permisos');
+        })->name('sin-permisos');
 
         Route::get('/pedidos', function () {
             return view('pedidos');

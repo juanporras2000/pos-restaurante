@@ -27,6 +27,9 @@ class PerfilController extends Controller
                 $request->ip()
             );
 
+            $request->session()->forget('permisos_ids');
+            $request->session()->put('id_perfil', $perfil->id_perfil);
+
             return response()->json([
                 'success' => true,
                 'perfil'  => [
@@ -62,6 +65,7 @@ class PerfilController extends Controller
         return response()->json($query->paginate($perPage));
     }
 
+
     public function dataInicialAdmin()
     {
         return response()->json([
@@ -69,6 +73,7 @@ class PerfilController extends Controller
             'galeria' => DB::table('imagenes_perfil')->get(['id_imagen', 'path'])
         ]);
     }
+
 
     public function update(Request $request, int $id)
     {

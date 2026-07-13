@@ -1,13 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
-// ── Utilidad ──────────────────────────────────────────────────────────────────
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        maximumFractionDigits: 0,
-    }).format(n ?? 0);
+import { fmtCOP as fmtQ } from '../../utils/format';
+import { ErrorCard } from './EstadoCarga';
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 
@@ -27,28 +21,6 @@ FilaBalance.propTypes = {
     negrita:    PropTypes.bool,
 };
 
-function ErrorRetry({ msg, onRetry }) {
-    return (
-        <div className="flex flex-col items-center justify-center py-8 gap-3 text-sm text-red-500">
-            <p>{msg}</p>
-            {onRetry && (
-                <button
-                    type="button"
-                    onClick={onRetry}
-                    className="px-3 py-1.5 text-xs font-medium bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100"
-                >
-                    Reintentar
-                </button>
-            )}
-        </div>
-    );
-}
-
-ErrorRetry.propTypes = {
-    msg:     PropTypes.string.isRequired,
-    onRetry: PropTypes.func,
-};
-
 // ── Componente principal ──────────────────────────────────────────────────────
 
 /**
@@ -62,7 +34,7 @@ ErrorRetry.propTypes = {
  *  - error       : string | null
  *  - onRetry     : fn
  */
-export default function SeccionGastosIngresos({ totalVentas, gastos, loading, error, onRetry }) {
+export default function SeccionGastosIngresos({ totalVentas, gastos, nominaNeto, loading, error, onRetry }) {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
@@ -71,10 +43,10 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
         );
     }
 
-    if (error) return <ErrorRetry msg={error} onRetry={onRetry} />;
+    if (error) return <ErrorCard msg={error} onRetry={onRetry} />;
 
     const totalGastos = parseFloat(gastos?.total ?? 0);
-    const utilidad    = totalVentas - totalGastos;
+    const utilidad    = totalVentas - totalGastos - nominaNeto;
     const margen      = totalVentas > 0 ? ((utilidad / totalVentas) * 100).toFixed(1) : null;
     const tipos       = gastos?.tipos ?? [];
 
@@ -89,6 +61,11 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
             <FilaBalance
                 label="Gastos del período"
                 valor={`−${fmtQ(totalGastos)}`}
+                colorClase="text-red-500"
+            />
+            <FilaBalance
+                label="Nómina (neto)"
+                valor={`−${fmtQ(nominaNeto)}`}
                 colorClase="text-red-500"
             />
             <FilaBalance
@@ -147,6 +124,7 @@ SeccionGastosIngresos.propTypes = {
         })),
         comparativa: PropTypes.object,
     }),
+    nominaNeto: PropTypes.number,
     loading:  PropTypes.bool,
     error:    PropTypes.string,
     onRetry:  PropTypes.func,
@@ -155,6 +133,7 @@ SeccionGastosIngresos.propTypes = {
 SeccionGastosIngresos.defaultProps = {
     totalVentas: 0,
     gastos:      {},
+    nominaNeto:  0,
     loading:     false,
     error:       null,
 };

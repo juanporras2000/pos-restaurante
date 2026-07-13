@@ -33,17 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/reportes/ventas',                [ReporteController::class, 'ventas']);
     Route::get('/reportes/ventas-por-fecha',      [ReporteController::class, 'ventasPorFecha']);
-    Route::get('/reportes/productos-top',         [ReporteController::class, 'productosTop']);
     Route::get('/reportes/productos-mas-vendidos',[ReporteController::class, 'productosTop']);
-    Route::get('/reportes/ingresos',              [ReporteController::class, 'ingresos']);
     Route::get('/reportes/ganancias',             [ReporteController::class, 'ganancias']);
     Route::get('/reportes/metodos-pago',          [ReporteController::class, 'metodosPago']);
-    Route::get('/reportes/stock',                 [ReporteController::class, 'stockInsumos']);
-    Route::get('/reportes/insumos-top',           [ReporteController::class, 'insumosTop']);
-    Route::get('/reportes/insumos-uso',           [ReporteController::class, 'insumosTop']);
     Route::get('/reportes/gastos',                [ReporteController::class, 'gastosPorPeriodo']);
     Route::get('/reportes/tipo-pedido',           [ReporteController::class, 'tipoPedido']);
-    Route::get('/reporte-diario',                 [ReporteController::class, 'diario']);
+    Route::get('/reportes/nomina',                [ReporteController::class, 'nomina']);
 
     Route::get('/productos', [ProductoController::class, 'index']);
     Route::post('/productos', [ProductoController::class, 'store']);

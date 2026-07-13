@@ -5,16 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Pedido;
 use App\Models\PedidoDetalle;
-use App\Models\Pago;
 use App\Models\PagoDetalle;
 use App\Models\Gasto;
-use App\Models\Insumo;
-use App\Models\MovimientoInventario;
+use App\Services\NominaService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ReporteController extends Controller
 {
+    public function __construct(private readonly NominaService $nominaService) {}
+
     // ─── Helper: rango del período ANTERIOR para comparativas ───────────────
     private function rangoAnterior(string $periodo, ?string $desde, ?string $hasta): array
     {
@@ -184,23 +184,6 @@ class ReporteController extends Controller
         ]);
     }
 
-    // ─── 3. Ingresos totales ──────────────────────────────────────────────────
-    public function ingresos(Request $request)
-    {
-        [$desde, $hasta] = $this->rango($request);
-
-        $pagos = Pago::whereBetween('created_at', [$desde, $hasta]);
-
-        return response()->json([
-            'desde'          => $desde->toDateString(),
-            'hasta'          => $hasta->toDateString(),
-            'total_recibido' => round((clone $pagos)->sum('recibido'), 2),
-            'total_cambio'   => round((clone $pagos)->sum('cambio'), 2),
-            'neto'           => round((clone $pagos)->sum(DB::raw('recibido - cambio')), 2),
-            'cantidad_pagos' => (clone $pagos)->count(),
-        ]);
-    }
-
     // ─── 4. Ganancia estimada (precio venta − costo insumos) ─────────────────
     public function ganancias(Request $request)
     {
@@ -254,58 +237,7 @@ class ReporteController extends Controller
         ]);
     }
 
-    // ─── 6. Stock de insumos ──────────────────────────────────────────────────
-    public function stockInsumos(Request $request)
-    {
-        $soloAlertas = filter_var($request->query('alertas', false), FILTER_VALIDATE_BOOLEAN);
-
-        $query = Insumo::select('id', 'nombre', 'unidad_medida', 'stock_actual', 'stock_minimo')
-            ->orderBy('nombre');
-
-        if ($soloAlertas) {
-            $query->whereColumn('stock_actual', '<=', 'stock_minimo');
-        }
-
-        $insumos = $query->get()->map(function ($insumo) {
-            $insumo->alerta = $insumo->stock_actual <= $insumo->stock_minimo;
-            return $insumo;
-        });
-
-        return response()->json([
-            'total'          => $insumos->count(),
-            'en_alerta'      => $insumos->where('alerta', true)->count(),
-            'insumos'        => $insumos,
-        ]);
-    }
-
-    // ─── 7. Insumos más usados ────────────────────────────────────────────────
-    public function insumosTop(Request $request)
-    {
-        [$desde, $hasta] = $this->rango($request);
-        $limit           = (int) $request->query('limit', 10);
-
-        $insumos = MovimientoInventario::whereBetween('movimientos_inventario.created_at', [$desde, $hasta])
-            ->where('tipo', 'consumo')
-            ->join('insumos', 'movimientos_inventario.insumo_id', '=', 'insumos.id')
-            ->select(
-                'insumos.id',
-                'insumos.nombre',
-                'insumos.unidad_medida',
-                DB::raw('SUM(ABS(movimientos_inventario.cantidad)) as total_usado')
-            )
-            ->groupBy('insumos.id', 'insumos.nombre', 'insumos.unidad_medida')
-            ->orderByDesc('total_usado')
-            ->limit($limit)
-            ->get();
-
-        return response()->json([
-            'desde'   => $desde->toDateString(),
-            'hasta'   => $hasta->toDateString(),
-            'insumos' => $insumos,
-        ]);
-    }
-
-    // ─── 8. Gastos agrupados por período ─────────────────────────────────────
+    // ─── 6. Gastos agrupados por período ─────────────────────────────────────
     public function gastosPorPeriodo(Request $request)
     {
         [$desde, $hasta] = $this->rango($request);
@@ -335,7 +267,7 @@ class ReporteController extends Controller
         ]);
     }
 
-    // ─── 9. Distribución por tipo de pedido (mesa / domicilio / recoger) ────
+    // ─── 7. Distribución por tipo de pedido (mesa / domicilio / recoger) ────
     public function tipoPedido(Request $request)
     {
         [$desde, $hasta] = $this->rango($request);
@@ -367,27 +299,32 @@ class ReporteController extends Controller
         ]);
     }
 
-    // ─── Reporte diario (legacy) ──────────────────────────────────────────────
-    public function diario()
+    // ─── 8. Nómina del período (bruto, descontado por deudas, neto) ─────────
+    public function nomina(Request $request)
     {
-        $inicio = now()->startOfDay()->utc();
-        $fin    = now()->endOfDay()->utc();
+        [$desde, $hasta] = $this->rango($request);
 
-        $pedidos = Pedido::whereBetween('created_at', [$inicio, $fin])->get();
-        $pagos   = Pago::whereBetween('created_at', [$inicio, $fin])->get();
+        $resumen = $this->nominaService->resumenEnRango($desde->toDateString(), $hasta->toDateString());
 
-        $totalVentas    = $pedidos->sum('total');
-        $totalPagos     = $pagos->sum('recibido');
-        $totalCambio    = $pagos->sum('cambio');
-        $cantidadPedidos = $pedidos->count();
+        $detalle = $resumen->map(fn(array $r) => [
+            'trabajador_id'    => $r['trabajador']->id,
+            'nombre'           => $r['trabajador']->nombre,
+            'dias_count'       => $r['dias_count'],
+            'total_pagar'      => $r['total_pagar'],
+            'total_descuentos' => $r['total_descuentos'],
+            'total_neto'       => $r['total_neto'],
+            'deuda_pendiente'  => $r['total_deuda_pendiente'],
+        ])->values();
 
         return response()->json([
-            'fecha'           => now()->toDateString(),
-            'total_ventas'    => $totalVentas,
-            'total_recibido'  => $totalPagos,
-            'total_cambio'    => $totalCambio,
-            'cantidad_pedidos' => $cantidadPedidos,
-            'promedio_pedido' => $cantidadPedidos > 0 ? round($totalVentas / $cantidadPedidos, 2) : 0,
+            'desde'                 => $desde->toDateString(),
+            'hasta'                 => $hasta->toDateString(),
+            'trabajadores_activos'  => $resumen->where('dias_count', '>', 0)->count(),
+            'total_bruto'           => $resumen->sum('total_pagar'),
+            'total_descuentos'      => $resumen->sum('total_descuentos'),
+            'total_neto'            => $resumen->sum('total_neto'),
+            'total_deuda_pendiente' => $resumen->sum('total_deuda_pendiente'),
+            'detalle'               => $detalle,
         ]);
     }
 }

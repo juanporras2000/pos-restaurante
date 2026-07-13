@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { fmtCOP } from './nominaUtils';
 
 const DIAS_ES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-
-function fmtCOP(pesos) {
-    return `$${Number(pesos).toLocaleString('es-CO')}`;
-}
 
 function inicioSemana(ref = new Date()) {
     const d = new Date(ref);
@@ -58,6 +55,8 @@ export default function ResumenSemanal() {
     const esSemanaActual = semanaInicio === inicioSemana();
 
     const totalSemana = resumen.reduce((sum, r) => sum + (r.total_pagar ?? 0), 0);
+    const totalDescuentos = resumen.reduce((sum, r) => sum + (r.total_descuentos ?? 0), 0);
+    const totalNeto = resumen.reduce((sum, r) => sum + (r.total_neto ?? 0), 0);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 w-full">
@@ -121,7 +120,8 @@ export default function ResumenSemanal() {
                                         );
                                     })}
                                     <th className="text-center py-2 px-2 font-semibold text-gray-700 w-16">Días</th>
-                                    <th className="text-right py-2 px-4 font-semibold text-gray-700 w-32">Total a pagar</th>
+                                    <th className="text-right py-2 px-4 font-semibold text-gray-700 w-28">Descuentos</th>
+                                    <th className="text-right py-2 px-4 font-semibold text-gray-700 w-32">Neto a pagar</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -136,6 +136,11 @@ export default function ResumenSemanal() {
                                                     <p className="font-medium text-gray-900 truncate">{row.trabajador.nombre}</p>
                                                     {row.trabajador.cargo && (
                                                         <p className="text-xs text-gray-400 truncate">{row.trabajador.cargo}</p>
+                                                    )}
+                                                    {row.total_deuda_pendiente > 0 && (
+                                                        <span className="inline-block mt-0.5 text-xs font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-700">
+                                                            Debe {fmtCOP(row.total_deuda_pendiente)}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
@@ -162,8 +167,15 @@ export default function ResumenSemanal() {
                                             </span>
                                         </td>
                                         <td className="text-right py-3 px-4">
-                                            <span className={`text-sm font-bold ${row.total_pagar > 0 ? 'text-blue-700' : 'text-gray-400'}`}>
-                                                {fmtCOP(row.total_pagar)}
+                                            {row.total_descuentos > 0 ? (
+                                                <span className="text-sm font-semibold text-amber-600">-{fmtCOP(row.total_descuentos)}</span>
+                                            ) : (
+                                                <span className="text-sm text-gray-300">—</span>
+                                            )}
+                                        </td>
+                                        <td className="text-right py-3 px-4">
+                                            <span className={`text-sm font-bold ${row.total_neto > 0 ? 'text-blue-700' : 'text-gray-400'}`}>
+                                                {fmtCOP(row.total_neto)}
                                             </span>
                                             <p className="text-xs text-gray-400">{fmtCOP(row.trabajador.pago_por_turno)}/día</p>
                                         </td>
@@ -174,12 +186,15 @@ export default function ResumenSemanal() {
                     </div>
 
                     {/* Total semana */}
-                    <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center px-1">
+                    <div className="mt-4 pt-4 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-1">
                         <div>
                             <p className="text-sm text-gray-500">Total nómina semanal</p>
-                            <p className="text-xs text-gray-400">{resumen.reduce((s, r) => s + r.dias_count, 0)} turnos en la semana</p>
+                            <p className="text-xs text-gray-400">
+                                {resumen.reduce((s, r) => s + r.dias_count, 0)} turnos
+                                {totalDescuentos > 0 && <> · {fmtCOP(totalSemana)} bruto − {fmtCOP(totalDescuentos)} descuentos</>}
+                            </p>
                         </div>
-                        <p className="text-2xl font-bold text-blue-700">{fmtCOP(totalSemana)}</p>
+                        <p className="text-2xl font-bold text-blue-700">{fmtCOP(totalNeto)}</p>
                     </div>
                 </>
             )}

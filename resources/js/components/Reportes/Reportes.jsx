@@ -5,33 +5,12 @@ import TablaReportes from './TablaReportes';
 import SelectorPeriodo from './SelectorPeriodo';
 import SeccionTipoPedido from './SeccionTipoPedido';
 import SeccionGastosIngresos from './SeccionGastosIngresos';
+import SeccionNomina from './SeccionNomina';
+import { Spinner, ErrorCard } from './EstadoCarga';
 import { useReporte } from '../../hooks/useReporte';
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
+import { fmtCOP as fmtQ } from '../../utils/format';
 
 // ─── Componentes UI de apoyo ──────────────────────────────────────────────────
-
-function Spinner() {
-    return (
-        <div className="flex items-center justify-center h-48">
-            <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-    );
-}
-
-function ErrorCard({ msg, onRetry }) {
-    return (
-        <div className="flex flex-col items-center justify-center h-48 gap-3 text-sm text-red-500">
-            <p>{msg}</p>
-            {onRetry && (
-                <button onClick={onRetry} className="px-3 py-1.5 text-xs font-medium bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100">
-                    Reintentar
-                </button>
-            )}
-        </div>
-    );
-}
 
 function SectionCard({ title, subtitle, children, action }) {
     return (
@@ -96,6 +75,7 @@ export default function Reportes() {
     const ganancias = useReporte('reportes/ganancias', params);
     const gastos = useReporte('reportes/gastos', params);
     const tipoPed = useReporte('reportes/tipo-pedido', params);
+    const nomina = useReporte('reportes/nomina', params);
 
     // ── Valores derivados ──────────────────────────────────────────────────────
     const totalVentas = ventas.data?.total_ventas ?? 0;
@@ -215,15 +195,15 @@ export default function Reportes() {
                     </SectionCard>
 
                     <SectionCard
-                        title="Ingresos vs Gastos"
+                        title="Ingresos, gastos y nómina"
                         subtitle="Balance estimado del período"
                         action={
-                            !gastos.loading && !ventas.loading && (
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${(totalVentas - (gastos.data?.total ?? 0)) >= 0
+                            !gastos.loading && !ventas.loading && !nomina.loading && (
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${(totalVentas - (gastos.data?.total ?? 0) - (nomina.data?.total_neto ?? 0)) >= 0
                                     ? 'bg-green-100 text-green-700'
                                     : 'bg-red-100 text-red-600'
                                     }`}>
-                                    {(totalVentas - (gastos.data?.total ?? 0)) >= 0 ? 'Positivo' : 'Negativo'}
+                                    {(totalVentas - (gastos.data?.total ?? 0) - (nomina.data?.total_neto ?? 0)) >= 0 ? 'Positivo' : 'Negativo'}
                                 </span>
                             )
                         }
@@ -231,12 +211,30 @@ export default function Reportes() {
                         <SeccionGastosIngresos
                             totalVentas={totalVentas}
                             gastos={gastos.data ?? {}}
-                            loading={gastos.loading || ventas.loading}
+                            nominaNeto={nomina.data?.total_neto ?? 0}
+                            loading={gastos.loading || ventas.loading || nomina.loading}
                             error={gastos.error}
                             onRetry={gastos.recargar}
                         />
                     </SectionCard>
                 </div>
+
+                {/* Nómina del período */}
+                <SectionCard
+                    title="Nómina"
+                    subtitle="Sueldos del período, ya descontando préstamos/compras pendientes"
+                    action={
+                        !nomina.loading && (nomina.data?.total_deuda_pendiente ?? 0) > 0 && (
+                            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+                                {fmtQ(nomina.data.total_deuda_pendiente)} en deudas pendientes
+                            </span>
+                        )
+                    }
+                >
+                    {nomina.loading ? <Spinner /> :
+                        nomina.error ? <ErrorCard msg={nomina.error} onRetry={nomina.recargar} /> :
+                            <SeccionNomina nomina={nomina.data} />}
+                </SectionCard>
 
                 {/* Ganancias estimadas */}
                 {!ganancias.loading && !ganancias.error && (

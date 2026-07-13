@@ -3,7 +3,6 @@
  */
 export const REPORT_CONFIG = {
     VENTAS: {
-        LIMITE_SUPERIOR: 2000000,
         INTERVALOS: 11,
         ANCHO_EJE_Y: 80,
     },

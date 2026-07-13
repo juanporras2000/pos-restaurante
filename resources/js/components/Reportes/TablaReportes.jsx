@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { TablaReportesPropTypes } from '../../propTypes';
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
+import { fmtCOP as fmtQ } from '../../utils/format';
 
 /**
  * TablaReportes

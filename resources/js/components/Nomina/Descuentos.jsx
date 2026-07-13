@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Swal from 'sweetalert2';
 import { TIPOS, fmtCOP, csrf, hoy } from './nominaUtils';
-import ModalAbono from './ModalAbono';
 
 function ModalNuevaDeuda({ trabajadores, trabajadorId, onGuardar, onCerrar }) {
     const [idTrabajador, setIdTrabajador] = useState(trabajadorId ?? '');
@@ -162,7 +161,6 @@ function ModalNuevaDeuda({ trabajadores, trabajadorId, onGuardar, onCerrar }) {
 
 function FilaDeuda({ deuda, onCambio }) {
     const [expandido, setExpandido] = useState(false);
-    const [modalAbono, setModalAbono] = useState(false);
     const pagada = deuda.estado === 'pagada';
 
     const eliminarDeuda = async () => {
@@ -235,13 +233,6 @@ function FilaDeuda({ deuda, onCambio }) {
                 </div>
 
                 <div className="flex items-center gap-1 flex-shrink-0">
-                    {!pagada && (
-                        <button type="button" onClick={() => setModalAbono(true)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Registrar descuento">
-                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 4v16m8-8H4" />
-                            </svg>
-                        </button>
-                    )}
                     <button type="button" onClick={eliminarDeuda} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar deuda">
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -256,16 +247,17 @@ function FilaDeuda({ deuda, onCambio }) {
                         <p className="text-xs text-gray-500 italic mb-2">{deuda.observaciones}</p>
                     )}
                     {(deuda.abonos ?? []).length === 0 ? (
-                        <p className="text-xs text-gray-400">Sin descuentos registrados aún.</p>
+                        <p className="text-xs text-gray-400">Sin descuentos aplicados aún.</p>
                     ) : (
                         <ul className="space-y-1.5">
                             {deuda.abonos.map((a) => (
                                 <li key={a.id} className="flex items-center justify-between text-xs">
                                     <span className="text-gray-500">
                                         {new Date(a.fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        {a.origen === 'manual' && <span className="ml-1.5 text-gray-400">(manual)</span>}
                                     </span>
                                     <span className="font-medium text-gray-900">{fmtCOP(a.monto)}</span>
-                                    <button type="button" onClick={() => eliminarAbono(a)} className="text-gray-300 hover:text-red-600 transition-colors" title="Eliminar descuento">
+                                    <button type="button" onClick={() => eliminarAbono(a)} className="text-gray-300 hover:text-red-600 transition-colors" title="Deshacer este descuento">
                                         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M18 6L6 18M6 6l12 12" />
                                         </svg>
@@ -275,10 +267,6 @@ function FilaDeuda({ deuda, onCambio }) {
                         </ul>
                     )}
                 </div>
-            )}
-
-            {modalAbono && (
-                <ModalAbono deudas={deuda} onCerrar={() => setModalAbono(false)} onGuardar={() => { setModalAbono(false); onCambio(); }} />
             )}
         </li>
     );

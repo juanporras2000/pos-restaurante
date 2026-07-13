@@ -17,6 +17,7 @@ class DeudaAbono extends Model
         'deuda_id',
         'monto',
         'fecha',
+        'origen',
     ];
 
     protected $casts = [

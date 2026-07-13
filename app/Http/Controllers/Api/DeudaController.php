@@ -74,6 +74,7 @@ class DeudaController extends Controller
                 'deuda_id' => $deuda->id,
                 'monto'    => $data['monto'],
                 'fecha'    => $data['fecha'],
+                'origen'   => 'manual',
             ]);
 
             $deuda->decrement('saldo', $data['monto']);

@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Api\TrabajadorController;
 use App\Http\Controllers\Api\AsistenciaController;
+use App\Http\Controllers\Api\DeudaController;
 
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
@@ -104,5 +105,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/asistencias/{asistencia}', [AsistenciaController::class, 'destroy']);
 
     Route::get('/nomina/resumen', [AsistenciaController::class, 'resumen']);
+
+    Route::get('/deudas', [DeudaController::class, 'index']);
+    Route::post('/deudas', [DeudaController::class, 'store']);
+    Route::delete('/deudas/{deuda}', [DeudaController::class, 'destroy']);
+    Route::post('/deudas/{deuda}/abonos', [DeudaController::class, 'storeAbono']);
+    Route::delete('/deuda-abonos/{abono}', [DeudaController::class, 'destroyAbono']);
 
 });

@@ -34,4 +34,9 @@ class Trabajador extends Model
     {
         return $this->asistencias()->whereBetween('fecha', [$inicio, $fin]);
     }
+
+    public function deudas(): HasMany
+    {
+        return $this->hasMany(Deuda::class);
+    }
 }

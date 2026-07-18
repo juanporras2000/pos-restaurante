@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\InventarioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\InventarioActualizado;
 
 class InventarioController extends Controller
 {
@@ -36,6 +37,8 @@ class InventarioController extends Controller
             Auth::id()
         );
 
+        $this->transmitirAlertasActuales();
+
         return response()->json($insumo);
     }
 
@@ -44,5 +47,14 @@ class InventarioController extends Controller
         $insumos = $this->inventarioService->obtenerAlertasStock();
 
         return response()->json($insumos);
+    }
+
+    public function transmitirAlertasActuales(): void
+    {
+        // Obtenemos la lista actualizada usando tu método existente
+        $alertas = $this->inventarioService->obtenerAlertasStock()->toArray();
+
+        // Despachamos el evento a través de Reverb
+        broadcast(new InventarioActualizado($alertas));
     }
 }

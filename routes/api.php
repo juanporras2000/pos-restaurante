@@ -23,14 +23,14 @@ use App\Http\Controllers\Api\DeudaController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('pagos', [PagoController::class, 'store']);
-    Route::patch('pagos/{pago}', [PagoController::class, 'update']);
-    Route::get('pedidos/pendientes', [PedidoController::class, 'pendientes']);
-    Route::get('pedidos/cerrados-hoy', [PedidoController::class, 'cerradosHoy']);
-    Route::post('pedidos', [PedidoController::class, 'store']);
-    Route::put('pedidos/{pedido}', [PedidoController::class, 'update']);
-    Route::delete('pedidos/{pedido}', [PedidoController::class, 'destroy']);
-    
+    Route::post('/pagos', [PagoController::class, 'store']);
+    Route::patch('/pagos/{pago}', [PagoController::class, 'update']);
+    Route::get('/pedidos/pendientes', [PedidoController::class, 'pendientes']);
+    Route::get('/pedidos/cerrados-hoy', [PedidoController::class, 'cerradosHoy']);
+    Route::post('/pedidos', [PedidoController::class, 'store']);
+    Route::put('/pedidos/{pedido}', [PedidoController::class, 'update']);
+    Route::delete('/pedidos/{pedido}', [PedidoController::class, 'destroy']);
+
     Route::get('/reportes/ventas',                [ReporteController::class, 'ventas']);
     Route::get('/reportes/ventas-por-fecha',      [ReporteController::class, 'ventasPorFecha']);
     Route::get('/reportes/productos-mas-vendidos',[ReporteController::class, 'productosTop']);

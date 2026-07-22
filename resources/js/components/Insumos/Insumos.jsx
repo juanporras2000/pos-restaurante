@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import ModalInsumo from './ModalInsumo';
 import ModalAjuste from './ModalAjuste';
 import ModalHistorial from './ModalHistorial';
+import axios from '../../services/axios'
 
 const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '', costo_unitario: '' };
 
@@ -19,9 +20,8 @@ export default function Insumos() {
 
     const cargar = useCallback(() => {
         setCargando(true);
-        fetch('/api/insumos')
-            .then((r) => r.json())
-            .then(setInsumos)
+        axios.get('/insumos')
+            .then((r) => setInsumos(r.data))
             .catch(() => Swal.fire('Error', 'No se pudieron cargar los insumos', 'error'))
             .finally(() => setCargando(false));
     }, []);
@@ -45,30 +45,30 @@ export default function Insumos() {
     const guardar = async (data) => {
         setGuardando(true);
         const esEdicion = Boolean(insumoActual.id);
-        const url = esEdicion ? `/api/insumos/${insumoActual.id}` : '/api/insumos';
+        const url = esEdicion ? `/insumos/${insumoActual.id}` : '/insumos';
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
         try {
-            const res = await fetch(url, {
-                method: esEdicion ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                body: JSON.stringify(data),
+            await axios({
+                method: esEdicion ? 'put' : 'post',
+                url,
+                headers: { 'X-CSRF-TOKEN': csrf },
+                data,
             });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                if (res.status === 422) {
-                    throw errorData; // Devolver errores para que react-hook-form los maneje
-                }
-                throw new Error(errorData.message ?? 'Error al guardar');
-            }
 
             cerrar();
             cargar();
             Swal.fire({ icon: 'success', title: esEdicion ? 'Insumo actualizado' : 'Insumo creado', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
-        } catch (err) {
-            if (err.errors) throw err; // Re-lanzar para el formulario
-            Swal.fire('Error', err.message ?? 'No se pudo guardar el insumo', 'error');
+        } catch (error) {
+            if (error.response) {
+                const errorData = error.response.data;
+                if (error.response.status === 422) {
+                    throw errorData; // Devolver errores para que react-hook-form los maneje
+                }
+                Swal.fire('Error', errorData.message ?? 'No se pudo guardar el insumo', 'error');
+                return;
+            }
+            Swal.fire('Error', 'No se pudo guardar el insumo', 'error');
         } finally {
             setGuardando(false);
         }
@@ -89,15 +89,17 @@ export default function Insumos() {
 
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/insumos/${ins.id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+            await axios.delete(`/insumos/${ins.id}`, {
+                headers: { 'X-CSRF-TOKEN': csrf },
             });
-            const data = await res.json();
-            if (!res.ok) { Swal.fire('No se puede eliminar', data.error ?? 'Error', 'error'); return; }
+
             cargar();
             Swal.fire({ icon: 'success', title: 'Insumo eliminado', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
-        } catch {
+        } catch (error) {
+            if (error.response && error.response.data) {
+                Swal.fire('No se puede eliminar', error.response.data.error ?? 'Error', 'error');
+                return;
+            }
             Swal.fire('Error', 'No se pudo eliminar el insumo', 'error');
         }
     };
@@ -141,188 +143,188 @@ export default function Insumos() {
 
             {/* Tabla */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full min-w-0">
-    {cargando ? (
-        <div className="p-12 text-center text-gray-500">Cargando insumos...</div>
-    ) : filtrados.length === 0 ? (
-        <div className="p-12 text-center">
-            <svg className="h-14 w-14 text-gray-300 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"></path>
-                <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
-            </svg>
-            <p className="text-gray-500 font-medium">{buscar ? 'Sin resultados para la búsqueda' : 'No hay insumos registrados'}</p>
-            {!buscar && <p className="text-gray-400 text-sm mt-1">Crea el primero con el botón de arriba</p>}
-        </div>
-    ) : (
-        <>
-            {/* =========================================================================
+                {cargando ? (
+                    <div className="p-12 text-center text-gray-500">Cargando insumos...</div>
+                ) : filtrados.length === 0 ? (
+                    <div className="p-12 text-center">
+                        <svg className="h-14 w-14 text-gray-300 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                            <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"></path>
+                            <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
+                        </svg>
+                        <p className="text-gray-500 font-medium">{buscar ? 'Sin resultados para la búsqueda' : 'No hay insumos registrados'}</p>
+                        {!buscar && <p className="text-gray-400 text-sm mt-1">Crea el primero con el botón de arriba</p>}
+                    </div>
+                ) : (
+                    <>
+                        {/* =========================================================================
                 1. VISTA PARA MÓVILES (Tarjetas/Cards)
                 - Se activa por defecto y se destruye en pantallas grandes (sm:hidden).
                ========================================================================= */}
-            <div className="block sm:hidden divide-y divide-gray-100">
-                {filtrados.map((ins) => {
-                    const bajo = parseFloat(ins.stock_actual) <= parseFloat(ins.stock_minimo) && parseFloat(ins.stock_minimo) > 0;
-                    return (
-                        <div key={ins.id} className="p-4 space-y-3">
-                            {/* Línea superior: Nombre del Insumo y Unidad de Medida */}
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="min-w-0">
-                                    <p className="font-bold text-gray-900 text-sm break-words">{ins.nombre}</p>
-                                </div>
-                                <span className="inline-flex items-center flex-shrink-0 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-700 font-mono">
-                                    {ins.unidad_medida}
-                                </span>
-                            </div>
+                        <div className="block sm:hidden divide-y divide-gray-100">
+                            {filtrados.map((ins) => {
+                                const bajo = parseFloat(ins.stock_actual) <= parseFloat(ins.stock_minimo) && parseFloat(ins.stock_minimo) > 0;
+                                return (
+                                    <div key={ins.id} className="p-4 space-y-3">
+                                        {/* Línea superior: Nombre del Insumo y Unidad de Medida */}
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <p className="font-bold text-gray-900 text-sm break-words">{ins.nombre}</p>
+                                            </div>
+                                            <span className="inline-flex items-center flex-shrink-0 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-700 font-mono">
+                                                {ins.unidad_medida}
+                                            </span>
+                                        </div>
 
-                            {/* Bloque central: Datos de stock alineados simétricamente */}
-                            <div className="grid grid-cols-2 gap-2 bg-gray-50/50 p-2.5 rounded-lg border border-gray-100 text-xs">
-                                <div>
-                                    <p className="text-gray-400 uppercase tracking-wider text-[10px]">Stock Actual</p>
-                                    <p className="font-semibold text-gray-900 mt-0.5 text-sm tabular-nums">
-                                        {parseFloat(ins.stock_actual).toFixed(2)}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-gray-400 uppercase tracking-wider text-[10px]">Stock Mínimo</p>
-                                    <p className="font-medium text-gray-600 mt-0.5 text-sm tabular-nums">
-                                        {parseFloat(ins.stock_minimo).toFixed(2)}
-                                    </p>
-                                </div>
-                            </div>
+                                        {/* Bloque central: Datos de stock alineados simétricamente */}
+                                        <div className="grid grid-cols-2 gap-2 bg-gray-50/50 p-2.5 rounded-lg border border-gray-100 text-xs">
+                                            <div>
+                                                <p className="text-gray-400 uppercase tracking-wider text-[10px]">Stock Actual</p>
+                                                <p className="font-semibold text-gray-900 mt-0.5 text-sm tabular-nums">
+                                                    {parseFloat(ins.stock_actual).toFixed(2)}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-gray-400 uppercase tracking-wider text-[10px]">Stock Mínimo</p>
+                                                <p className="font-medium text-gray-600 mt-0.5 text-sm tabular-nums">
+                                                    {parseFloat(ins.stock_minimo).toFixed(2)}
+                                                </p>
+                                            </div>
+                                        </div>
 
-                            {/* Línea inferior: Estado (Badge) y Botones de Acción optimizados para el dedo */}
-                            <div className="flex items-center justify-between gap-2 pt-1">
-                                <div>
-                                    {bajo ? (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
-                                            </svg>
-                                            Bajo
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                            OK
-                                        </span>
-                                    )}
-                                </div>
+                                        {/* Línea inferior: Estado (Badge) y Botones de Acción optimizados para el dedo */}
+                                        <div className="flex items-center justify-between gap-2 pt-1">
+                                            <div>
+                                                {bajo ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                            <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+                                                        </svg>
+                                                        Bajo
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                                        OK
+                                                    </span>
+                                                )}
+                                            </div>
 
-                                {/* Botonera móvil: Área táctil expandida */}
-                                <div className="flex items-center gap-1">
-                                    <button type="button" onClick={() => setInsumoHistorial(ins)}
-                                        className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100 bg-white" title="Ver historial">
-                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button" onClick={() => setInsumoAjuste(ins)}
-                                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors border border-green-100 bg-white" title="Ajustar stock">
-                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M12 4v16m8-8H4"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button" onClick={() => abrirEditar(ins)}
-                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100 bg-white" title="Editar">
-                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button" onClick={() => eliminar(ins)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 bg-white" title="Eliminar">
-                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                                            {/* Botonera móvil: Área táctil expandida */}
+                                            <div className="flex items-center gap-1">
+                                                <button type="button" onClick={() => setInsumoHistorial(ins)}
+                                                    className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100 bg-white" title="Ver historial">
+                                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button type="button" onClick={() => setInsumoAjuste(ins)}
+                                                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors border border-green-100 bg-white" title="Ajustar stock">
+                                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                </button>
+                                                <button type="button" onClick={() => abrirEditar(ins)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100 bg-white" title="Editar">
+                                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                                                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button type="button" onClick={() => eliminar(ins)}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 bg-white" title="Eliminar">
+                                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    );
-                })}
-            </div>
 
-            {/* =========================================================================
+                        {/* =========================================================================
                 2. VISTA PARA PANTALLAS GRANDES (Tabla Clásica)
                 - Se mantiene oculta en móviles (hidden) y se restaura en PC (sm:table).
                ========================================================================= */}
-            <table className="w-full text-sm hidden sm:table">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                        <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Nombre</th>
-                        <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Unidad</th>
-                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock actual</th>
-                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock mínimo</th>
-                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Estado</th>
-                        <th className="px-6 py-3"></th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                    {filtrados.map((ins) => {
-                        const bajo = parseFloat(ins.stock_actual) <= parseFloat(ins.stock_minimo) && parseFloat(ins.stock_minimo) > 0;
-                        return (
-                            <tr key={ins.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 font-medium text-gray-900">{ins.nombre}</td>
-                                <td className="px-6 py-4 text-gray-600">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700 font-mono">
-                                        {ins.unidad_medida}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-right font-medium text-gray-900 tabular-nums">
-                                    {parseFloat(ins.stock_actual).toFixed(2)}
-                                </td>
-                                <td className="px-6 py-4 text-right text-gray-500 tabular-nums">
-                                    {parseFloat(ins.stock_minimo).toFixed(2)}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    {bajo ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
-                                            </svg>
-                                            Stock bajo
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                            OK
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex justify-end gap-2">
-                                        <button type="button" onClick={() => setInsumoHistorial(ins)}
-                                            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors" title="Ver historial">
-                                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </button>
-                                        <button type="button" onClick={() => setInsumoAjuste(ins)}
-                                            className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors" title="Ajustar stock">
-                                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M12 4v16m8-8H4"></path>
-                                            </svg>
-                                        </button>
-                                        <button type="button" onClick={() => abrirEditar(ins)}
-                                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Editar">
-                                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg>
-                                        </button>
-                                        <button type="button" onClick={() => eliminar(ins)}
-                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Eliminar">
-                                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
-        </>
-    )}
-</div>
+                        <table className="w-full text-sm hidden sm:table">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Nombre</th>
+                                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Unidad</th>
+                                    <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock actual</th>
+                                    <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock mínimo</th>
+                                    <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Estado</th>
+                                    <th className="px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {filtrados.map((ins) => {
+                                    const bajo = parseFloat(ins.stock_actual) <= parseFloat(ins.stock_minimo) && parseFloat(ins.stock_minimo) > 0;
+                                    return (
+                                        <tr key={ins.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4 font-medium text-gray-900">{ins.nombre}</td>
+                                            <td className="px-6 py-4 text-gray-600">
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700 font-mono">
+                                                    {ins.unidad_medida}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-medium text-gray-900 tabular-nums">
+                                                {parseFloat(ins.stock_actual).toFixed(2)}
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-gray-500 tabular-nums">
+                                                {parseFloat(ins.stock_minimo).toFixed(2)}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                {bajo ? (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                                        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+                                                        </svg>
+                                                        Stock bajo
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                        OK
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex justify-end gap-2">
+                                                    <button type="button" onClick={() => setInsumoHistorial(ins)}
+                                                        className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors" title="Ver historial">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <button type="button" onClick={() => setInsumoAjuste(ins)}
+                                                        className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors" title="Ajustar stock">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M12 4v16m8-8H4"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <button type="button" onClick={() => abrirEditar(ins)}
+                                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Editar">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                                                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <button type="button" onClick={() => eliminar(ins)}
+                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Eliminar">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </>
+                )}
+            </div>
 
             <ModalInsumo
                 abierto={modalAbierto}

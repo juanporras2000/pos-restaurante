@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
+import axios from '../services/axios';
 /**
  * useReporte
  * Responsabilidad única: gestionar el ciclo fetch → loading → data → error
@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
  * @param {object} params   - Query params que se convierten a ?key=value
  */
 export function useReporte(endpoint, params = {}) {
-    const [data,    setData]    = useState(null);
+    const [data,     setData]    = useState(null);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState(null);
 
@@ -19,16 +19,16 @@ export function useReporte(endpoint, params = {}) {
         setLoading(true);
         setError(null);
 
-        const qs  = new URLSearchParams(params).toString();
-        const url = `/api/${endpoint}${qs ? '?' + qs : ''}`;
-
-        fetch(url)
+        // Axios se encarga automáticamente de serializar el objeto 'params' en la URL
+        axios.get(`/${endpoint}`, { params })
             .then((res) => {
-                if (!res.ok) throw new Error(`Error ${res.status}`);
-                return res.json();
+                setData(res.data);
             })
-            .then(setData)
-            .catch((e) => setError(e.message))
+            .catch((e) => {
+                // Captura el mensaje de error del servidor o el de Axios por defecto
+                const msg = e.response?.data?.message || `Error ${e.response?.status || e.message}`;
+                setError(msg);
+            })
             .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [endpoint, paramsKey]);

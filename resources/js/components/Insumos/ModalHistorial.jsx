@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ModalHistorialPropTypes } from '../../propTypes';
+import axios from '../../services/axios'
 
 const TIPO_CLASE = {
     entrada: 'bg-green-100 text-green-700',
@@ -15,10 +16,9 @@ export default function ModalHistorial({ abierto, insumo, onCerrar }) {
     useEffect(() => {
         if (!abierto || !insumo) return;
         setCargando(true);
-        fetch(`/api/inventario/movimientos?insumo_id=${insumo.id}&per_page=30`)
-            .then((r) => r.json())
-            .then((d) => setMovimientos(d.data ?? []))
-            .catch(() => {})
+        axios.get(`/inventario/movimientos?insumo_id=${insumo.id}&per_page=30`)
+            .then((r) => setMovimientos(r.data.data ?? []))
+            .catch(() => { })
             .finally(() => setCargando(false));
     }, [abierto, insumo]);
 

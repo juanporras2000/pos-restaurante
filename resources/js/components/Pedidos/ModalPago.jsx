@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useImprimir } from '../../hooks/useImprimir';
 import { ModalPagoPropTypes } from '../../propTypes';
+import axios from '../../services/axios'
 
 const MILES = 1000;
 
@@ -51,9 +52,9 @@ const METODOS = [
 ];
 
 const METODO_LABEL = {
-    efectivo:      'Efectivo',
-    nequi:         'Nequi',
-    tarjeta:       'Tarjeta',
+    efectivo: 'Efectivo',
+    nequi: 'Nequi',
+    tarjeta: 'Tarjeta',
     transferencia: 'Transferencia',
 };
 
@@ -65,27 +66,27 @@ const toast = (icon, title, timer = 2000) =>
 export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
     // Modo simple
     const [metodoPago, setMetodoPago] = useState('efectivo');
-    const [recibido, setRecibido]     = useState('');
+    const [recibido, setRecibido] = useState('');
 
     // Modo dividido
-    const [modoDividido, setModoDividido]     = useState(false);
-    const [splits, setSplits]                 = useState([]);
-    const [splitMetodo, setSplitMetodo]       = useState('efectivo');
-    const [splitMonto, setSplitMonto]         = useState('');
-    const [splitRecibido, setSplitRecibido]   = useState('');
+    const [modoDividido, setModoDividido] = useState(false);
+    const [splits, setSplits] = useState([]);
+    const [splitMetodo, setSplitMetodo] = useState('efectivo');
+    const [splitMonto, setSplitMonto] = useState('');
+    const [splitRecibido, setSplitRecibido] = useState('');
 
     const [procesando, setProcesando] = useState(false);
     const { imprimir } = useImprimir();
 
-    const total         = pedido ? Number.parseFloat(pedido.total) : 0;
-    const recibidoNum   = (Number.parseFloat(recibido) || 0) * MILES;
-    const cambioSimple  = recibidoNum - total;
+    const total = pedido ? Number.parseFloat(pedido.total) : 0;
+    const recibidoNum = (Number.parseFloat(recibido) || 0) * MILES;
+    const cambioSimple = recibidoNum - total;
 
-    const totalSplits   = splits.reduce((s, sp) => s + sp.monto, 0);
-    const restante      = Math.max(0, total - totalSplits);
+    const totalSplits = splits.reduce((s, sp) => s + sp.monto, 0);
+    const restante = Math.max(0, total - totalSplits);
     const splitMontoNum = (Number.parseFloat(splitMonto) || 0) * MILES;
-    const splitRecNum   = (Number.parseFloat(splitRecibido) || 0) * MILES;
-    const splitCambio   = splitMetodo === 'efectivo' ? splitRecNum - splitMontoNum : 0;
+    const splitRecNum = (Number.parseFloat(splitRecibido) || 0) * MILES;
+    const splitCambio = splitMetodo === 'efectivo' ? splitRecNum - splitMontoNum : 0;
 
     const cerrar = () => {
         setMetodoPago('efectivo');
@@ -120,9 +121,9 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
 
         setSplits([...splits, {
             metodo_pago: splitMetodo,
-            monto:       splitMontoNum,
-            recibido:    splitMetodo === 'efectivo' ? splitRecNum : splitMontoNum,
-            cambio:      Math.max(0, splitCambio),
+            monto: splitMontoNum,
+            recibido: splitMetodo === 'efectivo' ? splitRecNum : splitMontoNum,
+            cambio: Math.max(0, splitCambio),
         }]);
         setSplitMonto('');
         setSplitRecibido('');
@@ -144,7 +145,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
         setProcesando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
-        const body = modoDividido
+        const payload = modoDividido
             ? {
                 pedido_id: pedido.id,
                 splits: splits.map(({ metodo_pago, monto, recibido: r }) => ({
@@ -152,26 +153,19 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                 })),
             }
             : {
-                pedido_id:  pedido.id,
-                recibido:   metodoPago === 'efectivo' ? recibidoNum : total,
+                pedido_id: pedido.id,
+                recibido: metodoPago === 'efectivo' ? recibidoNum : total,
                 metodo_pago: metodoPago,
             };
 
         try {
-            const res  = await fetch('/api/pagos', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body:    JSON.stringify(body),
+            const res = await axios.post('/pagos', payload, {
+                headers: { 'X-CSRF-TOKEN': csrfToken },
             });
-            const data = await res.json();
 
-            if (!res.ok) {
-                toast('error', data.error || 'Error al procesar el pago', 2500);
-                console.log(data);
-                return;
-            }
-
+            const data = res.data;
             const cambioTotal = parseFloat(data.cambio ?? 0);
+
             toast(
                 'success',
                 cambioTotal > 0 ? `Pago procesado. Cambio: $${cambioTotal.toLocaleString('es-CO')}` : 'Pago procesado exitosamente',
@@ -196,7 +190,13 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
             });
 
             if (isConfirmed) imprimir(pedidoPagado);
-        } catch {
+        } catch (error) {
+            if (error.response && error.response.data) {
+                const data = error.response.data;
+                toast('error', data.error || 'Error al procesar el pago', 2500);
+                console.log(data);
+                return;
+            }
             toast('error', 'Error al procesar el pago');
         } finally {
             setProcesando(false);
@@ -254,11 +254,10 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                         <button
                             type="button"
                             onClick={toggleDividido}
-                            className={`w-full py-2 px-4 rounded-xl border-2 text-sm font-semibold transition-all ${
-                                modoDividido
+                            className={`w-full py-2 px-4 rounded-xl border-2 text-sm font-semibold transition-all ${modoDividido
                                     ? 'border-purple-500 bg-purple-50 text-purple-700'
                                     : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                            }`}
+                                }`}
                         >
                             {modoDividido ? '✕ Cancelar pago dividido' : '⇌ Dividir pago (múltiples métodos)'}
                         </button>
@@ -274,11 +273,10 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                 key={value}
                                                 type="button"
                                                 onClick={() => { setMetodoPago(value); setRecibido(''); }}
-                                                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
-                                                    metodoPago === value
+                                                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${metodoPago === value
                                                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                                                         : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                                                }`}
+                                                    }`}
                                             >
                                                 {icon}
                                                 <span className="text-xs font-semibold">{label}</span>
@@ -362,11 +360,10 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                     key={value}
                                                     type="button"
                                                     onClick={() => { setSplitMetodo(value); setSplitRecibido(''); }}
-                                                    className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ${
-                                                        splitMetodo === value
+                                                    className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ${splitMetodo === value
                                                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                                                             : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {icon}
                                                     <span className="text-xs font-semibold">{label}</span>
@@ -417,11 +414,10 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                     <p className="mt-0.5 text-xs text-gray-400">= ${fmt(splitRecNum)}</p>
                                                 )}
                                                 {splitRecNum > 0 && splitCambio !== 0 && (
-                                                    <div className={`mt-1.5 p-2 rounded-lg border text-sm font-semibold ${
-                                                        splitCambio >= 0
+                                                    <div className={`mt-1.5 p-2 rounded-lg border text-sm font-semibold ${splitCambio >= 0
                                                             ? 'bg-green-50 border-green-200 text-green-700'
                                                             : 'bg-red-50 border-red-200 text-red-600'
-                                                    }`}>
+                                                        }`}>
                                                         {splitCambio >= 0 ? 'Cambio: ' : 'Falta: '}${fmt(Math.abs(splitCambio))}
                                                     </div>
                                                 )}

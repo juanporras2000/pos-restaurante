@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { invalidarCacheConfiguracion } from '../../hooks/useImprimir';
+import axios from '../../services/axios'
 
 export default function AjustesGenerales() {
     const [recargoDomicilio, setRecargoDomicilio] = useState('');
@@ -13,16 +14,16 @@ export default function AjustesGenerales() {
     const [errores, setErrores] = useState({});
 
     useEffect(() => {
-        fetch('/api/configuraciones')
-            .then((r) => r.json())
-            .then((data) => {
-                const cfg = Object.fromEntries(data.map((c) => [c.clave, c.valor]));
+        axios.get('/configuraciones')
+            .then((respuesta) => {
+                const cfg = Object.fromEntries(respuesta.data.map((c) => [c.clave, c.valor]));
                 setRecargoDomicilio(cfg.recargo_domicilio ? String(parseFloat(cfg.recargo_domicilio) / 1000) : '0');
                 setHoraCierre(cfg.hora_cierre ?? '5');
                 setNombreNegocio(cfg.nombre_negocio ?? '');
                 setTelefonoNegocio(cfg.telefono_negocio ?? '');
                 setDireccionNegocio(cfg.direccion_negocio ?? '');
             })
+            .catch((error) => console.error("Error al cargar configuraciones:", error))
             .finally(() => setCargando(false));
     }, []);
 
@@ -48,25 +49,16 @@ export default function AjustesGenerales() {
         setErrores({});
         setGuardando(true);
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-
         try {
-            const res = await fetch('/api/configuraciones', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                },
-                body: JSON.stringify({
-                    recargo_domicilio: (parseFloat(recargoDomicilio) || 0) * 1000,
-                    hora_cierre: parseInt(horaCierre),
-                    nombre_negocio: nombreNegocio.trim(),
-                    telefono_negocio: telefonoNegocio.trim(),
-                    direccion_negocio: direccionNegocio.trim(),
-                }),
+            const res = await axios.put('/configuraciones', {
+                recargo_domicilio: (parseFloat(recargoDomicilio) || 0) * 1000,
+                hora_cierre: parseInt(horaCierre),
+                nombre_negocio: nombreNegocio.trim(),
+                telefono_negocio: telefonoNegocio.trim(),
+                direccion_negocio: direccionNegocio.trim(),
             });
 
-            if (!res.ok) throw new Error('Error al guardar');
+            if (res.status != 200) throw new Error('Error al guardar');
 
             // Invalidar caché para que el próximo recibo tome los nuevos datos
             invalidarCacheConfiguracion();

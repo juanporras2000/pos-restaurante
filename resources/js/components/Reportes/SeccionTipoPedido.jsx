@@ -2,15 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ShoppingBagIcon, TruckIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import { CHART_PALETTE } from '../../constants';
+import { fmtCOP as fmtQ } from '../../utils/format';
+import { ErrorCard } from './EstadoCarga';
 
 const TIPO_CONFIG = {
     mesa:      { label: 'Mesa',      Icon: BuildingStorefrontIcon, color: CHART_PALETTE[0] },
     domicilio: { label: 'Domicilio', Icon: TruckIcon,              color: CHART_PALETTE[1] },
     recoger:   { label: 'Para llevar', Icon: ShoppingBagIcon,      color: CHART_PALETTE[2] },
 };
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
 
 /**
  * Barra de progreso simple para cada tipo de pedido.
@@ -64,18 +63,7 @@ export default function SeccionTipoPedido({ tipos = [], totalPedidos = 0, loadin
         );
     }
 
-    if (error) {
-        return (
-            <div className="flex flex-col items-center gap-2 py-8 text-sm text-red-500">
-                <p>{error}</p>
-                {onRetry && (
-                    <button onClick={onRetry} className="text-xs px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100">
-                        Reintentar
-                    </button>
-                )}
-            </div>
-        );
-    }
+    if (error) return <ErrorCard msg={error} onRetry={onRetry} />;
 
     if (!tipos.length) {
         return <p className="text-center py-8 text-sm text-gray-400">Sin pedidos en este período</p>;

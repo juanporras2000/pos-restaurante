@@ -9,11 +9,9 @@ import {
 } from 'recharts';
 import { REPORT_CONFIG, CHART_PALETTE } from '../../constants';
 import { GraficaLineaPropTypes, GraficaBarraPropTypes, GraficaPiePropTypes } from '../../propTypes';
+import { fmtCOP as fmtQ } from '../../utils/format';
 
 const PALETTE = CHART_PALETTE;
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
 
 // ─── Tooltip personalizado ────────────────────────────────────────────────────
 function CustomTooltip({ active, payload, label, currency = false }) {
@@ -67,7 +65,7 @@ export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label 
                     tickLine={false}
                 />
                 <YAxis
-                    domain={[0, REPORT_CONFIG.VENTAS.LIMITE_SUPERIOR]}
+                    domain={[0, 'dataMax']}
                     tickCount={REPORT_CONFIG.VENTAS.INTERVALOS}
                     tickFormatter={(v) => fmtQ(v)}
                     tick={{ fontSize: 11, fill: '#94a3b8' }}

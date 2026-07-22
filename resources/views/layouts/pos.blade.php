@@ -142,6 +142,21 @@
                     </a>
                 @endif
 
+                {{-- ID 8: Nómina --}}
+                @if (in_array(8, $permisosIds))
+                    <a href="/nomina"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('nomina') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('nomina') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            aria-hidden="true">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"></path>
+                        </svg>
+                        Nómina
+                    </a>
+                @endif
+
             </nav>
 
             {{-- Alertas de stock bajo --}}

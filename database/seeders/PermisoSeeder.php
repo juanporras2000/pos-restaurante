@@ -20,16 +20,15 @@ class PermisoSeeder extends Seeder
             ['id_permiso' => 4, 'descripcion' => 'Gastos y apertura de caja'],
             ['id_permiso' => 5, 'descripcion' => 'Insumos'],
             ['id_permiso' => 6, 'descripcion' => 'Configuración'],
-            ['id_permiso' => 7, 'descripcion' => 'Historial del día']
+            ['id_permiso' => 7, 'descripcion' => 'Historial del día'],
+            ['id_permiso' => 8, 'descripcion' => 'Nómina'],
         ];
 
         foreach ($permisos as $permiso) {
-            DB::table('permiso')->updateOrInsert([
-                'id_permiso'  => $permiso['id_permiso'],
-                'descripcion' => $permiso['descripcion'],
-                'created_at'  => now(),
-                'updated_at'  => now()
-            ]);
+            DB::table('permiso')->updateOrInsert(
+                ['id_permiso' => $permiso['id_permiso']],
+                ['descripcion' => $permiso['descripcion'], 'updated_at' => now()]
+            );
         }
     }
 }

@@ -4,16 +4,15 @@ namespace App\Services;
 
 use App\Models\Pedido;
 use App\Models\PedidoDetalle;
-use App\Models\Pago;
 use App\Models\PagoDetalle;
 use App\Models\Gasto;
-use App\Models\Insumo;
-use App\Models\MovimientoInventario;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ReporteService
 {
+    public function __construct(private readonly NominaService $nominaService) {}
+
     /**
      * Construye la serie temporal de ventas y su comparativa con el periodo anterior.
      */
@@ -106,23 +105,6 @@ class ReporteService
     }
 
     /**
-     * Obtiene el resumen de ingresos brutos y netos recibidos en caja.
-     */
-    public function obtenerResumenIngresos(Carbon $desde, Carbon $hasta): array
-    {
-        $pagos = Pago::whereBetween('created_at', [$desde, $hasta]);
-
-        return [
-            'desde'          => $desde->toDateString(),
-            'hasta'          => $hasta->toDateString(),
-            'total_recibido' => round((clone $pagos)->sum('recibido'), 2),
-            'total_cambio'   => round((clone $pagos)->sum('cambio'), 2),
-            'neto'           => round((clone $pagos)->sum(DB::raw('recibido - cambio')), 2),
-            'amount_pagos'   => (clone $pagos)->count(),
-        ];
-    }
-
-    /**
      * Calcula la ganancia estimada cruzando la venta contra el costo de insumos configurados.
      */
     public function obtenerGananciaEstimada(Carbon $desde, Carbon $hasta): array
@@ -171,56 +153,6 @@ class ReporteService
             'desde'   => $desde->toDateString(),
             'hasta'   => $hasta->toDateString(),
             'metodos' => $metodos,
-        ];
-    }
-
-    /**
-     * Devuelve el consolidado de stock actual e insumos en estado crítico.
-     */
-    public function obtenerEstadoStockInsumos(bool $soloAlertas): array
-    {
-        $query = Insumo::select('id', 'nombre', 'unidad_medida', 'stock_actual', 'stock_minimo')
-            ->orderBy('nombre');
-
-        if ($soloAlertas) {
-            $query->whereColumn('stock_actual', '<=', 'stock_minimo');
-        }
-
-        $insumos = $query->get()->map(function ($insumo) {
-            $insumo->alerta = $insumo->stock_actual <= $insumo->stock_minimo;
-            return $insumo;
-        });
-
-        return [
-            'total'     => $insumos->count(),
-            'en_alerta' => $insumos->where('alerta', true)->count(),
-            'insumos'   => $insumos,
-        ];
-    }
-
-    /**
-     * Ranking de explotación y consumo de insumos en cocina.
-     */
-    public function obtenerInsumosTop(Carbon $desde, Carbon $hasta, int $limit = 10): array
-    {
-        $insumos = MovimientoInventario::whereBetween('movimientos_inventario.created_at', [$desde, $hasta])
-            ->where('tipo', 'consumo')
-            ->join('insumos', 'movimientos_inventario.insumo_id', '=', 'insumos.id')
-            ->select(
-                'insumos.id',
-                'insumos.nombre',
-                'insumos.unidad_medida',
-                DB::raw('SUM(ABS(movimientos_inventario.cantidad)) as total_usado')
-            )
-            ->groupBy('insumos.id', 'insumos.nombre', 'insumos.unidad_medida')
-            ->orderByDesc('total_usado')
-            ->limit($limit)
-            ->get();
-
-        return [
-            'desde'   => $desde->toDateString(),
-            'hasta'   => $hasta->toDateString(),
-            'insumos' => $insumos,
         ];
     }
 
@@ -281,28 +213,31 @@ class ReporteService
     }
 
     /**
-     * Cierre arqueado básico del día (Legacy).
+     * Nómina del período: bruto, descuentos aplicados por deudas y neto a pagar por trabajador.
      */
-    public function obtenerReporteDiarioLegacy(): array
+    public function obtenerResumenNomina(Carbon $desde, Carbon $hasta): array
     {
-        $inicio = now()->startOfDay()->utc();
-        $fin    = now()->endOfDay()->utc();
+        $resumen = $this->nominaService->resumenEnRango($desde->toDateString(), $hasta->toDateString());
 
-        $pedidos = Pedido::whereBetween('created_at', [$inicio, $fin])->get();
-        $pagos   = Pago::whereBetween('created_at', [$inicio, $fin])->get();
-
-        $totalVentas     = $pedidos->sum('total');
-        $totalPagos      = $pagos->sum('recibido');
-        $totalCambio     = $pagos->sum('cambio');
-        $cantidadPedidos = $pedidos->count();
+        $detalle = $resumen->map(fn(array $r) => [
+            'trabajador_id'    => $r['trabajador']->id,
+            'nombre'           => $r['trabajador']->nombre,
+            'dias_count'       => $r['dias_count'],
+            'total_pagar'      => $r['total_pagar'],
+            'total_descuentos' => $r['total_descuentos'],
+            'total_neto'       => $r['total_neto'],
+            'deuda_pendiente'  => $r['total_deuda_pendiente'],
+        ])->values();
 
         return [
-            'fecha'            => now()->toDateString(),
-            'total_ventas'     => $totalVentas,
-            'total_recibido'   => $totalPagos,
-            'total_cambio'     => $totalCambio,
-            'cantidad_pedidos' => $cantidadPedidos,
-            'promedio_pedido'  => $cantidadPedidos > 0 ? round($totalVentas / $cantidadPedidos, 2) : 0,
+            'desde'                 => $desde->toDateString(),
+            'hasta'                 => $hasta->toDateString(),
+            'trabajadores_activos'  => $resumen->where('dias_count', '>', 0)->count(),
+            'total_bruto'           => $resumen->sum('total_pagar'),
+            'total_descuentos'      => $resumen->sum('total_descuentos'),
+            'total_neto'            => $resumen->sum('total_neto'),
+            'total_deuda_pendiente' => $resumen->sum('total_deuda_pendiente'),
+            'detalle'               => $detalle,
         ];
     }
 

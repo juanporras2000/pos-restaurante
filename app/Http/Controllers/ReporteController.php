@@ -47,15 +47,6 @@ class ReporteController extends Controller
         return response()->json($resultado);
     }
 
-    public function ingresos(Request $request)
-    {
-        [$desde, $hasta] = $this->rango($request);
-
-        $resultado = $this->reporteService->obtenerResumenIngresos($desde, $hasta);
-
-        return response()->json($resultado);
-    }
-
     public function ganancias(Request $request)
     {
         [$desde, $hasta] = $this->rango($request);
@@ -70,28 +61,6 @@ class ReporteController extends Controller
         [$desde, $hasta] = $this->rango($request);
 
         $resultado = $this->reporteService->obtenerMetodosPago($desde, $hasta);
-
-        return response()->json($resultado);
-    }
-
-    public function stockInsumos(Request $request)
-    {
-        $soloAlertas = filter_var($request->query('alertas', false), FILTER_VALIDATE_BOOLEAN);
-
-        $resultado = $this->reporteService->obtenerEstadoStockInsumos($soloAlertas);
-
-        return response()->json($resultado);
-    }
-
-    public function insumosTop(Request $request)
-    {
-        [$desde, $hasta] = $this->rango($request);
-
-        $resultado = $this->reporteService->obtenerInsumosTop(
-            $desde,
-            $hasta,
-            (int) $request->query('limit', 10)
-        );
 
         return response()->json($resultado);
     }
@@ -120,9 +89,11 @@ class ReporteController extends Controller
         return response()->json($resultado);
     }
 
-    public function diario()
+    public function nomina(Request $request)
     {
-        $resultado = $this->reporteService->obtenerReporteDiarioLegacy();
+        [$desde, $hasta] = $this->rango($request);
+
+        $resultado = $this->reporteService->obtenerResumenNomina($desde, $hasta);
 
         return response()->json($resultado);
     }

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { ShoppingBagIcon, TruckIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import { CHART_PALETTE } from '../../constants';
 import { fmtCOP } from '../../utils/format';
+import { ErrorCard } from './EstadoCarga';
 
 const TIPO_CONFIG = {
     mesa:      { label: 'Mesa',      Icon: BuildingStorefrontIcon, color: CHART_PALETTE[0] },
@@ -62,18 +63,7 @@ export default function SeccionTipoPedido({ tipos = [], totalPedidos = 0, loadin
         );
     }
 
-    if (error) {
-        return (
-            <div className="flex flex-col items-center gap-2 py-8 text-sm text-red-500">
-                <p>{error}</p>
-                {onRetry && (
-                    <button onClick={onRetry} className="text-xs px-3 py-1.5 bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100">
-                        Reintentar
-                    </button>
-                )}
-            </div>
-        );
-    }
+    if (error) return <ErrorCard msg={error} onRetry={onRetry} />;
 
     if (!tipos.length) {
         return <p className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">Sin pedidos en este período</p>;

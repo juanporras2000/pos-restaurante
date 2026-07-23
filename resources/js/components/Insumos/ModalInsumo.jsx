@@ -6,9 +6,9 @@ import { ModalInsumosPropTypes } from '../../propTypes';
 import Modal from '../shared/Modal';
 import IconButton from '../shared/IconButton';
 
-const INSUMO_VACIO = { 
-    id: null, nombre: '', unidad_medida: '', 
-    stock_actual: '', stock_minimo: '', 
+const INSUMO_VACIO = {
+    id: null, nombre: '', unidad_medida: '',
+    stock_actual: '', stock_minimo: '',
     costo_unitario: '', valor_producto: ''
 };
 const UNIDADES = ['gr', 'kg', 'ml', 'lt', 'unidad', 'porción', 'oz', 'lb'];
@@ -45,15 +45,16 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
 
     const stockActual    = useWatch({ control, name: 'stock_actual' });
     const valorProducto  = useWatch({ control, name: 'valor_producto' });
+
     useEffect(() => {
-        // Solo recalcular cuando el usuario ingresó un valor_producto explícito.
-        // Si está vacío (modo edición sin modificar el campo), conservar el valor cargado.
         if (valorProducto === '' || valorProducto === null || valorProducto === undefined) return;
         const stock = Number.parseFloat(stockActual)  || 0;
         const valor = Number.parseFloat(valorProducto) || 0;
         const costo = stock > 0 ? Number.parseFloat((valor / stock).toFixed(4)) : 0;
         setValue('costo_unitario', costo);
     }, [stockActual, valorProducto, setValue]);
+
+
     useEffect(() => {
         if (abierto) {
             reset(insumo.id

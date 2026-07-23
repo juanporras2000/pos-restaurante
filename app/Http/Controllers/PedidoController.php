@@ -50,6 +50,10 @@ class PedidoController extends Controller
             // Se delega toda la lógica de negocio al servicio
             $pedido = $pedidoService->crearPedido($request->all());
 
+            broadcast(new \App\Events\InventarioActualizado(
+                \App\Models\Insumo::whereColumn('stock_actual', '<=', 'stock_minimo')->where('stock_minimo', '>', 0)->orderBy('nombre')->get()->toArray()
+            ));
+
             return response()->json([
                 'mensaje' => 'Pedido creado correctamente',
                 'pedido'  => $pedido->load('perfil'),
@@ -90,6 +94,10 @@ class PedidoController extends Controller
 
             event(new \App\Events\PedidoActualizado($pedidoActualizado));
 
+            broadcast(new \App\Events\InventarioActualizado(
+                \App\Models\Insumo::whereColumn('stock_actual', '<=', 'stock_minimo')->where('stock_minimo', '>', 0)->orderBy('nombre')->get()->toArray()
+            ));
+
             return response()->json([
                 'mensaje' => 'Pedido actualizado correctamente',
                 'pedido'  => $pedidoActualizado->load('detalles.producto', 'perfil'),
@@ -124,6 +132,10 @@ class PedidoController extends Controller
             $pedidoService->eliminarPedido($pedido, $request->razon_eliminacion);
 
             event(new \App\Events\PedidoEliminado($pedido));
+
+            broadcast(new \App\Events\InventarioActualizado(
+                \App\Models\Insumo::whereColumn('stock_actual', '<=', 'stock_minimo')->where('stock_minimo', '>', 0)->orderBy('nombre')->get()->toArray()
+            ));
 
             return response()->json(['mensaje' => 'Pedido eliminado correctamente y stock restaurado con éxito.']);
 

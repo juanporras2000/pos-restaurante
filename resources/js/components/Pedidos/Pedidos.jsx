@@ -4,6 +4,7 @@ import HistorialPedidos from './HistorialPedidos';
 import { PedidoMesa } from './PedidoMesa';
 import { PedidoDomicilio } from './PedidoDomicilio';
 import { PedidoRecoger } from './PedidoRecoger';
+import axios from '../../services/axios'
 
 export default function Pedidos() {
     const audioNotificacion = useRef(new Audio('/sounds/notificacion-pedido.mp3'));
@@ -22,20 +23,16 @@ export default function Pedidos() {
     const permiso = permisosPerfilActivo.find(p => p.descripcion == 'Historial del día')
 
     const cargarProductos = useCallback(() => {
-        fetch('/api/productos?todos=1')
-            .then((r) => r.json())
-            .then((data) => setProductos(data.map((p) => ({ ...p, precio: parseFloat(p.precio) }))))
+        axios.get('/productos?todos=1')
+            .then((r) => setProductos(r.data.map((p) => ({ ...p, precio: parseFloat(p.precio) }))))
             .catch(() => { });
     }, []);
-
 
     const cargarPendientes = useCallback(() => {
-        fetch('/api/pedidos/pendientes')
-            .then((r) => r.json())
-            .then(setPedidosPendientes)
+        axios.get('/pedidos/pendientes')
+            .then((r) => setPedidosPendientes(r.data))
             .catch(() => { });
     }, []);
-
 
     useEffect(() => {
         cargarProductos();

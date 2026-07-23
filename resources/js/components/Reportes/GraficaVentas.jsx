@@ -84,7 +84,7 @@ export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label 
                     tickLine={false}
                 />
                 <YAxis
-                    domain={[0, REPORT_CONFIG.VENTAS.LIMITE_SUPERIOR]}
+                    domain={[0, 'dataMax']}
                     tickCount={REPORT_CONFIG.VENTAS.INTERVALOS}
                     tickFormatter={(v) => fmtCOP(v)}
                     tick={{ fontSize: 11, fill: colors.axis }}

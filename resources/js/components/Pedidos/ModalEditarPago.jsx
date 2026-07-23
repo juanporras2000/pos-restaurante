@@ -3,17 +3,18 @@ import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import { METODO_ETIQUETA } from './historialUtils';
 import IconButton from '../shared/IconButton';
+import axios from '../../services/axios'
 
 const METODOS = [
     { value: 'efectivo', label: 'Efectivo' },
-    { value: 'nequi',    label: 'Nequi' },
-    { value: 'tarjeta',  label: 'Tarjeta de crédito/débito' },
+    { value: 'nequi', label: 'Nequi' },
+    { value: 'tarjeta', label: 'Tarjeta de crédito/débito' },
     { value: 'transferencia', label: 'Transferencia' },
 ];
 
 export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerrar }) {
     const [metodoPago, setMetodoPago] = useState('efectivo');
-    const [guardando, setGuardando]   = useState(false);
+    const [guardando, setGuardando] = useState(false);
 
     useEffect(() => {
         if (abierto && pedido?.pago?.metodo_pago) {
@@ -31,28 +32,11 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
         }
 
         setGuardando(true);
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
         try {
-            const res = await fetch(`/api/pagos/${pedido.pago.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ metodo_pago: metodoPago }),
+            const res = await axios.patch(`/pagos/${pedido.pago.id}`, {
+                metodo_pago: metodoPago
             });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                Swal.fire({
-                    icon: 'error',
-                    title: data.error || 'Error al actualizar el método de pago',
-                    timer: 2500,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end',
-                });
-                return;
-            }
 
             Swal.fire({
                 icon: 'success',
@@ -63,13 +47,19 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                 position: 'top-end',
             });
 
-            onActualizado(pedido.id, data.pago);
+            onActualizado(pedido.id, res.data.pago);
             onCerrar();
-        } catch {
+        } catch (error) {
+            let msgError = 'Error de conexión. Intenta de nuevo.';
+
+            if (error.response && error.response.data) {
+                msgError = error.response.data.error || 'Error al actualizar el método de pago';
+            }
+
             Swal.fire({
                 icon: 'error',
-                title: 'Error de conexión. Intenta de nuevo.',
-                timer: 2000,
+                title: msgError,
+                timer: 2500,
                 showConfirmButton: false,
                 toast: true,
                 position: 'top-end',
@@ -82,7 +72,7 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
     if (!abierto || !pedido) return null;
 
     const metodoActual = pedido.pago?.metodo_pago;
-    const esMixto      = metodoActual === 'mixto';
+    const esMixto = metodoActual === 'mixto';
 
     return (
         <div
@@ -172,15 +162,15 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
 }
 
 ModalEditarPago.propTypes = {
-    abierto:       PropTypes.bool.isRequired,
-    pedido:        PropTypes.shape({
-        id:          PropTypes.number,
-        numero_dia:  PropTypes.number,
-        pago:        PropTypes.shape({
-            id:          PropTypes.number,
+    abierto: PropTypes.bool.isRequired,
+    pedido: PropTypes.shape({
+        id: PropTypes.number,
+        numero_dia: PropTypes.number,
+        pago: PropTypes.shape({
+            id: PropTypes.number,
             metodo_pago: PropTypes.string,
         }),
     }),
     onActualizado: PropTypes.func.isRequired,
-    onCerrar:      PropTypes.func.isRequired,
+    onCerrar: PropTypes.func.isRequired,
 };

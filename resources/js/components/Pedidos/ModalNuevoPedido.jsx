@@ -5,6 +5,7 @@ import Carrito from './Carrito';
 import IconButton from '../shared/IconButton';
 import { DANGER } from '../../utils/colors';
 import { ModalNuevoPedidoPropTypes } from '../../propTypes';
+import axios from '../../services/axios'
 
 const PEDIDO_VACIO = {
     tipo: 'mesa',
@@ -26,15 +27,13 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
     // Cargar configuraciones y adiciones
     useEffect(() => {
         if (abierto) {
-            fetch('/api/configuraciones')
-                .then((r) => r.json())
-                .then(setConfiguraciones)
-                .catch(() => {});
+            axios.get('/configuraciones')
+                .then((r) => setConfiguraciones(r.data))
+                .catch(() => { });
 
-            fetch('/api/adiciones')
-                .then((r) => r.json())
-                .then(setAdicionesDisponibles)
-                .catch(() => {});
+            axios.get('/adiciones')
+                .then((r) => setAdicionesDisponibles(r.data))
+                .catch(() => { });
         }
     }, [abierto]);
 
@@ -94,20 +93,20 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                 const existe = adiciones.find((a) => a.adicion_id === adicion.id);
                 const nuevasAdiciones = existe
                     ? adiciones.map((a) =>
-                          a.adicion_id === adicion.id
-                              ? { ...a, cantidad: a.cantidad + 1, subtotal: (a.cantidad + 1) * a.precio }
-                              : a
-                      )
+                        a.adicion_id === adicion.id
+                            ? { ...a, cantidad: a.cantidad + 1, subtotal: (a.cantidad + 1) * a.precio }
+                            : a
+                    )
                     : [
-                          ...adiciones,
-                          {
-                              adicion_id: adicion.id,
-                              nombre: adicion.nombre,
-                              precio: parseFloat(adicion.precio),
-                              cantidad: 1,
-                              subtotal: parseFloat(adicion.precio),
-                          },
-                      ];
+                        ...adiciones,
+                        {
+                            adicion_id: adicion.id,
+                            nombre: adicion.nombre,
+                            precio: parseFloat(adicion.precio),
+                            cantidad: 1,
+                            subtotal: parseFloat(adicion.precio),
+                        },
+                    ];
                 return { ...item, adiciones: nuevasAdiciones };
             })
         );
@@ -124,10 +123,10 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     existe.cantidad === 1
                         ? adiciones.filter((a) => a.adicion_id !== adicion.id)
                         : adiciones.map((a) =>
-                              a.adicion_id === adicion.id
-                                  ? { ...a, cantidad: a.cantidad - 1, subtotal: (a.cantidad - 1) * a.precio }
-                                  : a
-                          );
+                            a.adicion_id === adicion.id
+                                ? { ...a, cantidad: a.cantidad - 1, subtotal: (a.cantidad - 1) * a.precio }
+                                : a
+                        );
                 return { ...item, adiciones: nuevasAdiciones };
             })
         );
@@ -208,53 +207,53 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         setEnviando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
-        const body = JSON.stringify({
-            tipo: pedido.tipo,
-            numero_mesa: pedido.numero_mesa || null,
-            direccion: pedido.direccion || null,
-            nombre_cliente: pedido.nombre_cliente?.trim() || null,
-            id_perfil: idPerfil,
-            productos: carrito.map((item) => ({
-                producto_id: item.id,
-                cantidad: item.cantidad,
-                precio: item.precio,
-                observacion: item.nota?.trim() || null,
-                adiciones: (item.adiciones ?? []).map((a) => ({
-                    adicion_id: a.adicion_id,
-                    nombre: a.nombre,
-                    precio: a.precio,
-                    cantidad: a.cantidad,
-                })),
-            })),
-        });
-
-        const url = esEdicion ? `/api/pedidos/${pedidoEditar.id}` : '/api/pedidos';
-        const method = esEdicion ? 'PUT' : 'POST';
+        const url = esEdicion ? `/pedidos/${pedidoEditar.id}` : '/pedidos';
+        const method = esEdicion ? 'put' : 'post';
 
         try {
-            const res = await fetch(url, {
+            await axios({
                 method,
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body,
+                url,
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                data: {
+                    tipo: pedido.tipo,
+                    numero_mesa: pedido.numero_mesa || null,
+                    direccion: pedido.direccion || null,
+                    nombre_cliente: pedido.nombre_cliente?.trim() || null,
+                    id_perfil: idPerfil,
+                    productos: carrito.map((item) => ({
+                        producto_id: item.id,
+                        cantidad: item.cantidad,
+                        precio: item.precio,
+                        observacion: item.nota?.trim() || null,
+                        adiciones: (item.adiciones ?? []).map((a) => ({
+                            adicion_id: a.adicion_id,
+                            nombre: a.nombre,
+                            precio: a.precio,
+                            cantidad: a.cantidad,
+                        })),
+                    })),
+                },
             });
 
-            if (res.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: esEdicion ? 'Pedido actualizado exitosamente' : 'Pedido creado exitosamente',
-                    timer: 1800, showConfirmButton: false, toast: true, position: 'top-end',
-                });
+            Swal.fire({
+                icon: 'success',
+                title: esEdicion ? 'Pedido actualizado exitosamente' : 'Pedido creado exitosamente',
+                timer: 1800, showConfirmButton: false, toast: true, position: 'top-end',
+            });
 
-                if (esEdicion) {
-                    setActualizado(!actualizado);
-                }
-                
-                cerrar();
-                onCreado();
-            } else {
-                const data = await res.json();
-                if (res.status === 422 && data.faltantes?.length) {
-                    // Stock insuficiente — mostrar detalle de insumos faltantes
+            if (esEdicion) {
+                setActualizado(!actualizado);
+            }
+
+            cerrar();
+            onCreado();
+        } catch (error) {
+            if (error.response) {
+                const data = error.response.data;
+
+                // Stock insuficiente — mostrar detalle de insumos faltantes
+                if (error.response.status === 422 && data.faltantes?.length) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Stock insuficiente',
@@ -262,11 +261,15 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                         confirmButtonText: 'Entendido',
                         confirmButtonColor: DANGER,
                     });
-                } else {
-                    Swal.fire({ icon: 'error', title: data.error || 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                    return;
                 }
+
+                // Otro tipo de error controlado devuelto por el servidor
+                Swal.fire({ icon: 'error', title: data.error || 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                return;
             }
-        } catch {
+
+            // Error de red o conexión sin respuesta
             Swal.fire({ icon: 'error', title: 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setEnviando(false);

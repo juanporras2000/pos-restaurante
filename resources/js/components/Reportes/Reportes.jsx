@@ -5,24 +5,12 @@ import TablaReportes from './TablaReportes';
 import SelectorPeriodo from './SelectorPeriodo';
 import SeccionTipoPedido from './SeccionTipoPedido';
 import SeccionGastosIngresos from './SeccionGastosIngresos';
+import SeccionNomina from './SeccionNomina';
+import { Spinner, ErrorCard } from './EstadoCarga';
 import { useReporte } from '../../hooks/useReporte';
 import { fmtCOP } from '../../utils/format';
-import Spinner from '../shared/Spinner';
 
 // ─── Componentes UI de apoyo ──────────────────────────────────────────────────
-
-function ErrorCard({ msg, onRetry }) {
-    return (
-        <div className="flex flex-col items-center justify-center h-48 gap-3 text-sm text-red-500">
-            <p>{msg}</p>
-            {onRetry && (
-                <button onClick={onRetry} className="px-3 py-1.5 text-xs font-medium bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100">
-                    Reintentar
-                </button>
-            )}
-        </div>
-    );
-}
 
 function SectionCard({ title, subtitle, children, action }) {
     return (
@@ -87,6 +75,7 @@ export default function Reportes() {
     const ganancias = useReporte('reportes/ganancias', params);
     const gastos = useReporte('reportes/gastos', params);
     const tipoPed = useReporte('reportes/tipo-pedido', params);
+    const nomina = useReporte('reportes/nomina', params);
 
     // ── Valores derivados ──────────────────────────────────────────────────────
     const totalVentas = ventas.data?.total_ventas ?? 0;
@@ -101,8 +90,8 @@ export default function Reportes() {
                 <div className="flex flex-col justify-center items-center sm:flex-row lg:items-start lg:justify-between gap-4">
                     <div className='flex-1'>
                         <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center lg:justify-normal gap-3">
-                            <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
+                            <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
                             </svg>
 
                             Métrica de Reportes
@@ -206,15 +195,15 @@ export default function Reportes() {
                     </SectionCard>
 
                     <SectionCard
-                        title="Ingresos vs Gastos"
+                        title="Ingresos, gastos y nómina"
                         subtitle="Balance estimado del período"
                         action={
-                            !gastos.loading && !ventas.loading && (
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${(totalVentas - (gastos.data?.total ?? 0)) >= 0
+                            !gastos.loading && !ventas.loading && !nomina.loading && (
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${(totalVentas - (gastos.data?.total ?? 0) - (nomina.data?.total_neto ?? 0)) >= 0
                                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                     : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                                     }`}>
-                                    {(totalVentas - (gastos.data?.total ?? 0)) >= 0 ? 'Positivo' : 'Negativo'}
+                                    {(totalVentas - (gastos.data?.total ?? 0) - (nomina.data?.total_neto ?? 0)) >= 0 ? 'Positivo' : 'Negativo'}
                                 </span>
                             )
                         }
@@ -222,12 +211,30 @@ export default function Reportes() {
                         <SeccionGastosIngresos
                             totalVentas={totalVentas}
                             gastos={gastos.data ?? {}}
-                            loading={gastos.loading || ventas.loading}
+                            nominaNeto={nomina.data?.total_neto ?? 0}
+                            loading={gastos.loading || ventas.loading || nomina.loading}
                             error={gastos.error}
                             onRetry={gastos.recargar}
                         />
                     </SectionCard>
                 </div>
+
+                {/* Nómina del período */}
+                <SectionCard
+                    title="Nómina"
+                    subtitle="Sueldos del período, ya descontando préstamos/compras pendientes"
+                    action={
+                        !nomina.loading && (nomina.data?.total_deuda_pendiente ?? 0) > 0 && (
+                            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+                                {fmtCOP(nomina.data.total_deuda_pendiente)} en deudas pendientes
+                            </span>
+                        )
+                    }
+                >
+                    {nomina.loading ? <Spinner /> :
+                        nomina.error ? <ErrorCard msg={nomina.error} onRetry={nomina.recargar} /> :
+                            <SeccionNomina nomina={nomina.data} />}
+                </SectionCard>
 
                 {/* Ganancias estimadas */}
                 {!ganancias.loading && !ganancias.error && (

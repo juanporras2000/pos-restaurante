@@ -41,9 +41,10 @@
             </div>
 
             @php
-                $perfilActivo = \App\Models\Perfil::with('permisos')->find(session('id_perfil'));
-                $permisosIds = $perfilActivo ? $perfilActivo->permisos->pluck('id_permiso')->toArray() : [];
+                $permisosIds = session('permisos_ids', []);
             @endphp
+
+
 
             <nav class="mt-6 space-y-1 flex-1 px-4">
 
@@ -272,34 +273,58 @@
     @stack('scripts')
 
     <script>
-        (function() {
-            function cargarAlertas() {
-                fetch('/api/inventario/alertas')
+        document.addEventListener('DOMContentLoaded', function() {
+            (function() {
+                // Función centralizada para actualizar el DOM con el array de alertas
+                function actualizarInterfazAlertas(data) {
+                    var caja = document.getElementById('stock-alertas');
+                    var texto = document.getElementById('stock-alertas-texto');
+                    if (!caja || !texto) return;
+
+                    if (data && data.length > 0) {
+                        texto.textContent = data.length === 1 ?
+                            data[0].nombre + ': stock bajo' :
+                            data.length + ' insumos con stock bajo';
+                        caja.classList.remove('hidden');
+                    } else {
+                        caja.classList.add('hidden');
+                    }
+                }
+
+                // 1. Carga inicial al refrescar o entrar por primera vez
+                axios.get('/inventario/alertas')
                     .then(function(r) {
-                        return r.json();
-                    })
-                    .then(function(data) {
-                        var caja = document.getElementById('stock-alertas');
-                        var texto = document.getElementById('stock-alertas-texto');
-                        if (!caja || !texto) return;
-                        if (data.length > 0) {
-                            texto.textContent = data.length === 1 ?
-                                data[0].nombre + ': stock bajo' :
-                                data.length + ' insumos con stock bajo';
-                            caja.classList.remove('hidden');
-                        } else {
-                            caja.classList.add('hidden');
-                        }
+                        actualizarInterfazAlertas(r.data);
                     })
                     .catch(function() {});
-            }
-            cargarAlertas();
-            setInterval(cargarAlertas, 60000);
-        })();
+
+                // 2. Conexión reactiva por WebSockets vía Laravel Echo
+                if (window.Echo) {
+                    // Escuchamos el canal público
+                    let canal = window.Echo.channel('inventario-channel');
+
+                    canal.listen('inventario.actualizado', function(e) {
+                        if (e && e.alertas) actualizarInterfazAlertas(e.alertas);
+                    });
+
+                    // Opción B: Escucha con la convención de clases de Laravel (por si acaso)
+                    canal.listen('.App\\Events\\InventarioActualizado', function(e) {
+                        if (e && e.alertas) actualizarInterfazAlertas(e.alertas);
+                    });
+
+                    // Auditoría: Si entra en la pestaña Network, esto lo va a cazar sí o sí
+                    canal.listenToAll(function(nombreEvento, datos) {
+                        // Si los datos vienen envueltos directamente en el evento
+                        if (datos && datos.alertas) {
+                            actualizarInterfazAlertas(datos.alertas);
+                        }
+                    });
+                }
+            })();
+        });
 
         function cerrarPerfilFronend() {
             localStorage.removeItem('perfil_activo');
-
             document.getElementById('form-logout-perfil').submit();
         }
     </script>

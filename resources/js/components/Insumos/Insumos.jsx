@@ -1,9 +1,10 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import ModalInsumo from './ModalInsumo';
 import ModalAjuste from './ModalAjuste';
 import ModalHistorial from './ModalHistorial';
 import { DANGER, NEUTRAL } from '../../utils/colors';
+import axios from '../../services/axios'
 
 const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '', costo_unitario: '' };
 
@@ -21,9 +22,8 @@ export default function Insumos() {
 
     const cargar = useCallback(() => {
         setCargando(true);
-        fetch('/api/insumos')
-            .then((r) => r.json())
-            .then(setInsumos)
+        axios.get('/insumos')
+            .then((r) => setInsumos(r.data))
             .catch(() => Swal.fire('Error', 'No se pudieron cargar los insumos', 'error'))
             .finally(() => setCargando(false));
     }, []);
@@ -47,30 +47,30 @@ export default function Insumos() {
     const guardar = async (data) => {
         setGuardando(true);
         const esEdicion = Boolean(insumoActual.id);
-        const url = esEdicion ? `/api/insumos/${insumoActual.id}` : '/api/insumos';
+        const url = esEdicion ? `/insumos/${insumoActual.id}` : '/insumos';
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
         try {
-            const res = await fetch(url, {
-                method: esEdicion ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                body: JSON.stringify(data),
+            await axios({
+                method: esEdicion ? 'put' : 'post',
+                url,
+                headers: { 'X-CSRF-TOKEN': csrf },
+                data,
             });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                if (res.status === 422) {
-                    throw errorData; // Devolver errores para que react-hook-form los maneje
-                }
-                throw new Error(errorData.message ?? 'Error al guardar');
-            }
 
             cerrar();
             cargar();
             Swal.fire({ icon: 'success', title: esEdicion ? 'Insumo actualizado' : 'Insumo creado', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
-        } catch (err) {
-            if (err.errors) throw err; // Re-lanzar para el formulario
-            Swal.fire('Error', err.message ?? 'No se pudo guardar el insumo', 'error');
+        } catch (error) {
+            if (error.response) {
+                const errorData = error.response.data;
+                if (error.response.status === 422) {
+                    throw errorData; // Devolver errores para que react-hook-form los maneje
+                }
+                Swal.fire('Error', errorData.message ?? 'No se pudo guardar el insumo', 'error');
+                return;
+            }
+            Swal.fire('Error', 'No se pudo guardar el insumo', 'error');
         } finally {
             setGuardando(false);
         }
@@ -92,15 +92,17 @@ export default function Insumos() {
         setEliminandoId(ins.id);
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/insumos/${ins.id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+            await axios.delete(`/insumos/${ins.id}`, {
+                headers: { 'X-CSRF-TOKEN': csrf },
             });
-            const data = await res.json();
-            if (!res.ok) { Swal.fire('No se puede eliminar', data.error ?? 'Error', 'error'); return; }
+
             cargar();
             Swal.fire({ icon: 'success', title: 'Insumo eliminado', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
-        } catch {
+        } catch (error) {
+            if (error.response && error.response.data) {
+                Swal.fire('No se puede eliminar', error.response.data.error ?? 'Error', 'error');
+                return;
+            }
             Swal.fire('Error', 'No se pudo eliminar el insumo', 'error');
         } finally {
             setEliminandoId(null);
@@ -241,11 +243,11 @@ export default function Insumos() {
                                 </div>
                             </div>
                         </div>
-                    );
+                        );
                 })}
-            </div>
+                        </div>
 
-            {/* =========================================================================
+                        {/* =========================================================================
                 2. VISTA PARA PANTALLAS GRANDES (Tabla Clásica)
                 - Se mantiene oculta en móviles (hidden) y se restaura en PC (sm:table).
                ========================================================================= */}
@@ -352,4 +354,3 @@ export default function Insumos() {
         </div>
     );
 }
-

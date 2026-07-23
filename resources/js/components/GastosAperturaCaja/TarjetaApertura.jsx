@@ -3,10 +3,10 @@ import Swal from 'sweetalert2';
 import { fmt } from './constants';
 
 export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) {
-    const [editando, setEditando]     = useState(!apertura);
-    const [monto, setMonto]           = useState(apertura ? String(Number.parseFloat(apertura.monto) / 1000) : '');
-    const [nota, setNota]             = useState(apertura?.nota ?? '');
-    const [guardando, setGuardando]   = useState(false);
+    const [editando, setEditando] = useState(!apertura);
+    const [monto, setMonto] = useState(apertura ? String(Number.parseFloat(apertura.monto) / 1000) : '');
+    const [nota, setNota] = useState(apertura?.nota ?? '');
+    const [guardando, setGuardando] = useState(false);
 
     useEffect(() => {
         setEditando(!apertura);
@@ -22,15 +22,16 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
         setGuardando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch('/api/caja-apertura', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ fecha, monto: montoNum * 1000, nota: nota.trim() || null }),
+            const res = await axios.post('/caja-apertura', {
+                fecha,
+                monto: montoNum * 1000,
+                nota: nota.trim() || null,
+            }, {
+                headers: { 'X-CSRF-TOKEN': csrfToken },
             });
-            if (!res.ok) throw new Error();
-            const data = await res.json();
+
             setEditando(false);
-            onGuardado(data);
+            onGuardado(res.data);
             Swal.fire({ icon: 'success', title: 'Base de caja guardada', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
         } catch {
             Swal.fire({ icon: 'error', title: 'Error al guardar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
@@ -106,7 +107,7 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
                 </svg>
                 {apertura ? 'Editar base de apertura de caja' : '¿Con cuánto inicia la caja hoy?'}
             </p>
-            <form onSubmit={guardar} className="flex flex-wrap items-end gap-3">
+            <form onSubmit={guardar} className="flex flex-wrap gap-3">
                 <div className="flex-1 min-w-36">
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Monto inicial</label>
                     <div className="relative">

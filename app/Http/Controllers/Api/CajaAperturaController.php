@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CajaApertura;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class CajaAperturaController extends Controller
 {
@@ -33,7 +34,7 @@ class CajaAperturaController extends Controller
             [
                 'monto'   => $data['monto'],
                 'nota'    => $data['nota'] ?? null,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]
         );
 

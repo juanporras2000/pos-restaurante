@@ -8,11 +8,17 @@ use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(
-            Categoria::withCount('productos')->orderBy('nombre')->get()
-        );
+        // 1. Preparamos la consulta base con el conteo de productos ordenado por nombre
+        $query = Categoria::withCount('productos')->orderBy('nombre');
+
+        if (!$request->boolean('paginado')) {
+            return response()->json($query->get());
+        }
+
+        $perPage = $request->integer('per_page', 15);
+        return response()->json($query->paginate($perPage));
     }
 
     public function store(Request $request)

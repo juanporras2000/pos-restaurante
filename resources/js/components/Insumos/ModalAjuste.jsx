@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import { ModalAjustePropTypes } from '../../propTypes';
 import Modal from '../shared/Modal';
 import IconButton from '../shared/IconButton';
+import axios from '../../services/axios'
 
 export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     const [tipo, setTipo] = useState('entrada');
@@ -22,16 +23,23 @@ export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
         setGuardando(true);
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch('/api/inventario/ajuste', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                body: JSON.stringify({ insumo_id: insumo.id, tipo, cantidad: cant, motivo: motivo.trim() || null }),
+            await axios.post('/inventario/ajuste', {
+                insumo_id: insumo.id,
+                tipo,
+                cantidad: cant,
+                motivo: motivo.trim() || null,
+            }, {
+                headers: { 'X-CSRF-TOKEN': csrf },
             });
-            if (!res.ok) { const d = await res.json(); Swal.fire('Error', d.message ?? 'Error', 'error'); return; }
+
             Swal.fire({ icon: 'success', title: tipo === 'entrada' ? 'Stock agregado' : 'Stock ajustado', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
             onCerrar();
             onGuardado();
-        } catch {
+        } catch (error) {
+            if (error.response && error.response.data) {
+                Swal.fire('Error', error.response.data.message ?? 'Error', 'error');
+                return;
+            }
             Swal.fire('Error', 'No se pudo guardar', 'error');
         } finally {
             setGuardando(false);

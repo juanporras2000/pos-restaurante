@@ -7,38 +7,39 @@ import ModalGasto from './ModalGasto';
 import ResumenTarjetas from './ResumenTarjetas';
 import FiltrosGasto from './FiltrosGasto';
 import TablaGastos from './TablaGastos';
+import axios from '../../services/axios'
 
 export default function Gastos() {
-    const [gastos, setGastos]             = useState([]);
-    const [total, setTotal]               = useState(0);
-    const [apertura, setApertura]         = useState(null);
-    const [cargando, setCargando]         = useState(true);
+    const [gastos, setGastos] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [apertura, setApertura] = useState(null);
+    const [cargando, setCargando] = useState(true);
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [gastoEditar, setGastoEditar]   = useState(null);
-    const [fecha, setFecha]               = useState(fechaLocal);
-    const [filtroTipo, setFiltroTipo]     = useState('todos');
+    const [gastoEditar, setGastoEditar] = useState(null);
+    const [fecha, setFecha] = useState(fechaLocal);
+    const [filtroTipo, setFiltroTipo] = useState('todos');
 
     const esHoy = fecha === fechaLocal();
 
     const cargar = useCallback(() => {
         setCargando(true);
         Promise.all([
-            fetch(`/api/gastos?fecha=${fecha}`).then((r) => r.json()),
-            fetch(`/api/caja-apertura/${fecha}`).then((r) => r.json()),
+            axios.get(`/gastos?fecha=${fecha}`).then((r) => r.data),
+            axios.get(`/caja-apertura/${fecha}`).then((r) => r.data),
         ])
             .then(([gastoData, aperturaData]) => {
                 setGastos(gastoData.gastos ?? []);
                 setTotal(gastoData.total ?? 0);
                 setApertura(aperturaData ?? null);
             })
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => setCargando(false));
     }, [fecha]);
 
     useEffect(() => { cargar(); }, [cargar]);
 
-    const abrirNuevo  = () => { setGastoEditar(null); setModalAbierto(true); };
-    const abrirEditar = (g) => { setGastoEditar(g);   setModalAbierto(true); };
+    const abrirNuevo = () => { setGastoEditar(null); setModalAbierto(true); };
+    const abrirEditar = (g) => { setGastoEditar(g); setModalAbierto(true); };
 
     const handleGuardado = () => {
         setModalAbierto(false);
@@ -68,11 +69,10 @@ export default function Gastos() {
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/gastos/${g.id}`, {
-                method: 'DELETE',
+            await axios.delete(`/gastos/${g.id}`, {
                 headers: { 'X-CSRF-TOKEN': csrfToken },
             });
-            if (!res.ok) throw new Error();
+
             Swal.fire({ icon: 'success', title: 'Gasto eliminado', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
             cargar();
         } catch {

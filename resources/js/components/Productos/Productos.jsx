@@ -32,26 +32,27 @@ export default function Productos() {
 
     // Cargar categorías e insumos al montar
     useEffect(() => {
-        fetch('/api/categorias')
-            .then((r) => r.json())
-            .then(setCategorias)
-            .catch(() => {});
-        fetch('/api/insumos')
-            .then((r) => r.json())
-            .then(setInsumos)
-            .catch(() => {});
+        axios.get('/categorias')
+            .then((r) => setCategorias(r.data))
+            .catch(() => { });
+
+        axios.get('/insumos')
+            .then((r) => setInsumos(r.data))
+            .catch(() => { });
     }, []);
 
     // Cargar productos cuando cambia búsqueda, categoría o página
     const cargarProductos = useCallback(() => {
         setCargando(true);
-        const params = new URLSearchParams({ page: paginaActual });
-        if (buscar.trim()) params.append('buscar', buscar.trim());
-        if (categoriaFiltro) params.append('categoria_id', categoriaFiltro);
 
-        fetch(`/api/productos?${params}`)
-            .then((r) => r.json())
-            .then((data) => {
+        // Construimos el objeto de parámetros de forma dinámica
+        const params = { page: paginaActual };
+        if (buscar.trim()) params.buscar = buscar.trim();
+        if (categoriaFiltro) params.categoria_id = categoriaFiltro;
+
+        axios.get('/productos', { params })
+            .then((r) => {
+                const data = r.data;
                 setProductos(data.data ?? []);
                 setPaginacion(data);
             })
@@ -121,7 +122,7 @@ export default function Productos() {
         ));
 
         const esEdicion = Boolean(productoActual.id);
-        const url = esEdicion ? `/api/productos/${productoActual.id}` : '/api/productos';
+        const url = esEdicion ? `/productos/${productoActual.id}` : '/productos';
 
         if (esEdicion) {
             formData.append('_method', 'PUT');
@@ -130,19 +131,9 @@ export default function Productos() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
         try {
-            const res = await fetch(url, {
-                method: 'POST',
+            await axios.post(url, formData, {
                 headers: { 'X-CSRF-TOKEN': csrfToken },
-                body: formData,
             });
-
-            if (!res.ok) {
-                const err = await res.json();
-                if (res.status === 422) {
-                    throw err; // React Hook Form manejará esto
-                }
-                throw new Error(err.message ?? 'Error al guardar');
-            }
 
             cerrarModal();
             cargarProductos();
@@ -154,9 +145,16 @@ export default function Productos() {
                 toast: true,
                 position: 'top-end'
             });
-        } catch (err) {
-            if (err.errors) throw err;
-            Swal.fire('Error', err.message ?? 'No se pudo guardar el producto', 'error');
+        } catch (error) {
+            if (error.response) {
+                const err = error.response.data;
+                if (error.response.status === 422) {
+                    throw err; // React Hook Form manejará esto
+                }
+                Swal.fire('Error', err.message ?? 'No se pudo guardar el producto', 'error');
+                return;
+            }
+            Swal.fire('Error', 'No se pudo guardar el producto', 'error');
         } finally {
             setGuardando(false);
         }
@@ -180,22 +178,22 @@ export default function Productos() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
         try {
-            const res = await fetch(`/api/productos/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' },
+            await axios.delete(`/productos/${id}`, {
+                headers: { 'X-CSRF-TOKEN': csrfToken }
             });
-
-            if (res.status === 409) {
-                const data = await res.json();
-                Swal.fire('No se puede eliminar', data.error, 'warning');
-                return;
-            }
-
-            if (!res.ok) throw new Error();
 
             cargarProductos();
             Swal.fire({ icon: 'success', title: 'Producto eliminado', timer: 1500, showConfirmButton: false });
-        } catch {
+        } catch (error) {
+            if (error.response) {
+                // Manejo del estado 409 (Conflicto / Producto en uso)
+                if (error.response.status === 409) {
+                    const data = error.response.data;
+                    Swal.fire('No se puede eliminar', data.error || 'El producto está en uso', 'warning');
+                    return;
+                }
+            }
+
             Swal.fire('Error', 'No se pudo eliminar el producto', 'error');
         }
     };

@@ -41,7 +41,7 @@ export const Perfiles = () => {
 
     useEffect(() => {
         axios
-            .get("/api/perfiles", {})
+            .get("/perfiles", {})
             .then((res) => {
                 setPerfiles(res.data);
             })
@@ -77,7 +77,7 @@ export const Perfiles = () => {
         if (tiempoEspera > 0) return;
 
         axios
-            .post("/api/verificar-perfil-pin", {
+            .post("/verificar-perfil-pin", {
                 id_perfil: perfilSeleccionado.id_perfil,
                 pin: pinIngresado,
             })

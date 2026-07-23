@@ -14,7 +14,14 @@ class AdicionController extends Controller
             ? Adicion::orderBy('activo', 'desc')->orderBy('nombre')
             : Adicion::where('activo', true)->orderBy('nombre');
 
-        return response()->json($query->get());
+        if ($request->has('paginado') && !$request->boolean('paginado')) {
+            return response()->json($query->get());
+        }
+
+        $perPage = $request->integer('per_page', 15);
+        $adicionesPaginadas = $query->paginate($perPage);
+
+        return response()->json($adicionesPaginadas);
     }
 
     public function store(Request $request)

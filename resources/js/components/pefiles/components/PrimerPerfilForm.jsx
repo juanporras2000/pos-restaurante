@@ -71,7 +71,7 @@ export const PrimerPerfilForm = () => {
         setCargando(true);
 
         axios
-            .post("/api/primer-perfil", { nombre: nombre.trim(), pin: pinCompleto })
+            .post("/primer-perfil", { nombre: nombre.trim(), pin: pinCompleto })
             .then(() => {
                 window.location.href = "/pedidos";
             })

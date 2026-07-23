@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import GestionTrabajadores from './GestionTrabajadores';
 import RegistroAsistencia from './RegistroAsistencia';
 import ResumenSemanal from './ResumenSemanal';
+import Descuentos from './Descuentos';
 
 const TABS = [
     {
@@ -33,6 +34,16 @@ const TABS = [
                 <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+            </svg>
+        ),
+    },
+    {
+        id: 'descuentos',
+        label: 'Descuentos',
+        icon: (
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 10v2" />
             </svg>
         ),
     },
@@ -79,6 +90,7 @@ export default function Nomina() {
             {tab === 'asistencia'   && <RegistroAsistencia />}
             {tab === 'resumen'      && <ResumenSemanal />}
             {tab === 'trabajadores' && <GestionTrabajadores />}
+            {tab === 'descuentos'   && <Descuentos />}
         </div>
     );
 }

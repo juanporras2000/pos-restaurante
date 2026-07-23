@@ -5,12 +5,12 @@ import { TIPOS } from './constants';
 export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
     const [form, setForm] = useState({
         concepto: gasto?.concepto ?? '',
-        tipo:     gasto?.tipo     ?? 'otro',
-        monto:    gasto?.monto    != null ? String(parseFloat(gasto.monto) / 1000) : '',
-        nota:     gasto?.nota     ?? '',
+        tipo: gasto?.tipo ?? 'otro',
+        monto: gasto?.monto != null ? String(parseFloat(gasto.monto) / 1000) : '',
+        nota: gasto?.nota ?? '',
     });
     const [guardando, setGuardando] = useState(false);
-    const [errores, setErrores]     = useState({});
+    const [errores, setErrores] = useState({});
     const esEdicion = !!gasto?.id;
 
     const set = (campo, valor) => setForm((f) => ({ ...f, [campo]: valor }));
@@ -25,33 +25,31 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
 
         setGuardando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        const url    = esEdicion ? `/api/gastos/${gasto.id}` : '/api/gastos';
-        const method = esEdicion ? 'PUT' : 'POST';
+        const url = esEdicion ? `/gastos/${gasto.id}` : '/gastos';
+        const method = esEdicion ? 'put' : 'post';
 
         try {
-            const res = await fetch(url, {
+            const res = await axios({
                 method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({
+                url,
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                data: {
                     concepto: form.concepto.trim(),
-                    tipo:     form.tipo,
-                    monto:    montoNum * 1000,
-                    nota:     form.nota.trim() || null,
-                }),
+                    tipo: form.tipo,
+                    monto: montoNum * 1000,
+                    nota: form.nota.trim() || null,
+                },
             });
 
-            if (res.status === 422) {
-                const data = await res.json();
+            onGuardar(res.data);
+        } catch (error) {
+            if (error.response && error.response.status === 422) {
+                const data = error.response.data;
                 const map = {};
                 Object.entries(data.errors ?? {}).forEach(([k, v]) => { map[k] = v[0]; });
                 setErrores(map);
                 return;
             }
-            if (!res.ok) throw new Error();
-
-            const data = await res.json();
-            onGuardar(data);
-        } catch {
             Swal.fire({ icon: 'error', title: 'Error al guardar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setGuardando(false);
@@ -102,11 +100,10 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
                                     key={t.value}
                                     type="button"
                                     onClick={() => set('tipo', t.value)}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${
-                                        form.tipo === t.value
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${form.tipo === t.value
                                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                                             : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 hover:border-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     {t.label}
                                 </button>

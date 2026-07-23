@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 import ReciboImpresion from '../components/Pedidos/ReciboImpresion';
+import axios from '../services/axios'
 
 // ── Caché a nivel de módulo — se carga una vez por sesión de navegador ─────────
 let _configCache = null;
@@ -15,12 +16,9 @@ function cargarConfiguracion() {
     if (_configCache) return Promise.resolve(_configCache);
     if (_configPending) return _configPending;
 
-    _configPending = fetch('/api/configuraciones')
+    _configPending = axios.get('/configuraciones')
         .then((r) => {
-            if (!r.ok) throw new Error(`Error ${r.status}`);
-            return r.json();
-        })
-        .then((arr) => {
+            const arr = r.data;
             const cfg = Object.fromEntries(arr.map((c) => [c.clave, c.valor]));
             _configCache   = cfg;
             _configPending = null;

@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Perfil;
-use App\Models\Permiso;
-use App\Models\Rol;
+use App\Services\PerfilService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
 
 class PerfilController extends Controller
 {
+    public function __construct(private readonly PerfilService $perfilService) {}
+
     public function verificarPin(Request $request)
     {
         $request->validate([
@@ -20,31 +19,16 @@ class PerfilController extends Controller
             'pin'       => 'required|integer',
         ]);
 
-        $throttleKey = 'verify-pin:' . Auth::id() . ':' . $request->ip();
+        try {
+            $perfil = $this->perfilService->verificarPin(
+                Auth::id(),
+                $request->id_perfil,
+                $request->pin,
+                $request->ip()
+            );
 
-        if (RateLimiter::tooManyAttempts($throttleKey, $perMinute = 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
-
-            return response()->json([
-                'error' => 'Demasiados intentos.',
-                'retry_after' => $seconds
-            ], 429);
-        }
-
-        $perfil = Perfil::where('id_perfil', $request->id_perfil)
-            ->where('id_user', Auth::id())
-            ->with('permisos')
-            ->first();
-
-        if (!$perfil) {
-            return response()->json(['error' => 'Perfil no encontrado o no autorizado'], 404);
-        }
-
-        if (Hash::check($request->pin, $perfil->pin)) {
-
-            RateLimiter::clear($throttleKey);
-            session(['id_perfil' => $perfil->id_perfil]);
-            session(['nombre_perfil' => $perfil->nombre]);
+            $request->session()->forget('permisos_ids');
+            $request->session()->put('id_perfil', $perfil->id_perfil);
 
             return response()->json([
                 'success' => true,
@@ -56,119 +40,117 @@ class PerfilController extends Controller
                     'permisos'      => $perfil->permisos
                 ]
             ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->errors();
+            if (isset($errors['throttle'])) {
+                return response()->json(['error' => $errors['throttle'][0], 'retry_after' => $errors['retry_after'][0] ?? 60], 429);
+            }
+            return response()->json(['error' => $e->getMessage(), 'intentos_restantes' => $errors['intentos_restantes'][0] ?? 0], 401);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        }
+    }
+
+    public function index(Request $request) // Añadimos el objeto Request
+    {
+        $query = Perfil::with(['rol', 'imagen'])
+            ->where('id_user', Auth::id());
+
+
+        if (!$request->boolean('paginado')) {
+            return response()->json($query->get());
         }
 
-        RateLimiter::hit($throttleKey, $decaySeconds = 60);
-        $intentosRealizados = RateLimiter::attempts($throttleKey);
-        $intentosRestantes = max(0, 5 - $intentosRealizados);
-
-        return response()->json([
-            'error' => 'El PIN es incorrecto.',
-            'intentos_restantes' => $intentosRestantes
-        ], 401);
+        $perPage = $request->integer('per_page', 15);
+        return response()->json($query->paginate($perPage));
     }
 
-    public function index()
-    {
-        $userId = Auth::id();
-
-        $perfiles = Perfil::with(['rol', 'imagen'])
-            ->where('id_user', $userId)
-            ->get();
-
-        return response()->json($perfiles);
-    }
 
     public function dataInicialAdmin()
     {
-        $roles = DB::table('rol')->get(['id_rol', 'nombre']);
-
-        // Traemos las imágenes de la tabla 'imagenes_perfil' (id_imagen_perfil, url)
-        $avatarGaleria = DB::table('imagenes_perfil')->get(['id_imagen', 'path']);
-
         return response()->json([
-            'roles' => $roles,
-            'galeria' => $avatarGaleria
+            'roles'   => DB::table('rol')->get(['id_rol', 'nombre']),
+            'galeria' => DB::table('imagenes_perfil')->get(['id_imagen', 'path'])
         ]);
     }
 
+
     public function update(Request $request, int $id)
     {
-
         $request->validate([
-            'nombre'   => 'required|string|max:255',
-            'pin'      => 'nullable|numeric|digits:4',
-            'permisos' => 'array',
-            'id_rol'   => 'required|integer',
+            'nombre'    => 'required|string|max:255',
+            'pin'       => 'nullable|numeric|digits:4',
+            'permisos'  => 'array',
+            'id_rol'    => 'required|integer',
             'id_imagen' => 'required|integer',
         ]);
 
-        $perfil = Perfil::where('id_perfil', $id)
-            ->where('id_user', Auth::id())
-            ->firstOrFail();
+        $perfil = Perfil::where('id_perfil', $id)->where('id_user', Auth::id())->firstOrFail();
 
-        $perfil->nombre = $request->nombre;
-        $perfil->id_rol = $request->id_rol;
-        $perfil->id_imagen = $request->id_imagen;
-
-
-        if ($request->filled('pin')) {
-            $perfil->pin = Hash::make($request->pin);
-        }
-        $perfil->save();
-
-        // 2. Sincronizar permisos en la tabla pivote
-        // Esto actualizará 'perfil_permiso' automáticamente
-        $perfil->permisos()->sync($request->permisos);
+        $perfilActualizado = $this->perfilService->actualizarPerfil($perfil, $request->all());
 
         return response()->json([
             'success' => true,
             'message' => 'Perfil y permisos actualizados correctamente',
-            'perfil'  => $perfil->load('permisos')
+            'perfil'  => $perfilActualizado
         ]);
     }
 
-    public function indexAdmin()
+    public function indexAdmin(Request $request) // Añadimos el objeto Request
     {
-        $userId = Auth::id();
+        // 1. Definimos la consulta base con sus relaciones cargadas
+        $query = Perfil::where('id_user', Auth::id())
+            ->with('rol', 'imagen', 'permisos:id_permiso');
 
-        // Traemos los perfiles con la relación de permisos, pero solo el ID para el checklist
-        return Perfil::where('id_user', $userId)
-            ->with('rol', 'imagen', 'permisos:id_permiso')
-            ->get()
-            ->map(function ($perfil) {
+        // Opción de compatibilidad: Si NO viene '?paginado=true', procesa el array plano clásico
+        if (!$request->boolean('paginado')) {
+            return response()->json(
+                $query->get()->map(function ($perfil) {
+                    return [
+                        'id_perfil'  => $perfil->id_perfil,
+                        'nombre'     => $perfil->nombre,
+                        'id_rol'     => $perfil->id_rol,
+                        'nombre_rol' => $perfil->rol->nombre ?? 'Sin Rol',
+                        'imagen'     => $perfil->imagen->path,
+                        'id_imagen'  => $perfil->imagen->id_imagen,
+                        'permisos'   => $perfil->permisos->pluck('id_permiso')
+                    ];
+                })
+            );
+        }
+
+        // 2. Si se activa la paginación real (?paginado=true)
+        $perPage = $request->integer('per_page', 15);
+        $paginador = $query->paginate($perPage);
+
+        // Transformamos los elementos dentro del objeto de paginación sin romper la estructura de Laravel
+        $paginador->setCollection(
+            $paginador->getCollection()->map(function ($perfil) {
                 return [
-                    'id_perfil' => $perfil->id_perfil,
-                    'nombre'    => $perfil->nombre,
-                    'id_rol'    => $perfil->id_rol,
-                    'nombre_rol'    => $perfil->rol->nombre ?? 'Sin Rol', // Nombre del rol para el UI
-                    'imagen' => $perfil->imagen->path,
-                    'id_imagen' => $perfil->imagen->id_imagen,
-                    'permisos'  => $perfil->permisos->pluck('id_permiso')
+                    'id_perfil'  => $perfil->id_perfil,
+                    'nombre'     => $perfil->nombre,
+                    'id_rol'     => $perfil->id_rol,
+                    'nombre_rol' => $perfil->rol->nombre ?? 'Sin Rol',
+                    'imagen'     => $perfil->imagen->path,
+                    'id_imagen'  => $perfil->imagen->id_imagen,
+                    'permisos'   => $perfil->permisos->pluck('id_permiso')
                 ];
-            });
+            })
+        );
+
+        return response()->json($paginador);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255',
-            'pin'    => 'required|numeric|digits:4',
-            'id_rol' => 'required|integer',
+            'nombre'    => 'required|string|max:255',
+            'pin'       => 'required|numeric|digits:4',
+            'id_rol'    => 'required|integer',
             'id_imagen' => 'required|integer',
         ]);
 
-        $perfil = new Perfil();
-        $perfil->id_user   = Auth::id();
-        $perfil->nombre  = $request->nombre;
-        $perfil->pin     = Hash::make($request->pin);
-        $perfil->id_rol  = $request->id_rol;
-        $perfil->id_imagen = $request->id_imagen;
-        $perfil->save();
-
-        $primerPermisoId = \App\Models\Permiso::orderBy('id_permiso', 'asc')->value('id_permiso');
-        $permisosAsignar = $primerPermisoId ? [$primerPermisoId] : [];
-        $perfil->permisos()->sync($permisosAsignar);
+        $perfil = $this->perfilService->crearPerfil(Auth::id(), $request->all());
 
         return response()->json([
             'success' => true,
@@ -178,43 +160,26 @@ class PerfilController extends Controller
 
     public function storePrimerPerfil(Request $request)
     {
-
-        if (Perfil::where('id_user', Auth::id())->exists()) {
-            return response()->json(['error' => 'El usuario ya tiene perfiles creados.'], 422);
-        }
-
         $request->validate([
             'nombre' => 'required|string|max:255',
             'pin'    => 'required|numeric|digits:4',
         ]);
 
-        $rol = Rol::where('nombre', 'Administrador')->firstOrFail();
+        try {
+            $perfil = $this->perfilService->crearPrimerPerfil(Auth::id(), $request->all());
 
-        $perfil = new Perfil();
-        $perfil->id_user   = Auth::id();
-        $perfil->nombre    = $request->nombre;
-        $perfil->pin       = Hash::make($request->pin);
-        $perfil->id_rol    = $rol->id_rol;
-        $perfil->id_imagen = 1;
-        $perfil->save();
-
-        $perfil->permisos()->sync(Permiso::pluck('id_permiso'));
-
-        session(['id_perfil'     => $perfil->id_perfil]);
-        session(['nombre_perfil' => $perfil->nombre]);
-
-        return response()->json([
-            'success' => true,
-            'perfil'  => $perfil->load(['rol', 'permisos']),
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'perfil'  => $perfil,
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
     }
 
     public function destroy(int $id)
     {
-        $perfil = Perfil::where('id_perfil', $id)
-            ->where('id_user', Auth::id())
-            ->firstOrFail();
-
+        $perfil = Perfil::where('id_perfil', $id)->where('id_user', Auth::id())->firstOrFail();
         $perfil->delete();
 
         return response()->json(['success' => true]);

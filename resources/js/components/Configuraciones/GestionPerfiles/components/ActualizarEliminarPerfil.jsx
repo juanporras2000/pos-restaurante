@@ -32,7 +32,7 @@ export const ActualizarEliminarPerfil = ({
 
             console.log(data);
 
-            await axios.put(`/api/perfiles/${perfilSeleccionado.id_perfil}`, data);
+            await axios.put(`/perfiles/${perfilSeleccionado.id_perfil}`, data);
 
             const rolSeleccionadoObj = roles.find(r => r.id_rol === parseInt(editRol));
 
@@ -83,7 +83,7 @@ export const ActualizarEliminarPerfil = ({
 
         if (resultado.isConfirmed) {
             try {
-                await axios.delete(`/api/perfiles/${perfilSeleccionado.id_perfil}`);
+                await axios.delete(`/perfiles/${perfilSeleccionado.id_perfil}`);
 
                 // Filtramos la lista para remover el perfil eliminado
                 const restantes = perfiles.filter(p => p.id_perfil !== perfilSeleccionado.id_perfil);

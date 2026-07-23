@@ -1,4 +1,4 @@
-import axios from 'axios';
+
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { BotonPerfil } from './components/BotonPerfil';
@@ -7,6 +7,7 @@ import { GestionarPermisos } from './components/GestionarPermisos';
 import { ModalCrear } from './components/ModalCrear';
 import { ModalAvatar } from './components/ModalAvatar';
 import { DANGER } from '../../../utils/colors';
+import axios from '../../../services/axios'
 
 export const GestionPerfiles = () => {
 
@@ -39,9 +40,9 @@ export const GestionPerfiles = () => {
                 setLoading(true);
 
                 const [resPermisos, resPerfiles, resDataInicial] = await Promise.all([
-                    axios.get('/api/permisos-lista'),
-                    axios.get('/api/perfiles-admin'),
-                    axios.get('/api/perfiles-data-inicial')
+                    axios.get('/permisos-lista'),
+                    axios.get('/perfiles-admin'),
+                    axios.get('/perfiles-data-inicial')
                 ]);
 
                 setPermisosDisponibles(resPermisos.data);
@@ -49,7 +50,7 @@ export const GestionPerfiles = () => {
 
                 const rolesFiltrados = resDataInicial.data.roles.filter( rol => rol.id_rol != 1)
                 setRoles(rolesFiltrados);
-                
+
                 setGaleriaAvatares(resDataInicial.data.galeria);
 
             } catch (error) {
@@ -126,7 +127,7 @@ export const GestionPerfiles = () => {
                 id_imagen: createAvatar.id_imagen
             };
 
-            const res = await axios.post('/api/perfiles', data);
+            const res = await axios.post('/perfiles', data);
 
             // CORRECCIÓN 1: Cambiar 'seleccionarPerfil' por la función real 'ejecutarSeleccionPerfil'
             // Pasamos el objeto combinado para asegurar que contenga '.path' y evitar el undefined.webp
@@ -204,8 +205,8 @@ export const GestionPerfiles = () => {
                             }}
                             className="bg-green-600 text-white text-sm px-3 py-1.5 rounded-lg font-semibold hover:bg-green-700 flex items-center gap-1 transition-colors"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
                             Nuevo perfil
                         </button>

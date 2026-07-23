@@ -7,6 +7,7 @@ import { fmtCOP } from '../../utils/format';
 import { formatFecha } from './historialUtils';
 import { DANGER } from '../../utils/colors';
 import { PedidoCardPropTypes } from '../../propTypes';
+import axios from '../../services/axios'
 
 function timeAgo(dateString) {
     const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
@@ -59,29 +60,25 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
 
         if (!isConfirmed || !razon) return;
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         setProcesando(true);
         try {
-            const res = await fetch(`/api/pedidos/${pedido.id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ razon_eliminacion: razon }),
+            await axios.delete(`/pedidos/${pedido.id}`, {
+                data: { razon_eliminacion: razon }, // El body de un DELETE en Axios se envía dentro de la propiedad 'data'
             });
-            if (res.ok) {
-                Swal.fire({ icon: 'success', title: 'Pedido eliminado correctamente', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
-                onActualizado?.();
-                setEliminado(!eliminado);
-            } else {
-                const data = await res.json();
-                Swal.fire({ icon: 'error', title: data.error || 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+
+            Swal.fire({ icon: 'success', title: 'Pedido eliminado correctamente', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
+            onActualizado?.();
+            setEliminado(!eliminado);
+        } catch (error) {
+            if (error.response && error.response.data) {
+                Swal.fire({ icon: 'error', title: error.response.data.error || 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                return;
             }
-        } catch {
             Swal.fire({ icon: 'error', title: 'Error al eliminar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setProcesando(false);
         }
     };
-
 
     return (
         <>
@@ -249,31 +246,31 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                 </div>
             </div>
 
-            <ModalNuevoPedido
-                abierto={modalEditarAbierto}
-                productos={productos}
-                pedidoEditar={pedido}
-                onCreado={() => {
-                    setModalEditarAbierto(false);
-                    onActualizado?.();
-                }}
-                onCerrar={() => setModalEditarAbierto(false)}
-                actualizado={actualizado}
-                setActualizado={setActualizado}
-            />
+        <ModalNuevoPedido
+            abierto={modalEditarAbierto}
+            productos={productos}
+            pedidoEditar={pedido}
+            onCreado={() => {
+                setModalEditarAbierto(false);
+                onActualizado?.();
+            }}
+            onCerrar={() => setModalEditarAbierto(false)}
+            actualizado={actualizado}
+            setActualizado={setActualizado}
+        />
 
-            <ModalPago
-                abierto={modalPagoAbierto}
-                pedido={pedido}
-                onPagado={() => {
-                    setModalPagoAbierto(false);
-                    onActualizado?.();
-                    setPagado(!pagado);
-                }}
-                onCerrar={() => setModalPagoAbierto(false)}
-            />
-        </>
-    );
+        <ModalPago
+            abierto={modalPagoAbierto}
+            pedido={pedido}
+            onPagado={() => {
+                setModalPagoAbierto(false);
+                onActualizado?.();
+                setPagado(!pagado);
+            }}
+            onCerrar={() => setModalPagoAbierto(false)}
+        />
+    </>
+);
 }
 
 PedidoCard.propTypes = PedidoCardPropTypes;

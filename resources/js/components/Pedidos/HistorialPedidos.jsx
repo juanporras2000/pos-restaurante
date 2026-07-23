@@ -1,37 +1,40 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import ResumenDia    from './ResumenDia';
+import ResumenDia from './ResumenDia';
 import TarjetaPedido from './TarjetaPedido';
 import SeccionGastos from './SeccionGastos';
 import CierreCaja    from './CierreCaja';
 import Spinner       from '../shared/Spinner';
+import axios from '../../services/axios'
 
 export default function HistorialPedidos() {
-    const [pedidos, setPedidos]   = useState([]);
-    const [gastos, setGastos]     = useState([]);
+    const [pedidos, setPedidos] = useState([]);
+    const [gastos, setGastos] = useState([]);
     const [apertura, setApertura] = useState(null);
     const [cargando, setCargando] = useState(false);
-    const [error, setError]       = useState(null);
+    const [error, setError] = useState(null);
 
     const cargar = useCallback(() => {
         setCargando(true);
         setError(null);
         const d = new Date();
         const fechaHoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
         Promise.all([
-            fetch('/api/pedidos/cerrados-hoy').then((r) => {
-                if (!r.ok) throw new Error('Error al cargar el historial');
-                return r.json();
-            }),
-            fetch('/api/gastos').then((r) => r.json()).catch(() => ({ gastos: [], total: 0 })),
-            fetch(`/api/caja-apertura/${fechaHoy}`).then((r) => r.json()).catch(() => null),
+            axios.get('/pedidos/cerrados-hoy').then((r) => r.data),
+            axios.get('/gastos').then((r) => r.data).catch(() => ({ gastos: [], total: 0 })),
+            axios.get(`/caja-apertura/${fechaHoy}`).then((r) => r.data).catch(() => null),
         ])
             .then(([pedidosData, gastosData, aperturaData]) => {
                 setPedidos(pedidosData);
                 setGastos(gastosData.gastos ?? []);
                 setApertura(aperturaData ?? null);
             })
-            .catch((e) => setError(e.message))
+            .catch((e) => {
+                // Si Axios arroja un error con respuesta del servidor, usamos su mensaje o uno genérico
+                const msg = e.response?.data?.message || 'Error al cargar el historial';
+                setError(msg);
+            })
             .finally(() => setCargando(false));
     }, []);
 

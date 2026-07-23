@@ -162,7 +162,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
             <div className="modal-panel-lg max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="modal-header shrink-0">
-                    <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                         </svg>
@@ -205,7 +205,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                     className={`form-input ${errors.precio ? 'border-red-500 bg-red-50' : ''}`}
                                 />
                                 {precioWatch !== '' && !isNaN(Number(precioWatch)) && Number(precioWatch) > 0 && (
-                                    <p className="mt-0.5 text-xs text-gray-400">= ${(Number(precioWatch) * 1000).toLocaleString('es-CO')}</p>
+                                    <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">= ${(Number(precioWatch) * 1000).toLocaleString('es-CO')}</p>
                                 )}
                                 {errors.precio && <p className="form-error">{errors.precio.message}</p>}
                             </div>
@@ -233,9 +233,9 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                         {...register('es_domicilio')}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </label>
-                                <span className="text-sm font-medium text-gray-700">Disponible a domicilio</span>
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Disponible a domicilio</span>
                                 {esDomicilio && (
                                     <span className="ml-auto text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5 font-medium">
                                         Agrega los insumos adicionales abajo
@@ -258,7 +258,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                     <img
                                         src={imagenPreviewUrl}
                                         alt="Previsualización"
-                                        className="mt-2 h-20 w-20 object-cover rounded-lg border border-gray-200"
+                                        className="mt-2 h-20 w-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
                                     />
                                 )}
                             </div>
@@ -354,21 +354,21 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
 
                             {/* Lista de insumos agregados */}
                             {fields.length === 0 ? (
-                                <div className={`text-xs text-center py-3 border border-dashed rounded-lg ${errors.receta ? 'border-red-400 bg-red-50 text-red-600' : 'border-gray-200 text-gray-400'}`}>
+                                <div className={`text-xs text-center py-3 border border-dashed rounded-lg ${errors.receta ? 'border-red-400 bg-red-50 text-red-600' : 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500'}`}>
                                     {errors.receta ? errors.receta.message : 'Sin insumos agregados'}
                                 </div>
                             ) : (
-                                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                                    <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                                    <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                         <span>Insumo</span>
                                         <span className="text-right w-28">Cantidad</span>
                                         <span className="w-8"></span>
                                     </div>
                                     {fields.map((fila, index) => (
-                                        <div key={fila.key} className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 border-t border-gray-100 items-center">
+                                        <div key={fila.key} className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 border-t border-gray-100 dark:border-gray-800 items-center">
                                             <span className="text-sm text-gray-800">
                                                 {fila.nombre}
-                                                <span className="text-gray-400 ml-1 text-xs">({fila.unidad_medida})</span>
+                                                <span className="text-gray-400 dark:text-gray-500 ml-1 text-xs">({fila.unidad_medida})</span>
                                             </span>
                                             <div className="flex flex-col">
                                                 <input
@@ -501,7 +501,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                             <div key={fila.key} className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 border-t border-blue-100 items-center">
                                                 <span className="text-sm text-gray-800">
                                                     {fila.nombre}
-                                                    <span className="text-gray-400 ml-1 text-xs">({fila.unidad_medida})</span>
+                                                    <span className="text-gray-400 dark:text-gray-500 ml-1 text-xs">({fila.unidad_medida})</span>
                                                 </span>
                                                 <div className="flex flex-col">
                                                     <input

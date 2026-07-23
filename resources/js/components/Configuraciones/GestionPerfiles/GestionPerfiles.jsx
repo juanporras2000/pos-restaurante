@@ -183,17 +183,17 @@ export const GestionPerfiles = () => {
 
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+        <div className="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400">
             <p className="font-medium">Cargando perfiles y permisos...</p>
         </div>
     );
 
     return (
         <div>
-            <div className='bg-white p-5 rounded-2xl border border-gray-200 shadow-sm'>
+            <div className='bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm'>
                 <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row items-center justify-between mb-6 sm:mb-2">
-                        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Perfiles Registrados</h3>
+                        <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Perfiles Registrados</h3>
                         <button
                             onClick={() => {
                                 setCreateNombre("");
@@ -242,14 +242,14 @@ export const GestionPerfiles = () => {
                                     type="button"
                                     onClick={() => cambiarDePerfilConValidacion(p)}
                                     className={`w-full h-14 px-4 rounded-xl border transition-all flex items-center justify-between gap-3 touch-manipulation ${esElActivo
-                                        ? 'border-green-500 bg-green-50/50 text-green-700 shadow-sm font-bold'
-                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+                                        ? 'border-green-500 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-sm font-bold'
+                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
                                         }`}
                                 >
                                     {/* Contenedor del Avatar, Nombre y Rol */}
                                     <div className="flex items-center gap-3 min-w-0 w-full">
                                         {/* Mini Avatar circular */}
-                                        <div className="w-9 h-9 rounded-full border border-gray-100 overflow-hidden bg-gray-100 flex-shrink-0">
+                                        <div className="w-9 h-9 rounded-full border border-gray-100 dark:border-gray-700 overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                                             {
                                                 rutaImagen
                                                     ?
@@ -265,10 +265,10 @@ export const GestionPerfiles = () => {
 
                                         {/* Textos: Nombre arriba y Rol abajo */}
                                         <div className="flex flex-col items-start min-w-0 w-full text-left">
-                                            <span className="text-sm font-semibold text-gray-800 truncate w-full">
+                                            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate w-full">
                                                 {p.nombre}
                                             </span>
-                                            <span className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${esElActivo ? 'text-green-600' : 'text-gray-400'
+                                            <span className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${esElActivo ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
                                                 }`}>
                                                 {p.nombre_rol}
                                             </span>
@@ -310,14 +310,14 @@ export const GestionPerfiles = () => {
 
                 ) : (
                     /* ESTADO VACÍO: Lo que ve el usuario cuando no hay ningún perfil seleccionado */
-                    <div className="h-full flex flex-col items-center justify-center text-center p-8 min-h-[350px] bg-white border border-gray-100 rounded-3xl shadow-sm">
-                        <div className="p-4 bg-gray-50 rounded-full text-gray-400 mb-3">
+                    <div className="h-full flex flex-col items-center justify-center text-center p-8 min-h-[350px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl shadow-sm">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-full text-gray-400 dark:text-gray-500 mb-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                             </svg>
                         </div>
-                        <h3 className="text-sm font-bold text-gray-700">Ningún perfil seleccionado</h3>
-                        <p className="text-xs text-gray-400 max-w-xs mt-1">
+                        <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300">Ningún perfil seleccionado</h3>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 max-w-xs mt-1">
                             Selecciona uno de los perfiles de la barra superior para gestionar sus credenciales, rol y permisos de acceso.
                         </p>
                     </div>

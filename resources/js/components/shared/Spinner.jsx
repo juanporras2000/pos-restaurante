@@ -11,7 +11,7 @@ const SIZES = {
  * Spinner de carga canónico del proyecto. Reemplaza los SVG/div copy-pasteados
  * en cada módulo (Productos, Configuraciones, Reportes, Pedidos...).
  */
-export default function Spinner({ size = 'md', className = 'text-blue-500' }) {
+export default function Spinner({ size = 'md', className = 'text-blue-500 dark:text-blue-400' }) {
     return (
         <div
             role="status"

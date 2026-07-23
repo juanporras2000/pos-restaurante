@@ -93,12 +93,12 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
             onKeyDown={(e) => { if (e.key === 'Escape') onCerrar(); }}
             tabIndex={-1}
         >
-            <div className="bg-white rounded-xl shadow-xl max-w-sm w-full">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full">
                 <div className="p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-5">
-                        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                            <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
                             </svg>
                             Editar forma de pago
@@ -111,17 +111,17 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                     </div>
 
                     {/* Info del pedido */}
-                    <div className="bg-gray-50 rounded-lg p-3 mb-5 text-sm text-gray-600">
-                        <span className="font-medium text-gray-800">Pedido #{pedido.numero_dia || pedido.id}</span>
+                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 mb-5 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="font-medium text-gray-800 dark:text-gray-200">Pedido #{pedido.numero_dia || pedido.id}</span>
                         {metodoActual && (
-                            <span className="ml-2 text-gray-400">
-                                · Actual: <span className="text-gray-600">{METODO_ETIQUETA[metodoActual] ?? metodoActual}</span>
+                            <span className="ml-2 text-gray-400 dark:text-gray-500">
+                                · Actual: <span className="text-gray-600 dark:text-gray-400">{METODO_ETIQUETA[metodoActual] ?? metodoActual}</span>
                             </span>
                         )}
                     </div>
 
                     {esMixto ? (
-                        <div className="mb-5 flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-700">
+                        <div className="mb-5 flex items-start gap-2 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 rounded-lg p-3 text-sm text-orange-700 dark:text-orange-400">
                             <svg className="h-4 w-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                             </svg>
@@ -129,14 +129,14 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                         </div>
                     ) : (
                         <div className="mb-5">
-                            <label htmlFor="metodo-pago-select" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="metodo-pago-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Nuevo método de pago
                             </label>
                             <select
                                 id="metodo-pago-select"
                                 value={metodoPago}
                                 onChange={(e) => setMetodoPago(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                             >
                                 {METODOS.map((m) => (
                                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -150,7 +150,7 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                         <button
                             type="button"
                             onClick={onCerrar}
-                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
                         >
                             {esMixto ? 'Cerrar' : 'Cancelar'}
                         </button>
@@ -159,7 +159,7 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                                 type="button"
                                 onClick={confirmar}
                                 disabled={guardando || metodoPago === metodoActual}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm disabled:cursor-not-allowed"
+                                className="flex-1 bg-primary hover:bg-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm disabled:cursor-not-allowed"
                             >
                                 {guardando ? 'Guardando...' : 'Guardar cambio'}
                             </button>

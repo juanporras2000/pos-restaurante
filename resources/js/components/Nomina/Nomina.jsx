@@ -45,7 +45,7 @@ export default function Nomina() {
         <div className="p-4 sm:p-6 max-w-5xl mx-auto">
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <svg className="h-6 w-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
@@ -53,7 +53,7 @@ export default function Nomina() {
                     </svg>
                     Nómina
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">Gestión de trabajadores, asistencia y pago semanal.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestión de trabajadores, asistencia y pago semanal.</p>
             </div>
 
             {/* Pill tabs */}
@@ -65,8 +65,8 @@ export default function Nomina() {
                         onClick={() => setTab(t.id)}
                         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                             tab === t.id
-                                ? 'bg-white text-blue-700 shadow-sm border border-gray-200'
-                                : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white dark:bg-gray-800 text-blue-700 shadow-sm border border-gray-200 dark:border-gray-700'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                         }`}
                     >
                         {t.icon}

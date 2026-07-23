@@ -58,12 +58,12 @@ export default function ResumenSemanal() {
     const totalSemana = resumen.reduce((sum, r) => sum + (r.total_pagar ?? 0), 0);
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 w-full">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 w-full">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Resumen semanal</h2>
-                    <p className="text-sm text-gray-500 mt-0.5">{formatearRango(semanaInicio, semanaFin)}</p>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Resumen semanal</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{formatearRango(semanaInicio, semanaFin)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button type="button" onClick={() => navSemana(-1)} className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Semana anterior">
@@ -94,7 +94,7 @@ export default function ResumenSemanal() {
                         <rect x="3" y="4" width="18" height="18" rx="2" />
                         <path d="M16 2v4M8 2v4M3 10h18" />
                     </svg>
-                    <p className="text-sm text-gray-500">No hay trabajadores registrados.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay trabajadores registrados.</p>
                 </div>
             ) : (
                 <>
@@ -102,35 +102,35 @@ export default function ResumenSemanal() {
                     <div className="overflow-x-auto -mx-4 sm:mx-0">
                         <table className="w-full text-sm min-w-[600px]">
                             <thead>
-                                <tr className="border-b border-gray-200">
-                                    <th className="text-left py-2 px-4 font-semibold text-gray-700 w-48">Trabajador</th>
+                                <tr className="border-b border-gray-200 dark:border-gray-700">
+                                    <th className="text-left py-2 px-4 font-semibold text-gray-700 dark:text-gray-300 w-48">Trabajador</th>
                                     {dias.map((d, i) => {
                                         const esHoy = d === new Date().toLocaleDateString('en-CA');
                                         return (
-                                            <th key={d} className={`text-center py-2 px-2 font-medium text-xs w-12 ${esHoy ? 'text-blue-600' : 'text-gray-500'}`}>
+                                            <th key={d} className={`text-center py-2 px-2 font-medium text-xs w-12 ${esHoy ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'}`}>
                                                 <div>{DIAS_ES[i]}</div>
-                                                <div className={`text-xs font-normal ${esHoy ? 'text-blue-500' : 'text-gray-400'}`}>
+                                                <div className={`text-xs font-normal ${esHoy ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`}>
                                                     {new Date(d + 'T00:00:00').getDate()}
                                                 </div>
                                             </th>
                                         );
                                     })}
-                                    <th className="text-center py-2 px-2 font-semibold text-gray-700 w-16">Días</th>
-                                    <th className="text-right py-2 px-4 font-semibold text-gray-700 w-32">Total a pagar</th>
+                                    <th className="text-center py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 w-16">Días</th>
+                                    <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300 w-32">Total a pagar</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {resumen.map((row) => (
-                                    <tr key={row.trabajador.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                    <tr key={row.trabajador.id} className="border-b border-gray-50 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                                         <td className="py-3 px-4">
                                             <div className="flex items-center gap-2">
-                                                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold uppercase flex-shrink-0 ${row.trabajador.activo ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
+                                                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold uppercase flex-shrink-0 ${row.trabajador.activo ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400 dark:text-gray-500'}`}>
                                                     {row.trabajador.nombre.charAt(0)}
                                                 </span>
                                                 <div className="min-w-0">
-                                                    <p className="font-medium text-gray-900 truncate">{row.trabajador.nombre}</p>
+                                                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{row.trabajador.nombre}</p>
                                                     {row.trabajador.cargo && (
-                                                        <p className="text-xs text-gray-400 truncate">{row.trabajador.cargo}</p>
+                                                        <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{row.trabajador.cargo}</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -140,27 +140,27 @@ export default function ResumenSemanal() {
                                             return (
                                                 <td key={d} className="text-center py-3 px-2">
                                                     {asistio ? (
-                                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100">
-                                                            <svg className="h-3.5 w-3.5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30">
+                                                            <svg className="h-3.5 w-3.5 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                                 <path d="M5 13l4 4L19 7" />
                                                             </svg>
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-block w-2 h-2 rounded-full bg-gray-200 mx-auto" />
+                                                        <span className="inline-block w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-600 mx-auto" />
                                                     )}
                                                 </td>
                                             );
                                         })}
                                         <td className="text-center py-3 px-2">
-                                            <span className={`text-sm font-semibold ${row.dias_count > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
+                                            <span className={`text-sm font-semibold ${row.dias_count > 0 ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}`}>
                                                 {row.dias_count}
                                             </span>
                                         </td>
                                         <td className="text-right py-3 px-4">
-                                            <span className={`text-sm font-bold ${row.total_pagar > 0 ? 'text-blue-700' : 'text-gray-400'}`}>
+                                            <span className={`text-sm font-bold ${row.total_pagar > 0 ? 'text-blue-700' : 'text-gray-400 dark:text-gray-500'}`}>
                                                 {fmtCOP(row.total_pagar)}
                                             </span>
-                                            <p className="text-xs text-gray-400">{fmtCOP(row.trabajador.pago_por_turno)}/día</p>
+                                            <p className="text-xs text-gray-400 dark:text-gray-500">{fmtCOP(row.trabajador.pago_por_turno)}/día</p>
                                         </td>
                                     </tr>
                                 ))}
@@ -169,10 +169,10 @@ export default function ResumenSemanal() {
                     </div>
 
                     {/* Total semana */}
-                    <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center px-1">
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center px-1">
                         <div>
-                            <p className="text-sm text-gray-500">Total nómina semanal</p>
-                            <p className="text-xs text-gray-400">{resumen.reduce((s, r) => s + r.dias_count, 0)} turnos en la semana</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Total nómina semanal</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">{resumen.reduce((s, r) => s + r.dias_count, 0)} turnos en la semana</p>
                         </div>
                         <p className="text-2xl font-bold text-blue-700">{fmtCOP(totalSemana)}</p>
                     </div>

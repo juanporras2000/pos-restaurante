@@ -21,11 +21,11 @@ function FilaTipo({ tipo, cantidad, total_ventas, porcentaje }) {
     return (
         <div className="space-y-1">
             <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2 font-medium text-gray-700">
+                <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
                     <Icon className="h-4 w-4" style={{ color }} />
                     {label}
                 </span>
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-gray-400">
                     <span className="font-semibold text-gray-800">{cantidad}</span> pedidos · {fmtCOP(total_ventas)}
                 </span>
             </div>
@@ -35,7 +35,7 @@ function FilaTipo({ tipo, cantidad, total_ventas, porcentaje }) {
                     style={{ width: `${porcentaje}%`, backgroundColor: color }}
                 />
             </div>
-            <p className="text-xs text-gray-400 text-right">{porcentaje}% del total</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 text-right">{porcentaje}% del total</p>
         </div>
     );
 }
@@ -67,7 +67,7 @@ export default function SeccionTipoPedido({ tipos = [], totalPedidos = 0, loadin
             <div className="flex flex-col items-center gap-2 py-8 text-sm text-red-500">
                 <p>{error}</p>
                 {onRetry && (
-                    <button onClick={onRetry} className="text-xs px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100">
+                    <button onClick={onRetry} className="text-xs px-3 py-1.5 bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100">
                         Reintentar
                     </button>
                 )}
@@ -76,12 +76,12 @@ export default function SeccionTipoPedido({ tipos = [], totalPedidos = 0, loadin
     }
 
     if (!tipos.length) {
-        return <p className="text-center py-8 text-sm text-gray-400">Sin pedidos en este período</p>;
+        return <p className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">Sin pedidos en este período</p>;
     }
 
     return (
         <div className="space-y-5">
-            <p className="text-xs text-gray-400 font-medium">{totalPedidos} pedidos en total</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{totalPedidos} pedidos en total</p>
             {tipos.map((t) => (
                 <FilaTipo key={t.tipo} {...t} />
             ))}

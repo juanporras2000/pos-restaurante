@@ -56,13 +56,13 @@ export default function HistorialPedidos() {
             {/* Subheader */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <p className="text-gray-600 text-sm capitalize">{hoy}</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm capitalize">{hoy}</p>
                 </div>
                 <button
                     type="button"
                     onClick={cargar}
                     disabled={cargando}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg transition-colors text-sm disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm disabled:opacity-50"
                 >
                     <ArrowPathIcon className={`h-4 w-4 ${cargando ? 'animate-spin' : ''}`} />
                     Actualizar
@@ -71,28 +71,28 @@ export default function HistorialPedidos() {
 
             {/* Estado de carga / error */}
             {cargando && (
-                <div className="flex items-center justify-center py-20 text-gray-500 gap-3">
-                    <Spinner size="md" className="text-blue-500" />
+                <div className="flex items-center justify-center py-20 text-gray-500 dark:text-gray-400 gap-3">
+                    <Spinner size="md" />
                     Cargando historial...
                 </div>
             )}
 
             {error && !cargando && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-                    <p className="text-red-600 font-medium">{error}</p>
-                    <button onClick={cargar} className="mt-3 text-sm text-red-500 underline hover:text-red-700">
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+                    <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
+                    <button onClick={cargar} className="mt-3 text-sm text-red-500 dark:text-red-400 underline hover:text-red-700 dark:hover:text-red-300">
                         Reintentar
                     </button>
                 </div>
             )}
 
             {!cargando && !error && pedidos.length === 0 && gastos.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                    <svg className="h-16 w-16 mb-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500">
+                    <svg className="h-16 w-16 mb-4 text-gray-300 dark:text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                         <rect x="6" y="4" width="12" height="16" rx="2"></rect>
                         <path d="M9 8h6M9 12h6M9 16h4"></path>
                     </svg>
-                    <p className="text-lg font-medium text-gray-500">No hay pedidos cerrados hoy</p>
+                    <p className="text-lg font-medium text-gray-500 dark:text-gray-400">No hay pedidos cerrados hoy</p>
                     <p className="text-sm mt-1">Los pedidos pagados aparecerán aquí.</p>
                 </div>
             )}

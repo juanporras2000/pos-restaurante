@@ -6,13 +6,13 @@ export const ModalAvatar = ({
 }) => {
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[120] p-4">
-            <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="p-5 flex justify-between items-center border-b">
-                    <h3 className="font-bold text-gray-800 text-sm uppercase">Selecciona un Avatar</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+                <div className="p-5 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="font-bold text-gray-800 dark:text-gray-100 text-sm uppercase">Selecciona un Avatar</h3>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -33,7 +33,7 @@ export const ModalAvatar = ({
                                 onClick={() => onSelectAvatar(avatar)}
                                 className={`relative rounded-2xl overflow-hidden aspect-square border-4 transition-all hover:scale-105 ${esSeleccionado
                                         ? 'border-green-500 shadow-md scale-105'
-                                        : 'border-gray-100 hover:border-gray-300'
+                                        : 'border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
                                 <img

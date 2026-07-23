@@ -16,7 +16,7 @@ function ErrorCard({ msg, onRetry }) {
         <div className="flex flex-col items-center justify-center h-48 gap-3 text-sm text-red-500">
             <p>{msg}</p>
             {onRetry && (
-                <button onClick={onRetry} className="px-3 py-1.5 text-xs font-medium bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100">
+                <button onClick={onRetry} className="px-3 py-1.5 text-xs font-medium bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100">
                     Reintentar
                 </button>
             )}
@@ -26,7 +26,7 @@ function ErrorCard({ msg, onRetry }) {
 
 function SectionCard({ title, subtitle, children, action }) {
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden w-full min-w-0">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden w-full min-w-0">
 
             <div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between gap-2 px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 border-b border-gray-50">
 
@@ -37,7 +37,7 @@ function SectionCard({ title, subtitle, children, action }) {
                     </h2>
                     {subtitle && (
 
-                        <p className="text-xs text-gray-400 mt-0.5 break-words">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 break-words">
                             {subtitle}
                         </p>
                     )}
@@ -96,11 +96,11 @@ export default function Reportes() {
     const comparativa = ventas.data?.comparativa ?? {};
 
     return (
-        <div className="min-h-screen  mx-auto bg-gray-50">
+        <div className="min-h-screen  mx-auto bg-gray-50 dark:bg-gray-900">
             <div className="max-w-7xl mx-auto xl:px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
                 <div className="flex flex-col justify-center items-center sm:flex-row lg:items-start lg:justify-between gap-4">
                     <div className='flex-1'>
-                        <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                        <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center lg:justify-normal gap-3">
                             <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
                             </svg>
@@ -123,7 +123,7 @@ export default function Reportes() {
                         Array.from({ length: 4 }).map((_, i) => (
                             <div
                                 key={i}
-                                className="bg-white rounded-2xl border border-gray-100 shadow-sm h-24 animate-pulse w-full"
+                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm h-24 animate-pulse w-full"
                             />
                         )
                         )
@@ -211,8 +211,8 @@ export default function Reportes() {
                         action={
                             !gastos.loading && !ventas.loading && (
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full ${(totalVentas - (gastos.data?.total ?? 0)) >= 0
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-red-100 text-red-600'
+                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                    : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                                     }`}>
                                     {(totalVentas - (gastos.data?.total ?? 0)) >= 0 ? 'Positivo' : 'Negativo'}
                                 </span>
@@ -235,7 +235,7 @@ export default function Reportes() {
                         title="Ganancia estimada"
                         subtitle="Ingreso − costo de insumos utilizado en producción"
                         action={
-                            <span className="text-[11px] sm:text-xs text-gray-400 italic block text-right sm:inline">
+                            <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 italic block text-right sm:inline">
                                 Solo productos con insumos configurados
                             </span>
                         }
@@ -245,7 +245,7 @@ export default function Reportes() {
 
                             {/* Bloque: Ingreso Bruto */}
                             <div className="pt-0 sm:pt-0 sm:px-2">
-                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
+                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide truncate">
                                     Ingreso bruto
                                 </p>
                                 <p className="text-lg sm:text-xl font-bold text-gray-800 mt-0.5 sm:mt-1 truncate" title={fmtCOP(ganancias.data?.ingreso ?? 0)}>
@@ -256,7 +256,7 @@ export default function Reportes() {
                             {/* Bloque: Costo Insumos */}
 
                             <div className="pt-3 sm:pt-0 sm:px-2">
-                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
+                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide truncate">
                                     Costo insumos
                                 </p>
                                 <p className="text-lg sm:text-xl font-bold text-red-500 mt-0.5 sm:mt-1 truncate" title={fmtCOP(ganancias.data?.costo_estimado ?? 0)}>
@@ -266,7 +266,7 @@ export default function Reportes() {
 
                             {/* Bloque: Ganancia */}
                             <div className="pt-3 sm:pt-0 sm:px-2">
-                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
+                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide truncate">
                                     Ganancia
                                 </p>
                                 <p className={`text-lg sm:text-xl font-black mt-0.5 sm:mt-1 truncate ${(ganancias.data?.ganancia ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`} title={fmtCOP(ganancias.data?.ganancia ?? 0)}>
@@ -282,7 +282,7 @@ export default function Reportes() {
                 <SectionCard
                     title="Detalle de productos vendidos"
                     subtitle="Ranking completo con ingresos y participación"
-                    action={<span className="text-xs text-gray-400 font-medium">{productos.data?.productos?.length ?? 0} productos</span>}
+                    action={<span className="text-xs text-gray-400 dark:text-gray-500 font-medium">{productos.data?.productos?.length ?? 0} productos</span>}
                 >
                     {productos.loading ? <Spinner /> :
                         productos.error ? <ErrorCard msg={productos.error} onRetry={productos.recargar} /> :

@@ -38,8 +38,8 @@ export default function Carrito({
     };
 
     return (
-        <div className="border-t border-gray-200 pt-4 mt-4">
-            <h4 className="font-medium text-gray-900 mb-3">Resumen del Pedido</h4>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Resumen del Pedido</h4>
             <div className="space-y-3 mb-4 max-h-72 overflow-y-auto pr-1">
                 {carrito.map((item) => {
                     const adicionesSubtotal = (item.adiciones ?? []).reduce((s, a) => s + a.subtotal, 0);
@@ -49,9 +49,9 @@ export default function Carrito({
                         <div key={item.id} className="text-sm">
                             {/* Fila principal */}
                             <div className="flex justify-between items-center">
-                                <span className="flex-1 text-gray-700 font-medium truncate pr-1">{item.nombre}</span>
-                                <span className="mx-1 text-gray-500 shrink-0">x{item.cantidad}</span>
-                                <span className="font-medium text-gray-900 mr-1 shrink-0">{fmtCOP(totalItem)}</span>
+                                <span className="flex-1 text-gray-700 dark:text-gray-300 font-medium truncate pr-1">{item.nombre}</span>
+                                <span className="mx-1 text-gray-500 dark:text-gray-400 shrink-0">x{item.cantidad}</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100 mr-1 shrink-0">{fmtCOP(totalItem)}</span>
 
                                 {/* Botón adiciones */}
                                 {adicionesDisponibles.length > 0 && (
@@ -61,8 +61,8 @@ export default function Carrito({
                                         variant="default"
                                         className={`mx-0.5 shrink-0 ${
                                             (item.adiciones ?? []).length > 0
-                                                ? 'text-purple-500 hover:text-purple-700'
-                                                : 'text-gray-300 hover:text-purple-400'
+                                                ? 'text-purple-500 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300'
+                                                : 'text-gray-300 dark:text-gray-600 hover:text-purple-400'
                                         }`}
                                     >
                                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -77,7 +77,7 @@ export default function Carrito({
                                     aria-label={item.nota ? 'Editar nota' : 'Agregar nota'}
                                     onClick={() => toggleNota(item.id)}
                                     variant="default"
-                                    className={`mx-0.5 shrink-0 ${item.nota ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-gray-500'}`}
+                                    className={`mx-0.5 shrink-0 ${item.nota ? 'text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300' : 'text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400'}`}
                                 >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"></path>
@@ -102,7 +102,7 @@ export default function Carrito({
                             {(item.adiciones ?? []).length > 0 && adicionAbierta !== item.id && (
                                 <div className="mt-0.5 ml-1 space-y-0.5">
                                     {item.adiciones.map((a) => (
-                                        <p key={a.adicion_id} className="text-xs text-purple-600 italic">
+                                        <p key={a.adicion_id} className="text-xs text-purple-600 dark:text-purple-400 italic">
                                             + {a.cantidad > 1 ? `${a.cantidad}x ` : ''}{a.nombre} <span className="not-italic font-medium">(+{fmtCOP(a.subtotal)})</span>
                                         </p>
                                     ))}
@@ -111,7 +111,7 @@ export default function Carrito({
 
                             {/* Nota visible cuando cerrada */}
                             {item.nota && notaAbierta !== item.id && (
-                                <p className="mt-0.5 ml-1 text-xs text-amber-600 italic truncate flex items-center gap-1">
+                                <p className="mt-0.5 ml-1 text-xs text-amber-600 dark:text-amber-400 italic truncate flex items-center gap-1">
                                     <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"></path>
                                         <path d="M17.5 2.5a2.121 2.121 0 013 3L12 14l-4 1 1-4 7.5-7.5z"></path>
@@ -122,8 +122,8 @@ export default function Carrito({
 
                             {/* Panel de adiciones */}
                             {adicionAbierta === item.id && (
-                                <div className="mt-2 bg-purple-50 border border-purple-200 rounded-lg p-3">
-                                    <p className="text-xs font-semibold text-purple-700 mb-2 flex items-center gap-1">
+                                <div className="mt-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                                    <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-2 flex items-center gap-1">
                                         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <circle cx="12" cy="12" r="10"></circle>
                                             <path d="M12 8v8M8 12h8"></path>
@@ -136,9 +136,9 @@ export default function Carrito({
                                             const cantidad = seleccionada?.cantidad ?? 0;
                                             return (
                                                 <div key={adicion.id} className="flex items-center justify-between text-xs">
-                                                    <span className="text-gray-700 flex-1">
+                                                    <span className="text-gray-700 dark:text-gray-300 flex-1">
                                                         {adicion.nombre}
-                                                        <span className="text-purple-500 ml-1">+{fmtCOP(Number.parseFloat(adicion.precio))}</span>
+                                                        <span className="text-purple-500 dark:text-purple-400 ml-1">+{fmtCOP(Number.parseFloat(adicion.precio))}</span>
                                                     </span>
                                                     <div className="flex items-center gap-1 shrink-0">
                                                         <IconButton
@@ -146,11 +146,11 @@ export default function Carrito({
                                                             onClick={() => onAdicionDecrementar(item.id, adicion)}
                                                             disabled={cantidad === 0}
                                                             variant="default"
-                                                            className="!rounded-full font-bold !bg-purple-200 hover:!bg-purple-300 !text-purple-700"
+                                                            className="!rounded-full font-bold !bg-purple-200 dark:!bg-purple-900/40 hover:!bg-purple-300 dark:hover:!bg-purple-900/60 !text-purple-700 dark:!text-purple-300"
                                                         >
                                                             −
                                                         </IconButton>
-                                                        <span className="w-5 text-center font-medium text-gray-800">{cantidad}</span>
+                                                        <span className="w-5 text-center font-medium text-gray-800 dark:text-gray-200">{cantidad}</span>
                                                         <IconButton
                                                             aria-label="Aumentar cantidad de adición"
                                                             onClick={() => onAdicionIncrementar(item.id, adicion)}
@@ -177,9 +177,9 @@ export default function Carrito({
                                         placeholder="Ej: sin salsa de ajo, término 3/4..."
                                         value={item.nota ?? ''}
                                         onChange={(e) => onNotaChange(item.id, e.target.value)}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-none bg-amber-50 placeholder-gray-400"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-none bg-amber-50 dark:bg-amber-900/20 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                     />
-                                    <p className="text-right text-xs text-gray-400 mt-0.5">
+                                    <p className="text-right text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                                         {(item.nota ?? '').length}/200
                                     </p>
                                 </div>
@@ -190,7 +190,7 @@ export default function Carrito({
             </div>
 
             {aplicaRecargo && (
-                <div className="flex justify-between items-center text-sm text-gray-600 mb-1 border-t border-gray-100 pt-3">
+                <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400 mb-1 border-t border-gray-100 dark:border-gray-700 pt-3">
                     <span>Subtotal</span>
                     <span>{fmtCOP(subtotalProductos)}</span>
                 </div>
@@ -208,7 +208,7 @@ export default function Carrito({
                 </div>
             )}
 
-            <div className={`flex justify-between items-center text-lg font-semibold ${aplicaRecargo ? 'border-t border-gray-200 pt-2' : 'border-t border-gray-200 pt-3'}`}>
+            <div className={`flex justify-between items-center text-lg font-semibold text-gray-900 dark:text-gray-100 ${aplicaRecargo ? 'border-t border-gray-200 dark:border-gray-700 pt-2' : 'border-t border-gray-200 dark:border-gray-700 pt-3'}`}>
                 <span>Total</span>
                 <span>{fmtCOP(totalGeneral)}</span>
             </div>

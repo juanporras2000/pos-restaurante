@@ -12,11 +12,11 @@ import IconButton from '../shared/IconButton';
  *   < 0%    → rojo           (pérdida)
  */
 function badgeMargen(margen) {
-    if (margen >= 60) return 'bg-emerald-100 text-emerald-800';
-    if (margen >= 40) return 'bg-green-100 text-green-700';
-    if (margen >= 20) return 'bg-yellow-100 text-yellow-700';
-    if (margen >= 0) return 'bg-orange-100 text-orange-700';
-    return 'bg-red-100 text-red-700';
+    if (margen >= 60) return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400';
+    if (margen >= 40) return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+    if (margen >= 20) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+    if (margen >= 0) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+    return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
 }
 
 function labelMargen(margen) {
@@ -61,7 +61,7 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                                         className="w-full h-full object-cover rounded-lg"
                                     />
                                 ) : (
-                                    <svg className="h-12 w-12 md:h-16 md:w-16 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                                    <svg className="h-12 w-12 md:h-16 md:w-16 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                                         <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                         <path d="M21 15l-5-5L5 21"></path>
@@ -72,27 +72,27 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                             {/* Información del Producto */}
                             <div className="mb-3">
                                 {/* truncate e inline-block evitan saltos de línea extraños si el nombre es kilométrico */}
-                                <h3 className="font-semibold text-gray-900 text-base md:text-lg leading-tight truncate" title={producto.nombre}>
+                                <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg leading-tight truncate" title={producto.nombre}>
                                     {producto.nombre}
                                 </h3>
                                 <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2 mt-1">
-                                    <p className="text-xs md:text-sm text-gray-500 truncate max-w-[120px] md:max-w-none">
+                                    <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate max-w-[120px] md:max-w-none">
                                         {producto.categoria?.nombre ?? 'Sin categoría'}
                                     </p>
                                     {producto.es_domicilio && (
-                                        <span className="text-[10px] md:text-xs bg-blue-100 text-blue-700 rounded-full px-2 py-0.5 font-medium flex items-center gap-1 shrink-0">
+                                        <span className="text-[10px] md:text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full px-2 py-0.5 font-medium flex items-center gap-1 shrink-0">
                                             <TruckIcon className="h-3 w-3" /> Domicilio
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-lg md:text-xl font-black text-gray-900">
+                                <p className="text-lg md:text-xl font-black text-gray-900 dark:text-gray-100">
                                     {fmtCOP(precio)}
                                 </p>
                             </div>
 
                             {/* Costos y Rentabilidad en Canal Local */}
                             {tieneCosto ? (
-                                <div className="mb-3 bg-gray-50 rounded-lg p-3 space-y-1.5 text-xs md:text-sm">
+                                <div className="mb-3 bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1.5 text-xs md:text-sm">
                                     <div className="flex justify-between text-gray-600">
                                         <span>Costo</span>
                                         <span className="font-medium text-gray-800">${fmtCOP(costo)}</span>
@@ -103,15 +103,15 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                                             {utilidad >= 0 ? '+' : ''}${fmtCOP(utilidad)}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center pt-1 border-t border-gray-200">
-                                        <span className="text-gray-500">Margen</span>
+                                    <div className="flex justify-between items-center pt-1 border-t border-gray-200 dark:border-gray-700">
+                                        <span className="text-gray-500 dark:text-gray-400">Margen</span>
                                         <span className={`text-[10px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 rounded-full ${badgeMargen(margen)} truncate max-w-[140px]`}>
                                             {margen.toFixed(1)}% · {labelMargen(margen)}
                                         </span>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mb-3 text-[11px] md:text-xs text-gray-400 italic text-center bg-gray-50 rounded-lg py-2.5">
+                                <div className="mb-3 text-[11px] md:text-xs text-gray-400 dark:text-gray-500 italic text-center bg-gray-50 dark:bg-gray-900 rounded-lg py-2.5">
                                     Sin costo asignado en receta
                                 </div>
                             )}
@@ -136,7 +136,7 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center pt-1 border-t border-blue-200">
-                                        <span className="text-gray-500">Margen</span>
+                                        <span className="text-gray-500 dark:text-gray-400">Margen</span>
                                         <span className={`text-[10px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 rounded-full ${badgeMargen(margenDom)} truncate max-w-[140px]`}>
                                             {margenDom.toFixed(1)}% · {labelMargen(margenDom)}
                                         </span>
@@ -174,8 +174,8 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                     <svg className="h-16 w-16 text-gray-300 mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                         <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                     </svg>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron productos</h3>
-                    <p className="text-gray-500 text-sm">Ajusta el filtro o crea un nuevo producto</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No se encontraron productos</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Ajusta el filtro o crea un nuevo producto</p>
                 </div>
             )}
         </div>

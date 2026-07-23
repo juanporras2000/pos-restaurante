@@ -85,14 +85,14 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
 
     return (
         <>
-            <div className="bg-white rounded-xl shadow-md border border-gray-100 flex flex-col justify-between overflow-hidden hover:shadow-lg transition-all duration-200 min-h-[320px] md:min-h-[340px] w-full max-w-full md:max-w-[350px] mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-800 flex flex-col justify-between overflow-hidden hover:shadow-lg transition-all duration-200 min-h-[320px] md:min-h-[340px] w-full max-w-full md:max-w-[350px] mx-auto">
 
                 {/* BLOQUE SUPERIOR */}
                 <div>
                     {/* Banner de tipo de pedido */}
-                    <div className={`px-4 py-1.5 flex justify-between items-center text-xs font-bold uppercase tracking-wider ${pedido.tipo === 'mesa' ? 'bg-blue-50 text-blue-700 border-b border-blue-100'
-                        : pedido.tipo === 'domicilio' ? 'bg-green-50 text-green-700 border-b border-green-100'
-                            : 'bg-orange-50 text-orange-700 border-b border-orange-100'
+                    <div className={`px-4 py-1.5 flex justify-between items-center text-xs font-bold uppercase tracking-wider ${pedido.tipo === 'mesa' ? 'bg-blue-50 text-blue-700 border-b border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                        : pedido.tipo === 'domicilio' ? 'bg-green-50 text-green-700 border-b border-green-100 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+                            : 'bg-orange-50 text-orange-700 border-b border-orange-100 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800'
                         }`}>
                         <span>Pedido #{pedido.numero_dia || pedido.id}</span>
                         <span>{pedido.tipo === 'mesa' ? 'Mesa' : pedido.tipo === 'domicilio' ? 'Domicilio' : 'Recoger'}</span>
@@ -103,20 +103,20 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                         {/* Ubicación Destacada */}
                         <div className="mb-3 min-h-[36px] flex items-center">
                             {pedido.tipo === 'mesa' && pedido.numero_mesa && (
-                                <h4 className="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
+                                <h4 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                     <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
                                     Mesa {pedido.numero_mesa}
                                 </h4>
                             )}
                             {pedido.tipo === 'domicilio' && pedido.direccion && (
                                 <div className="w-full">
-                                    <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-tight">Entregar en:</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-tight">Entregar en:</span>
                                     <p className="text-xs md:text-sm font-semibold text-gray-800 line-clamp-2">{pedido.direccion}</p>
                                 </div>
                             )}
                             {pedido.tipo === 'recoger' && (
                                 <div className="w-full">
-                                    <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-tight">Retira Cliente:</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-tight">Retira Cliente:</span>
                                     <p className="text-xs md:text-sm font-bold text-gray-800 truncate">{pedido.nombre_cliente || 'Cliente General'}</p>
                                 </div>
                             )}
@@ -127,12 +127,12 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                             {pedido.detalles?.map((detalle) => (
                                 <div key={detalle.id} className="text-xs">
                                     <div className="flex justify-between items-start">
-                                        <span className="text-gray-700 font-medium flex-1 pr-2 truncate">{detalle.producto?.nombre}</span>
-                                        <span className="text-gray-400 font-bold px-2">x{detalle.cantidad}</span>
-                                        <span className="font-semibold text-gray-900">{fmtCOP(detalle.subtotal)}</span>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium flex-1 pr-2 truncate">{detalle.producto?.nombre}</span>
+                                        <span className="text-gray-400 dark:text-gray-500 font-bold px-2">x{detalle.cantidad}</span>
+                                        <span className="font-semibold text-gray-900 dark:text-gray-100">{fmtCOP(detalle.subtotal)}</span>
                                     </div>
                                     {detalle.adiciones?.length > 0 && (
-                                        <div className="mt-0.5 ml-2 bg-purple-50 p-1 rounded text-[11px] text-purple-700 space-y-0.5">
+                                        <div className="mt-0.5 ml-2 bg-purple-50 dark:bg-purple-900/30 p-1 rounded text-[11px] text-purple-700 dark:text-purple-400 space-y-0.5">
                                             {detalle.adiciones.map((adic, i) => (
                                                 <p key={i} className="flex justify-between">
                                                     <span>+ {adic.nombre} (x{adic.cantidad})</span>
@@ -160,7 +160,7 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                 {/* BLOQUE INFERIOR */}
                 <div className="p-4 md:p-4.5 pt-0 mt-2">
                     {/* Metadata: Tiempo transcurrido y perfil */}
-                    <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
+                    <div className="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 mb-2">
                         <span
                             title={formatFecha(pedido.created_at)}
                             className="inline-flex items-center gap-1"
@@ -172,8 +172,8 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                             Hace {timeAgo(pedido.created_at)}
                         </span>
                         {pedido.perfil?.nombre && (
-                            <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium border border-gray-200">
-                                <svg className="h-2.5 w-2.5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <span className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full font-medium border border-gray-200 dark:border-gray-700">
+                                <svg className="h-2.5 w-2.5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
@@ -183,9 +183,9 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                     </div>
 
                     {/* Totales */}
-                    <div className="bg-gray-50 p-2 rounded-lg mb-2.5 space-y-0.5">
+                    <div className="bg-gray-50 dark:bg-gray-900 p-2 rounded-lg mb-2.5 space-y-0.5">
                         {tieneRecargo && (
-                            <div className="flex justify-between text-[11px] text-gray-500">
+                            <div className="flex justify-between text-[11px] text-gray-500 dark:text-gray-400">
                                 <span>Subtotal</span>
                                 <span>{fmtCOP(subtotalItems)}</span>
                             </div>
@@ -197,8 +197,8 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                             </div>
                         )}
                         <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-gray-500 uppercase">Total</span>
-                            <span className="text-base md:text-lg font-black text-gray-900">{fmtCOP(pedido.total)}</span>
+                            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Total</span>
+                            <span className="text-base md:text-lg font-black text-gray-900 dark:text-gray-100">{fmtCOP(pedido.total)}</span>
                         </div>
                     </div>
 
@@ -216,7 +216,7 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                             type="button"
                             onClick={handleImprimir}
                             disabled={procesando}
-                            className="p-1.5 md:p-2 border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-50 rounded-lg transition-colors"
+                            className="p-1.5 md:p-2 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 rounded-lg transition-colors"
                             title="Imprimir comanda"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -227,7 +227,7 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                             type="button"
                             onClick={() => setModalEditarAbierto(true)}
                             disabled={procesando}
-                            className="p-1.5 md:p-2 border border-gray-200 text-blue-600 hover:bg-blue-50 disabled:opacity-50 rounded-lg transition-colors"
+                            className="p-1.5 md:p-2 border border-gray-200 dark:border-gray-700 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 rounded-lg transition-colors"
                             title="Editar pedido"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -238,7 +238,7 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                             type="button"
                             onClick={eliminarPedido}
                             disabled={procesando}
-                            className="p-1.5 md:p-2 border border-gray-200 text-red-600 hover:bg-red-50 disabled:opacity-50 rounded-lg transition-colors"
+                            className="p-1.5 md:p-2 border border-gray-200 dark:border-gray-700 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 disabled:opacity-50 rounded-lg transition-colors"
                             title="Eliminar pedido"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const VARIANTS = {
-    default: 'text-gray-400 hover:text-gray-600 hover:bg-gray-100',
-    danger: 'text-red-500 hover:text-red-600 hover:bg-red-50',
-    primary: 'text-gray-400 hover:text-primary hover:bg-primary/10',
+    default: 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+    danger: 'text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30',
+    primary: 'text-gray-400 dark:text-gray-500 hover:text-primary hover:bg-primary/10',
 };
 
 /**

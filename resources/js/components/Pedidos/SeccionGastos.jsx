@@ -10,7 +10,7 @@ export default function SeccionGastos({ gastos }) {
     if (gastos.length === 0) return null;
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-red-100">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-red-100">
 
             {/* ── Cabecera clicable ── */}
             <button
@@ -25,13 +25,13 @@ export default function SeccionGastos({ gastos }) {
                         </svg>
                     </span>
                     <div>
-                        <p className="font-semibold text-gray-900">Gastos del día</p>
-                        <p className="text-sm text-gray-500">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''} registrado{gastos.length !== 1 ? 's' : ''}</p>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">Gastos del día</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''} registrado{gastos.length !== 1 ? 's' : ''}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-lg font-bold text-red-600">−{fmtCOP(totalGastos)}</span>
-                    <ChevronDownIcon className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandida ? 'rotate-180' : ''}`} />
+                    <ChevronDownIcon className={`h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${expandida ? 'rotate-180' : ''}`} />
                 </div>
             </button>
 
@@ -41,15 +41,15 @@ export default function SeccionGastos({ gastos }) {
                     {gastos.map((g) => {
                         const tipo = TIPOS_GASTO[g.tipo] ?? { label: g.tipo, color: 'bg-gray-100 text-gray-600' };
                         return (
-                            <div key={g.id} className="flex items-start justify-between py-2 border-b border-gray-50 last:border-0">
+                            <div key={g.id} className="flex items-start justify-between py-2 border-b border-gray-50 dark:border-gray-800 last:border-0">
                                 <div className="flex items-start gap-2 flex-1 min-w-0">
                                     <span className={`mt-0.5 shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${tipo.color}`}>
                                         {tipo.label}
                                     </span>
                                     <div className="min-w-0">
-                                        <p className="text-sm font-medium text-gray-800 truncate">{g.descripcion}</p>
+                                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{g.descripcion}</p>
                                         {g.created_at && (
-                                            <p className="text-xs text-gray-400">{new Date(g.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
+                                            <p className="text-xs text-gray-400 dark:text-gray-500">{new Date(g.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
                                         )}
                                     </div>
                                 </div>
@@ -59,7 +59,7 @@ export default function SeccionGastos({ gastos }) {
                     })}
 
                     <div className="flex justify-between items-center pt-2 border-t border-red-100 font-semibold">
-                        <span className="text-gray-700">Total gastos</span>
+                        <span className="text-gray-700 dark:text-gray-300">Total gastos</span>
                         <span className="text-red-600">{fmtCOP(totalGastos)}</span>
                     </div>
                 </div>

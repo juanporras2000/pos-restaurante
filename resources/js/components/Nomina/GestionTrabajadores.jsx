@@ -59,9 +59,9 @@ function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                         {esEdicion ? 'Editar trabajador' : 'Nuevo trabajador'}
                     </h3>
                     <IconButton aria-label="Cerrar" onClick={onCerrar}>
@@ -74,7 +74,7 @@ function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
                 <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
                     {/* Nombre */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Nombre <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -91,7 +91,7 @@ function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
 
                     {/* Cargo */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cargo</label>
                         <input
                             type="text"
                             value={cargo}
@@ -104,11 +104,11 @@ function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
 
                     {/* Pago por turno */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Pago por turno/día <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm">$</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium text-sm">$</span>
                             <input
                                 type="number"
                                 min="0"
@@ -122,13 +122,13 @@ function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
                         {errores.pago
                             ? <p className="mt-1 text-xs text-red-600">{errores.pago}</p>
                             : pagoMiles !== '' && !isNaN(parseFloat(pagoMiles)) && (
-                                <p className="mt-0.5 text-xs text-gray-400">= {fmtCOP(Math.round(parseFloat(pagoMiles) * 1000))} por día</p>
+                                <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">= {fmtCOP(Math.round(parseFloat(pagoMiles) * 1000))} por día</p>
                             )
                         }
                     </div>
 
                     <div className="flex gap-2 pt-1">
-                        <button type="button" onClick={onCerrar} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
+                        <button type="button" onClick={onCerrar} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-900">
                             Cancelar
                         </button>
                         <button type="submit" disabled={guardando} className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors">
@@ -207,12 +207,12 @@ export default function GestionTrabajadores() {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 w-full">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 w-full">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Trabajadores</h2>
-                    <p className="text-sm text-gray-500 mt-0.5">Configura el equipo y su pago por turno.</p>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Trabajadores</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Configura el equipo y su pago por turno.</p>
                 </div>
                 <button type="button" onClick={abrirNuevo} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -233,20 +233,20 @@ export default function GestionTrabajadores() {
                         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                     </svg>
-                    <p className="text-sm text-gray-500">No hay trabajadores. Agrega el primero.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay trabajadores. Agrega el primero.</p>
                 </div>
             ) : (
-                <ul className="divide-y divide-gray-100">
+                <ul className="divide-y divide-gray-100 dark:divide-gray-800">
                     {trabajadores.map((t) => (
                         <li key={t.id} className="flex items-center justify-between py-3.5 px-1 gap-3">
                             {/* Avatar + info */}
                             <div className="flex items-center gap-3 min-w-0">
-                                <span className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold uppercase flex-shrink-0 ${t.activo ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
+                                <span className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold uppercase flex-shrink-0 ${t.activo ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400 dark:text-gray-500'}`}>
                                     {t.nombre.charAt(0)}
                                 </span>
                                 <div className="min-w-0">
-                                    <p className={`text-sm font-medium truncate ${t.activo ? 'text-gray-900' : 'text-gray-400 line-through'}`}>{t.nombre}</p>
-                                    <p className="text-xs text-gray-400 truncate">
+                                    <p className={`text-sm font-medium truncate ${t.activo ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500 line-through'}`}>{t.nombre}</p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
                                         {t.cargo || 'Sin cargo'} · {fmtCOP(t.pago_por_turno)}/día
                                     </p>
                                 </div>
@@ -261,17 +261,17 @@ export default function GestionTrabajadores() {
                                     title={t.activo ? 'Desactivar' : 'Activar'}
                                     role="switch"
                                     aria-checked={t.activo}
-                                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${t.activo ? 'bg-blue-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${t.activo ? 'bg-blue-500' : 'bg-gray-200 dark:bg-gray-600'}`}
                                 >
                                     <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ${t.activo ? 'translate-x-6' : 'translate-x-1'}`} />
                                 </button>
-                                <button type="button" onClick={() => abrirEditar(t)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
+                                <button type="button" onClick={() => abrirEditar(t)} className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                         <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
                                 </button>
-                                <button type="button" onClick={() => eliminar(t)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
+                                <button type="button" onClick={() => eliminar(t)} className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>

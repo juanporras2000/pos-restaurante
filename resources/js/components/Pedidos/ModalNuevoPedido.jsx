@@ -280,11 +280,11 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
             className="modal-overlay"
             onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}
         >
-            <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 4v16m8-8H4"></path>
                             </svg>
@@ -300,8 +300,8 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Tipo de Pedido — card selectors */}
                         <div className="lg:col-span-1">
-                            <div className="border border-gray-200 rounded-xl p-4">
-                                <h3 className="font-semibold text-gray-500 mb-3 text-sm uppercase tracking-wide">Tipo de Pedido</h3>
+                            <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                                <h3 className="font-semibold text-gray-500 dark:text-gray-400 mb-3 text-sm uppercase tracking-wide">Tipo de Pedido</h3>
                                 <div className="space-y-2">
 
                                     {/* MESA */}
@@ -310,12 +310,12 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                         onClick={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
                                         className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                                             pedido.tipo === 'mesa'
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         }`}
                                     >
                                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'mesa' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
+                                            pedido.tipo === 'mesa' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                                         }`}>
                                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <rect x="3" y="8" width="18" height="4" rx="1"></rect>
@@ -323,8 +323,8 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             </svg>
                                         </div>
                                         <div className="flex-1">
-                                            <p className={`text-sm font-semibold ${pedido.tipo === 'mesa' ? 'text-blue-700' : 'text-gray-800'}`}>Mesa</p>
-                                            <p className="text-xs text-gray-500">Consumo en el local</p>
+                                            <p className={`text-sm font-semibold ${pedido.tipo === 'mesa' ? 'text-blue-700 dark:text-blue-400' : 'text-gray-800 dark:text-gray-200'}`}>Mesa</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Consumo en el local</p>
                                         </div>
                                         {pedido.tipo === 'mesa' && (
                                             <svg className="h-5 w-5 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -354,12 +354,12 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                         onClick={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
                                         className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                                             pedido.tipo === 'domicilio'
-                                                ? 'border-green-500 bg-green-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         }`}
                                     >
                                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'domicilio' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500'
+                                            pedido.tipo === 'domicilio' ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                                         }`}>
                                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
@@ -367,8 +367,8 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             </svg>
                                         </div>
                                         <div className="flex-1">
-                                            <p className={`text-sm font-semibold ${pedido.tipo === 'domicilio' ? 'text-green-700' : 'text-gray-800'}`}>Domicilio</p>
-                                            <p className="text-xs text-gray-500">Entrega a dirección</p>
+                                            <p className={`text-sm font-semibold ${pedido.tipo === 'domicilio' ? 'text-green-700 dark:text-green-400' : 'text-gray-800 dark:text-gray-200'}`}>Domicilio</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Entrega a dirección</p>
                                         </div>
                                         {pedido.tipo === 'domicilio' && (
                                             <svg className="h-5 w-5 text-green-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -401,12 +401,12 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                         onClick={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
                                         className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                                             pedido.tipo === 'recoger'
-                                                ? 'border-orange-500 bg-orange-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         }`}
                                     >
                                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'recoger' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'
+                                            pedido.tipo === 'recoger' ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                                         }`}>
                                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
@@ -415,8 +415,8 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                             </svg>
                                         </div>
                                         <div className="flex-1">
-                                            <p className={`text-sm font-semibold ${pedido.tipo === 'recoger' ? 'text-orange-600' : 'text-gray-800'}`}>Recoger</p>
-                                            <p className="text-xs text-gray-500">El cliente pasa a buscar</p>
+                                            <p className={`text-sm font-semibold ${pedido.tipo === 'recoger' ? 'text-orange-600 dark:text-orange-400' : 'text-gray-800 dark:text-gray-200'}`}>Recoger</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">El cliente pasa a buscar</p>
                                         </div>
                                         {pedido.tipo === 'recoger' && (
                                             <svg className="h-5 w-5 text-orange-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -428,7 +428,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                                     {pedido.tipo === 'recoger' && (
                                         <div className="px-1 pt-1">
                                             <label className="form-label">
-                                                Nombre del cliente <span className="text-gray-400 font-normal">(opcional)</span>
+                                                Nombre del cliente <span className="text-gray-400 dark:text-gray-500 font-normal">(opcional)</span>
                                             </label>
                                             <input
                                                 type="text"
@@ -466,7 +466,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     </div>
 
                     {/* Acciones */}
-                    <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                         <button type="button" onClick={cerrar} className="btn-secondary">
                             Cancelar
                         </button>

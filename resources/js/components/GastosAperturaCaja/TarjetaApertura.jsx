@@ -52,14 +52,14 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
     if (!esHoy) {
         if (!apertura) return null;
         return (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+            <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4 flex items-center gap-4 mb-6">
+                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center shrink-0">
                     <IconoCaja />
                 </div>
                 <div>
-                    <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Base de apertura de caja</p>
-                    <p className="text-2xl font-bold text-green-700">{fmt(apertura.monto)}</p>
-                    {apertura.nota && <p className="text-xs text-green-600 mt-0.5">{apertura.nota}</p>}
+                    <p className="text-xs text-green-700 dark:text-green-400 font-medium uppercase tracking-wide">Base de apertura de caja</p>
+                    <p className="text-2xl font-bold text-green-700 dark:text-green-400">{fmt(apertura.monto)}</p>
+                    {apertura.nota && <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">{apertura.nota}</p>}
                 </div>
             </div>
         );
@@ -68,21 +68,21 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
     // Modo visualización (hoy, ya guardada)
     if (!editando && apertura) {
         return (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between gap-4 mb-6">
+            <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4 flex items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center shrink-0">
                         <IconoCaja />
                     </div>
                     <div>
-                        <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Base de apertura de caja</p>
-                        <p className="text-2xl font-bold text-green-700">{fmt(apertura.monto)}</p>
-                        {apertura.nota && <p className="text-xs text-green-600 mt-0.5">{apertura.nota}</p>}
+                        <p className="text-xs text-green-700 dark:text-green-400 font-medium uppercase tracking-wide">Base de apertura de caja</p>
+                        <p className="text-2xl font-bold text-green-700 dark:text-green-400">{fmt(apertura.monto)}</p>
+                        {apertura.nota && <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">{apertura.nota}</p>}
                     </div>
                 </div>
                 <button
                     type="button"
                     onClick={() => setEditando(true)}
-                    className="text-green-600 hover:text-green-800 hover:bg-green-100 p-2 rounded-lg transition-colors shrink-0"
+                    className="text-green-600 dark:text-green-400 hover:text-green-800 hover:bg-green-100 dark:hover:bg-green-900/40 p-2 rounded-lg transition-colors shrink-0"
                     title="Editar base de caja"
                 >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -96,8 +96,8 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
 
     // Modo formulario (hoy, sin guardar o editando)
     return (
-        <div className="bg-white border-2 border-dashed border-green-300 rounded-xl p-4 mb-6">
-            <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 border-2 border-dashed border-green-300 rounded-xl p-4 mb-6">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                 <svg className="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="2" y="7" width="20" height="14" rx="2" />
                     <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
@@ -108,9 +108,9 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
             </p>
             <form onSubmit={guardar} className="flex flex-wrap items-end gap-3">
                 <div className="flex-1 min-w-36">
-                    <label className="block text-xs text-gray-500 mb-1">Monto inicial</label>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Monto inicial</label>
                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">$</span>
                         <input
                             type="number"
                             min="0"
@@ -123,11 +123,11 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
                         />
                     </div>
                     {monto !== '' && !Number.isNaN(Number.parseFloat(monto)) && (
-                        <p className="mt-0.5 text-xs text-gray-400">= ${(Number.parseFloat(monto) * 1000).toLocaleString('es-CO')}</p>
+                        <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">= ${(Number.parseFloat(monto) * 1000).toLocaleString('es-CO')}</p>
                     )}
                 </div>
                 <div className="flex-1 min-w-40">
-                    <label className="block text-xs text-gray-500 mb-1">Nota (opcional)</label>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Nota (opcional)</label>
                     <input
                         type="text"
                         value={nota}
@@ -142,7 +142,7 @@ export default function TarjetaApertura({ apertura, fecha, esHoy, onGuardado }) 
                         <button
                             type="button"
                             onClick={() => setEditando(false)}
-                            className="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50"
+                            className="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-900"
                         >
                             Cancelar
                         </button>

@@ -14,28 +14,28 @@ export default function ResumenTarjetas({ gastos, total, apertura }) {
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {/* Total gastos */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm col-span-2 md:col-span-1">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total gastos</p>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm col-span-2 md:col-span-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total gastos</p>
                 <p className="text-2xl font-bold text-red-600">{fmt(totalGastos)}</p>
-                <p className="text-xs text-gray-400 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{gastos.length} gasto{gastos.length !== 1 ? 's' : ''}</p>
             </div>
 
             {/* Disponible en caja (solo si hay apertura) */}
             {disponible != null && (
-                <div className={`bg-white rounded-xl border-2 ${disponible >= 0 ? 'border-green-300' : 'border-red-300'} p-4 shadow-sm col-span-2 md:col-span-1`}>
-                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Disponible en caja</p>
+                <div className={`bg-white dark:bg-gray-800 rounded-xl border-2 ${disponible >= 0 ? 'border-green-300' : 'border-red-300'} p-4 shadow-sm col-span-2 md:col-span-1`}>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Disponible en caja</p>
                     <p className={`text-2xl font-bold ${disponible >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {fmt(disponible)}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Base − Gastos</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Base − Gastos</p>
                 </div>
             )}
 
             {/* Subtotal por tipo */}
             {resumenPorTipo.map((t) => (
-                <div key={t.value} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{t.label}</p>
-                    <p className="text-xl font-bold text-gray-800">{fmt(t.subtotal)}</p>
+                <div key={t.value} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{t.label}</p>
+                    <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{fmt(t.subtotal)}</p>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${t.color}`}>{t.label}</span>
                 </div>
             ))}

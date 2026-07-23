@@ -110,11 +110,11 @@ export default function Insumos() {
     const filtrados = insumos.filter((i) => i.nombre.toLowerCase().includes(buscar.toLowerCase()));
 
     return (
-        <div className="min-h-screen bg-gray-50 lg:p-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:p-6">
 
             <div className="mb-8 flex flex-col lg:flex-row items-center justify-between">
                 <div>
-                    <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                    <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center lg:justify-normal gap-3">
                         <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"></path>
                             <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
@@ -145,17 +145,17 @@ export default function Insumos() {
             </div>
 
             {/* Tabla */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full min-w-0">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden w-full min-w-0">
     {cargando ? (
-        <div className="p-12 text-center text-gray-500">Cargando insumos...</div>
+        <div className="p-12 text-center text-gray-500 dark:text-gray-400">Cargando insumos...</div>
     ) : filtrados.length === 0 ? (
         <div className="p-12 text-center">
             <svg className="h-14 w-14 text-gray-300 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                 <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"></path>
                 <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
             </svg>
-            <p className="text-gray-500 font-medium">{buscar ? 'Sin resultados para la búsqueda' : 'No hay insumos registrados'}</p>
-            {!buscar && <p className="text-gray-400 text-sm mt-1">Crea el primero con el botón de arriba</p>}
+            <p className="text-gray-500 dark:text-gray-400 font-medium">{buscar ? 'Sin resultados para la búsqueda' : 'No hay insumos registrados'}</p>
+            {!buscar && <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Crea el primero con el botón de arriba</p>}
         </div>
     ) : (
         <>
@@ -171,23 +171,23 @@ export default function Insumos() {
                             {/* Línea superior: Nombre del Insumo y Unidad de Medida */}
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
-                                    <p className="font-bold text-gray-900 text-sm break-words">{ins.nombre}</p>
+                                    <p className="font-bold text-gray-900 dark:text-gray-100 text-sm break-words">{ins.nombre}</p>
                                 </div>
-                                <span className="inline-flex items-center flex-shrink-0 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-700 font-mono">
+                                <span className="inline-flex items-center flex-shrink-0 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-700 dark:text-gray-300 font-mono">
                                     {ins.unidad_medida}
                                 </span>
                             </div>
 
                             {/* Bloque central: Datos de stock alineados simétricamente */}
-                            <div className="grid grid-cols-2 gap-2 bg-gray-50/50 p-2.5 rounded-lg border border-gray-100 text-xs">
+                            <div className="grid grid-cols-2 gap-2 bg-gray-50/50 dark:bg-gray-900/50 p-2.5 rounded-lg border border-gray-100 dark:border-gray-800 text-xs">
                                 <div>
-                                    <p className="text-gray-400 uppercase tracking-wider text-[10px]">Stock Actual</p>
-                                    <p className="font-semibold text-gray-900 mt-0.5 text-sm tabular-nums">
+                                    <p className="text-gray-400 dark:text-gray-500 uppercase tracking-wider text-[10px]">Stock Actual</p>
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100 mt-0.5 text-sm tabular-nums">
                                         {parseFloat(ins.stock_actual).toFixed(2)}
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-gray-400 uppercase tracking-wider text-[10px]">Stock Mínimo</p>
+                                    <p className="text-gray-400 dark:text-gray-500 uppercase tracking-wider text-[10px]">Stock Mínimo</p>
                                     <p className="font-medium text-gray-600 mt-0.5 text-sm tabular-nums">
                                         {parseFloat(ins.stock_minimo).toFixed(2)}
                                     </p>
@@ -198,14 +198,14 @@ export default function Insumos() {
                             <div className="flex items-center justify-between gap-2 pt-1">
                                 <div>
                                     {bajo ? (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
                                             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                 <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
                                             </svg>
                                             Bajo
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                             OK
                                         </span>
                                     )}
@@ -214,26 +214,26 @@ export default function Insumos() {
                                 {/* Botonera móvil: Área táctil expandida */}
                                 <div className="flex items-center gap-1">
                                     <button type="button" onClick={() => setInsumoHistorial(ins)}
-                                        className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100 bg-white" title="Ver historial">
+                                        className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800" title="Ver historial">
                                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                     </button>
                                     <button type="button" onClick={() => setInsumoAjuste(ins)}
-                                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors border border-green-100 bg-white" title="Ajustar stock">
+                                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors border border-green-100 bg-white dark:bg-gray-800" title="Ajustar stock">
                                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M12 4v16m8-8H4"></path>
                                         </svg>
                                     </button>
                                     <button type="button" onClick={() => abrirEditar(ins)}
-                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100 bg-white" title="Editar">
+                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100 bg-white dark:bg-gray-800" title="Editar">
                                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
                                             <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
                                     </button>
                                     <button type="button" onClick={() => eliminar(ins)} disabled={eliminandoId === ins.id}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 bg-white disabled:opacity-40 disabled:pointer-events-none" title="Eliminar">
+                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:pointer-events-none" title="Eliminar">
                                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
@@ -250,13 +250,13 @@ export default function Insumos() {
                 - Se mantiene oculta en móviles (hidden) y se restaura en PC (sm:table).
                ========================================================================= */}
             <table className="w-full text-sm hidden sm:table">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                     <tr>
-                        <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Nombre</th>
-                        <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Unidad</th>
-                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock actual</th>
-                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Stock mínimo</th>
-                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Estado</th>
+                        <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Nombre</th>
+                        <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Unidad</th>
+                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Stock actual</th>
+                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Stock mínimo</th>
+                        <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Estado</th>
                         <th className="px-6 py-3"></th>
                     </tr>
                 </thead>
@@ -264,29 +264,29 @@ export default function Insumos() {
                     {filtrados.map((ins) => {
                         const bajo = parseFloat(ins.stock_actual) <= parseFloat(ins.stock_minimo) && parseFloat(ins.stock_minimo) > 0;
                         return (
-                            <tr key={ins.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 font-medium text-gray-900">{ins.nombre}</td>
+                            <tr key={ins.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">{ins.nombre}</td>
                                 <td className="px-6 py-4 text-gray-600">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700 font-mono">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700 dark:text-gray-300 font-mono">
                                         {ins.unidad_medida}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-right font-medium text-gray-900 tabular-nums">
+                                <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100 tabular-nums">
                                     {parseFloat(ins.stock_actual).toFixed(2)}
                                 </td>
-                                <td className="px-6 py-4 text-right text-gray-500 tabular-nums">
+                                <td className="px-6 py-4 text-right text-gray-500 dark:text-gray-400 tabular-nums">
                                     {parseFloat(ins.stock_minimo).toFixed(2)}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     {bajo ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
                                             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
                                             </svg>
                                             Stock bajo
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                             OK
                                         </span>
                                     )}
@@ -294,7 +294,7 @@ export default function Insumos() {
                                 <td className="px-6 py-4">
                                     <div className="flex justify-end gap-2">
                                         <button type="button" onClick={() => setInsumoHistorial(ins)}
-                                            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors" title="Ver historial">
+                                            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 rounded transition-colors" title="Ver historial">
                                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>

@@ -10,14 +10,14 @@ function FilaGasto({ gasto, esHoy, onEditar, onEliminar }) {
     });
 
     return (
-        <tr className="hover:bg-gray-50 group">
-            <td className="px-4 py-3 font-medium text-gray-900">{gasto.concepto}</td>
+        <tr className="hover:bg-gray-50 dark:hover:bg-gray-900 group">
+            <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{gasto.concepto}</td>
             <td className="px-4 py-3">
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tipo.color}`}>{tipo.label}</span>
             </td>
             <td className="px-4 py-3 text-right font-semibold text-red-600">{fmt(gasto.monto)}</td>
-            <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell max-w-xs truncate">{gasto.nota || '—'}</td>
-            <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{hora}</td>
+            <td className="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs hidden md:table-cell max-w-xs truncate">{gasto.nota || '—'}</td>
+            <td className="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs hidden sm:table-cell">{hora}</td>
             <td className="px-4 py-3">
                 {esHoy && (
                     <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity justify-end">
@@ -47,7 +47,7 @@ export default function TablaGastos({ gastos, filtroTipo, cargando, esHoy, onEdi
 
     if (cargando) {
         return (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-center py-16">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center py-16">
                 <Spinner size="md" />
             </div>
         );
@@ -55,7 +55,7 @@ export default function TablaGastos({ gastos, filtroTipo, cargando, esHoy, onEdi
 
     if (gastos.length === 0) {
         return (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm text-center py-16 text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center py-16 text-gray-400 dark:text-gray-500">
                 <svg className="mx-auto h-12 w-12 text-gray-200 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                 </svg>
@@ -67,19 +67,19 @@ export default function TablaGastos({ gastos, filtroTipo, cargando, esHoy, onEdi
     }
 
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                     <tr>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Concepto</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Nota</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Hora</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Concepto</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tipo</th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Monto</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide hidden md:table-cell">Nota</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide hidden sm:table-cell">Hora</th>
                         <th className="px-4 py-3" />
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {gastos.map((g) => (
                         <FilaGasto
                             key={g.id}
@@ -91,9 +91,9 @@ export default function TablaGastos({ gastos, filtroTipo, cargando, esHoy, onEdi
                     ))}
                 </tbody>
                 {gastos.length > 1 && (
-                    <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+                    <tfoot className="bg-gray-50 dark:bg-gray-900 border-t-2 border-gray-200 dark:border-gray-700">
                         <tr>
-                            <td colSpan={2} className="px-4 py-3 text-sm font-semibold text-gray-700">
+                            <td colSpan={2} className="px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 {filtroTipo !== 'todos' ? `Subtotal ${tipoInfo(filtroTipo).label}` : 'Total del día'}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-red-600">{fmt(totalFiltrado)}</td>

@@ -7,8 +7,8 @@ import Spinner from '../shared/Spinner';
 
 function FilaBalance({ label, valor, colorClase, negrita = false }) {
     return (
-        <div className={`flex justify-between items-center py-2 ${negrita ? 'border-t border-gray-200 mt-1 pt-3' : ''}`}>
-            <span className={`text-sm ${negrita ? 'font-bold text-gray-800' : 'text-gray-500'}`}>{label}</span>
+        <div className={`flex justify-between items-center py-2 ${negrita ? 'border-t border-gray-200 dark:border-gray-700 mt-1 pt-3' : ''}`}>
+            <span className={`text-sm ${negrita ? 'font-bold text-gray-800' : 'text-gray-500 dark:text-gray-400'}`}>{label}</span>
             <span className={`text-sm font-semibold ${colorClase}`}>{valor}</span>
         </div>
     );
@@ -29,7 +29,7 @@ function ErrorRetry({ msg, onRetry }) {
                 <button
                     type="button"
                     onClick={onRetry}
-                    className="px-3 py-1.5 text-xs font-medium bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100"
+                    className="px-3 py-1.5 text-xs font-medium bg-red-50 dark:bg-red-900/30 border border-red-200 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100"
                 >
                     Reintentar
                 </button>
@@ -94,8 +94,8 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
 
             {/* Desglose por tipo de gasto */}
             {tipos.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-gray-100">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">
                         Desglose de gastos
                     </p>
                     <div className="space-y-1.5">
@@ -105,14 +105,14 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
                                 : 0;
                             return (
                                 <div key={t.tipo} className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500 w-24 truncate capitalize">{t.tipo}</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 w-24 truncate capitalize">{t.tipo}</span>
                                     <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
                                         <div
                                             className="bg-red-400 h-full rounded-full transition-all duration-500"
                                             style={{ width: `${pct}%` }}
                                         />
                                     </div>
-                                    <span className="text-xs font-medium text-gray-700 w-20 text-right">
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-20 text-right">
                                         {fmtCOP(t.total)}
                                     </span>
                                 </div>
@@ -123,7 +123,7 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
             )}
 
             {tipos.length === 0 && totalGastos === 0 && (
-                <p className="text-xs text-gray-400 text-center pt-4">
+                <p className="text-xs text-gray-400 dark:text-gray-500 text-center pt-4">
                     Sin gastos registrados en este período
                 </p>
             )}

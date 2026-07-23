@@ -48,8 +48,8 @@ function ModalCategoria({ categoria, onGuardar, onCerrar }) {
 
     return (
         <Modal abierto onCerrar={onCerrar}>
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                         {esEdicion ? 'Editar categoría' : 'Nueva categoría'}
                     </h3>
                     <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
@@ -172,13 +172,13 @@ export default function GestionCategorias() {
             {/* Cabecera Adaptativa */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <svg className="h-5 w-5 text-orange-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M4 6h16M4 10h16M4 14h8M4 18h8" />
                         </svg>
                         Categorías
                     </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">Organiza los productos por categorías.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Organiza los productos por categorías.</p>
                 </div>
                 <button
                     type="button"
@@ -198,7 +198,7 @@ export default function GestionCategorias() {
                     <Spinner size="md" className="text-orange-500" />
                 </div>
             ) : categorias.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                     <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M4 6h16M4 10h16M4 14h8M4 18h8" />
                     </svg>
@@ -213,8 +213,8 @@ export default function GestionCategorias() {
                                     {cat.nombre ? cat.nombre.charAt(0) : '?'}
                                 </span>
                                 <div className="min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{cat.nombre}</p>
-                                    <p className="text-xs text-gray-400">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{cat.nombre}</p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500">
                                         {cat.productos_count === 0
                                             ? 'Sin productos'
                                             : `${cat.productos_count} producto${cat.productos_count !== 1 ? 's' : ''}`}

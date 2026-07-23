@@ -28,7 +28,7 @@ function ModalNuevaDeuda({ trabajadores, trabajadorId, onGuardar, onCerrar }) {
 
         setGuardando(true);
         try {
-            const res = await fetch('/api/deudas', {
+            const res = await fetch('/api/v1/deudas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() },
                 body: JSON.stringify({
@@ -177,7 +177,7 @@ function FilaDeuda({ deuda, onCambio }) {
         if (!isConfirmed) return;
 
         try {
-            const res = await fetch(`/api/deudas/${deuda.id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf() } });
+            const res = await fetch(`/api/v1/deudas/${deuda.id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf() } });
             if (!res.ok) throw new Error();
             onCambio();
         } catch {
@@ -199,7 +199,7 @@ function FilaDeuda({ deuda, onCambio }) {
         if (!isConfirmed) return;
 
         try {
-            const res = await fetch(`/api/deuda-abonos/${abono.id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf() } });
+            const res = await fetch(`/api/v1/deuda-abonos/${abono.id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf() } });
             if (!res.ok) throw new Error();
             onCambio();
         } catch {
@@ -285,7 +285,7 @@ export default function Descuentos() {
         const params = new URLSearchParams();
         if (filtroTrabajador) params.set('trabajador_id', filtroTrabajador);
         if (filtroEstado) params.set('estado', filtroEstado);
-        fetch(`/api/deudas?${params.toString()}`)
+        fetch(`/api/v1/deudas?${params.toString()}`)
             .then((r) => r.json())
             .then(setDeudas)
             .catch(() => {})
@@ -293,7 +293,7 @@ export default function Descuentos() {
     };
 
     useEffect(() => {
-        fetch('/api/trabajadores').then((r) => r.json()).then(setTrabajadores).catch(() => {});
+        fetch('/api/v1/trabajadores').then((r) => r.json()).then(setTrabajadores).catch(() => {});
     }, []);
 
     useEffect(cargarDeudas, [filtroTrabajador, filtroEstado]); // eslint-disable-line

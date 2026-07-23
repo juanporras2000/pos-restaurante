@@ -49,6 +49,36 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No autenticado.',
+                    'errors'  => null,
+                ], 401);
+            }
+        });
+
+        $exceptions->render(function (\Illuminate\Auth\Access\AuthorizationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'No tienes permiso para esta acción.',
+                    'errors'  => null,
+                ], 403);
+            }
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => config('app.debug') ? $e->getMessage() : 'No se encontró el recurso solicitado.',
+                    'errors'  => null,
+                ], $e->getStatusCode());
+            }
+        });
+
         $exceptions->render(function (\Throwable $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([

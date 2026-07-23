@@ -40,7 +40,7 @@ export default function ResumenSemanal() {
 
     useEffect(() => {
         setCargando(true);
-        fetch(`/api/nomina/resumen?inicio=${semanaInicio}&fin=${semanaFin}`)
+        fetch(`/api/v1/nomina/resumen?inicio=${semanaInicio}&fin=${semanaFin}`)
             .then((r) => r.json())
             .then(setResumen)
             .catch(() => {})

@@ -34,7 +34,7 @@ function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
 
         setGuardando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        const url    = esEdicion ? `/api/trabajadores/${trabajador.id}` : '/api/trabajadores';
+        const url    = esEdicion ? `/api/v1/trabajadores/${trabajador.id}` : '/api/v1/trabajadores';
         const method = esEdicion ? 'PUT' : 'POST';
 
         try {
@@ -149,7 +149,7 @@ export default function GestionTrabajadores() {
 
     const cargar = () => {
         setCargando(true);
-        fetch('/api/trabajadores')
+        fetch('/api/v1/trabajadores')
             .then((r) => r.json())
             .then(setTrabajadores)
             .catch(() => {})
@@ -170,7 +170,7 @@ export default function GestionTrabajadores() {
     const toggleActivo = async (t) => {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/trabajadores/${t.id}`, {
+            const res = await fetch(`/api/v1/trabajadores/${t.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                 body: JSON.stringify({ activo: !t.activo }),
@@ -197,7 +197,7 @@ export default function GestionTrabajadores() {
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
-            const res = await fetch(`/api/trabajadores/${t.id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken } });
+            const res = await fetch(`/api/v1/trabajadores/${t.id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken } });
             if (!res.ok) throw new Error();
             Swal.fire({ icon: 'success', title: 'Trabajador eliminado', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
             setTrabajadores((prev) => prev.filter((w) => w.id !== t.id));

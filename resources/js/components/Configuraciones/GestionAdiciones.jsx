@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { fmtCOP } from '../../utils/format';
+import { DANGER, NEUTRAL } from '../../utils/colors';
+import Spinner from '../shared/Spinner';
+import Modal from '../shared/Modal';
+import IconButton from '../shared/IconButton';
 
 function ModalAdicion({ adicion, onGuardar, onCerrar }) {
     const [nombre, setNombre] = useState(adicion?.nombre ?? '');
@@ -36,17 +40,16 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
+        <Modal abierto onCerrar={onCerrar}>
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                     <h3 className="font-semibold text-gray-900">
                         {esEdicion ? 'Editar adición' : 'Nueva adición'}
                     </h3>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
-                    </button>
+                    </IconButton>
                 </div>
 
                 <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
@@ -95,8 +98,7 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -105,6 +107,7 @@ export default function GestionAdiciones() {
     const [cargando, setCargando] = useState(true);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [adicionEditar, setAdicionEditar] = useState(null);
+    const [eliminandoId, setEliminandoId] = useState(null);
 
     const cargar = () => {
         setCargando(true);
@@ -151,11 +154,12 @@ export default function GestionAdiciones() {
             showCancelButton: true,
             confirmButtonText: 'Eliminar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
+            confirmButtonColor: DANGER,
+            cancelButtonColor: NEUTRAL,
         });
         if (!isConfirmed) return;
 
+        setEliminandoId(adicion.id);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
             const res = await fetch(`/api/adiciones/${adicion.id}`, {
@@ -167,6 +171,8 @@ export default function GestionAdiciones() {
             setAdiciones((prev) => prev.filter((a) => a.id !== adicion.id));
         } catch {
             Swal.fire({ icon: 'error', title: 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+        } finally {
+            setEliminandoId(null);
         }
     };
 
@@ -198,10 +204,7 @@ export default function GestionAdiciones() {
             {/* Lista de Adiciones */}
             {cargando ? (
                 <div className="flex items-center justify-center py-12">
-                    <svg className="animate-spin h-6 w-6 text-purple-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
+                    <Spinner size="md" className="text-purple-500" />
                 </div>
             ) : adiciones.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
@@ -244,27 +247,27 @@ export default function GestionAdiciones() {
                                 </span>
 
                                 <div className="flex items-center gap-0.5">
-                                    <button
-                                        type="button"
+                                    <IconButton
                                         onClick={() => abrirEditar(adicion)}
-                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors touch-manipulation"
-                                        title="Editar"
+                                        variant="primary"
+                                        aria-label="Editar adición"
+                                        className="text-gray-400 hover:text-blue-600 hover:bg-blue-50"
                                     >
                                         <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                             <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                         </svg>
-                                    </button>
-                                    <button
-                                        type="button"
+                                    </IconButton>
+                                    <IconButton
                                         onClick={() => eliminar(adicion)}
-                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-manipulation"
-                                        title="Eliminar"
+                                        variant="danger"
+                                        aria-label="Eliminar adición"
+                                        disabled={eliminandoId === adicion.id}
                                     >
                                         <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                    </button>
+                                    </IconButton>
                                 </div>
                             </div>
 

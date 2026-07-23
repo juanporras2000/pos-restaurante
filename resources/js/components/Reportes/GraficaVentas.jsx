@@ -9,11 +9,9 @@ import {
 } from 'recharts';
 import { REPORT_CONFIG, CHART_PALETTE } from '../../constants';
 import { GraficaLineaPropTypes, GraficaBarraPropTypes, GraficaPiePropTypes } from '../../propTypes';
+import { fmtCOP } from '../../utils/format';
 
 const PALETTE = CHART_PALETTE;
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
 
 // ─── Tooltip personalizado ────────────────────────────────────────────────────
 function CustomTooltip({ active, payload, label, currency = false }) {
@@ -23,7 +21,7 @@ function CustomTooltip({ active, payload, label, currency = false }) {
             <p className="font-semibold text-gray-700 mb-1">{label}</p>
             {payload.map((p, i) => (
                 <p key={i} style={{ color: p.color }} className="font-medium">
-                    {p.name}: {currency ? fmtQ(p.value) : p.value}
+                    {p.name}: {currency ? fmtCOP(p.value) : p.value}
                 </p>
             ))}
         </div>
@@ -57,7 +55,11 @@ function Empty() {
 export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label = 'Total (COP)' }) {
     if (!data.length) return <Empty />;
     return (
-        <ResponsiveContainer width="100%" height={260}>
+        <>
+            <p className="sr-only">
+                {`Gráfico de líneas: ${label}. ${data.length} punto${data.length !== 1 ? 's' : ''} de datos, total ${fmtCOP(data.reduce((s, d) => s + (+d[yKey] || 0), 0))}.`}
+            </p>
+            <ResponsiveContainer width="100%" height={260}>
             <LineChart data={data} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis
@@ -69,7 +71,7 @@ export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label 
                 <YAxis
                     domain={[0, REPORT_CONFIG.VENTAS.LIMITE_SUPERIOR]}
                     tickCount={REPORT_CONFIG.VENTAS.INTERVALOS}
-                    tickFormatter={(v) => fmtQ(v)}
+                    tickFormatter={(v) => fmtCOP(v)}
                     tick={{ fontSize: 11, fill: '#94a3b8' }}
                     axisLine={false}
                     tickLine={false}
@@ -86,7 +88,8 @@ export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label 
                     activeDot={{ r: 6 }}
                 />
             </LineChart>
-        </ResponsiveContainer>
+            </ResponsiveContainer>
+        </>
     );
 }
 
@@ -94,7 +97,11 @@ export function GraficaLinea({ data = [], xKey = 'fecha', yKey = 'total', label 
 export function GraficaBarra({ data = [], xKey = 'nombre', yKey = 'cantidad_vendida', label = 'Unidades vendidas', color = '#10b981' }) {
     if (!data.length) return <Empty />;
     return (
-        <ResponsiveContainer width="100%" height={260}>
+        <>
+            <p className="sr-only">
+                {`Gráfico de barras: ${label}. ${data.length} punto${data.length !== 1 ? 's' : ''} de datos.`}
+            </p>
+            <ResponsiveContainer width="100%" height={260}>
             <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
                 <XAxis
@@ -114,7 +121,8 @@ export function GraficaBarra({ data = [], xKey = 'nombre', yKey = 'cantidad_vend
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey={yKey} name={label} fill={color} radius={[0, 6, 6, 0]} maxBarSize={28} />
             </BarChart>
-        </ResponsiveContainer>
+            </ResponsiveContainer>
+        </>
     );
 }
 
@@ -123,6 +131,9 @@ export function GraficaPie({ data = [], nameKey = 'metodo_pago', valueKey = 'tot
     if (!data.length) return <Empty />;
     return (
         <div className="flex flex-col md:flex-row items-center gap-4">
+            <p className="sr-only">
+                {`Gráfico circular: distribución por ${nameKey}. ${data.length} categoría${data.length !== 1 ? 's' : ''}, total ${fmtCOP(data.reduce((s, d) => s + (+d[valueKey] || 0), 0))}.`}
+            </p>
             <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                     <Pie
@@ -141,7 +152,7 @@ export function GraficaPie({ data = [], nameKey = 'metodo_pago', valueKey = 'tot
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(v, n) => [fmtQ(v), n]}
+                        formatter={(v, n) => [fmtCOP(v), n]}
                         contentStyle={{ borderRadius: 12, fontSize: 13 }}
                     />
                     <Legend

@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import Modal from "../../shared/Modal";
 
 export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error, setShowModal, mensajeError, tiempoEspera }) => {
 
@@ -19,8 +20,23 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center w-80">
+        <div className="pin-modal-scope">
+            {/* Ajusta el overlay genérico de .modal-overlay para conservar el
+                fondo oscuro con blur que tenía este modal antes de migrar
+                al componente Modal compartido. */}
+            <style>{`
+                .pin-modal-scope .modal-overlay {
+                    background-color: rgb(0 0 0 / 0.8);
+                    -webkit-backdrop-filter: blur(4px);
+                    backdrop-filter: blur(4px);
+                    padding: 0;
+                }
+            `}</style>
+            <Modal
+                abierto={true}
+                onCerrar={() => setShowModal(false)}
+                className="!bg-white !p-8 !rounded-2xl !shadow-2xl !flex !flex-col !items-center !w-80 !max-w-none"
+            >
                 <h2 className="text-2xl font-bold mb-2">Ingresar PIN</h2>
                 <p className="text-gray-500 mb-6 italic">
                     {perfilSeleccionado?.nombre}
@@ -57,7 +73,7 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
                 >
                     Cancelar
                 </button>
-            </div>
+            </Modal>
         </div>
     );
 };

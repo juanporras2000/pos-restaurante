@@ -3,6 +3,8 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ModalInsumosPropTypes } from '../../propTypes';
+import Modal from '../shared/Modal';
+import IconButton from '../shared/IconButton';
 
 const INSUMO_VACIO = { 
     id: null, nombre: '', unidad_medida: '', 
@@ -84,8 +86,7 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+        <Modal abierto={abierto} onCerrar={onCerrar}>
                 <div className="p-6 border-b border-gray-200 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                         <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -94,11 +95,11 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                         </svg>
                         {insumo.id ? 'Editar Insumo' : 'Nuevo Insumo'}
                     </h2>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </IconButton>
                 </div>
 
                 <form id="form-insumo" onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
@@ -210,8 +211,7 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                         {guardando ? 'Guardando...' : (insumo.id ? 'Actualizar' : 'Crear')}
                     </button>
                 </div>
-            </div>
-        </div>
+        </Modal>
     );
 }
 

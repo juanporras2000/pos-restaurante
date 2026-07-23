@@ -6,6 +6,7 @@ import { ActualizarEliminarPerfil } from './components/ActualizarEliminarPerfil'
 import { GestionarPermisos } from './components/GestionarPermisos';
 import { ModalCrear } from './components/ModalCrear';
 import { ModalAvatar } from './components/ModalAvatar';
+import { DANGER } from '../../../utils/colors';
 
 export const GestionPerfiles = () => {
 
@@ -71,7 +72,7 @@ export const GestionPerfiles = () => {
                 text: `Tienes cambios sin guardar en el perfil "${perfilSeleccionado.nombre}". Si cambias de perfil, se perderán.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
+                confirmButtonColor: DANGER,
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Sí, descartar',
                 cancelButtonText: 'Seguir editando'

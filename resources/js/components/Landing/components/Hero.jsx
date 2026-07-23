@@ -105,11 +105,11 @@ export default function Hero() {
                                         // Fallback visual si no encuentra la imagen
                                         e.target.style.display = 'none';
                                         e.target.parentNode.innerHTML = `
-                      <div className="flex flex-col items-center text-center p-6 space-y-4">
-                        <img src="/assets/Recurso_3.webp" className="w-20 h-20 opacity-90 animate-pulse" alt="Logo" />
-                        <div className="space-y-1">
-                          <p className="text-sm font-semibold text-gray-800">Panel de Control en Tiempo Real</p>
-                          <p className="text-xs text-gray-400 max-w-xs">Aquí va la captura de pantalla de la increíble interfaz de tu aplicación</p>
+                      <div class="flex flex-col items-center text-center p-6 space-y-4">
+                        <img src="/assets/Recurso_3.webp" class="w-20 h-20 opacity-90 animate-pulse" alt="Logo" />
+                        <div class="space-y-1">
+                          <p class="text-sm font-semibold text-gray-800">Panel de Control en Tiempo Real</p>
+                          <p class="text-xs text-gray-500 max-w-xs">Aquí va la captura de pantalla de la increíble interfaz de tu aplicación</p>
                         </div>
                       </div>
                     `;

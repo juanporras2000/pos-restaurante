@@ -31,6 +31,7 @@ export default function PillsCategorias({ categorias = [], activa = null, onChan
             <button
                 type="button"
                 onClick={() => onChange(null)}
+                aria-pressed={esActiva(null)}
                 className={`flex-shrink-0 ${cls} rounded-full font-medium transition-colors ${pill(esActiva(null))}`}
             >
                 Todos
@@ -40,6 +41,7 @@ export default function PillsCategorias({ categorias = [], activa = null, onChan
                     key={cat.id}
                     type="button"
                     onClick={() => onChange(esActiva(cat.id) ? null : cat.id)}
+                    aria-pressed={esActiva(cat.id)}
                     className={`flex-shrink-0 ${cls} rounded-full font-medium transition-colors ${pill(esActiva(cat.id))}`}
                 >
                     {cat.nombre}

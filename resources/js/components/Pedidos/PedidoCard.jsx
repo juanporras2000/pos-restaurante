@@ -4,14 +4,9 @@ import ModalNuevoPedido from './ModalNuevoPedido';
 import ModalPago from './ModalPago';
 import { useImprimir } from '../../hooks/useImprimir';
 import { fmtCOP } from '../../utils/format';
+import { formatFecha } from './historialUtils';
+import { DANGER } from '../../utils/colors';
 import { PedidoCardPropTypes } from '../../propTypes';
-
-function formatDate(dateString) {
-    return new Date(dateString).toLocaleString('es-ES', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-    });
-}
 
 function timeAgo(dateString) {
     const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
@@ -23,10 +18,17 @@ function timeAgo(dateString) {
 export default function PedidoCard({ pedido, productos, onActualizado, setEliminado, eliminado, setPagado, pagado, setActualizado, actualizado }) {
     const [modalPagoAbierto, setModalPagoAbierto] = useState(false);
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+    const [procesando, setProcesando] = useState(false);
     const { imprimir } = useImprimir();
 
-    
-
+    const handleImprimir = async () => {
+        setProcesando(true);
+        try {
+            await imprimir(pedido);
+        } finally {
+            setProcesando(false);
+        }
+    };
 
     const subtotalItems = pedido.detalles?.reduce((acc, d) => acc + parseFloat(d.subtotal), 0) || 0;
     const tieneRecargo = pedido.tipo === 'domicilio' && parseFloat(pedido.total) > subtotalItems;
@@ -43,7 +45,7 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
             showCancelButton: true,
             confirmButtonText: 'Eliminar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#dc2626',
+            confirmButtonColor: DANGER,
             cancelButtonColor: '#6b7280',
             preConfirm: () => {
                 const val = document.getElementById('swal-razon').value.trim();
@@ -58,6 +60,7 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
         if (!isConfirmed || !razon) return;
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+        setProcesando(true);
         try {
             const res = await fetch(`/api/pedidos/${pedido.id}`, {
                 method: 'DELETE',
@@ -74,6 +77,8 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
             }
         } catch {
             Swal.fire({ icon: 'error', title: 'Error al eliminar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+        } finally {
+            setProcesando(false);
         }
     };
 
@@ -137,8 +142,13 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                                         </div>
                                     )}
                                     {detalle.observacion && (
-                                        <p className="text-[11px] text-amber-600 italic mt-0.5 ml-2">
-                                            💡 {detalle.observacion}
+                                        <p className="text-[11px] text-amber-600 italic mt-0.5 ml-2 flex items-start gap-1">
+                                            <svg className="h-3 w-3 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            </svg>
+                                            <span>{detalle.observacion}</span>
                                         </p>
                                     )}
                                 </div>
@@ -152,7 +162,7 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                     {/* Metadata: Tiempo transcurrido y perfil */}
                     <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
                         <span
-                            title={formatDate(pedido.created_at)}
+                            title={formatFecha(pedido.created_at)}
                             className="inline-flex items-center gap-1"
                         >
                             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -197,14 +207,16 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                         <button
                             type="button"
                             onClick={() => setModalPagoAbierto(true)}
-                            className="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-1.5 md:py-2 rounded-lg transition-colors text-xs uppercase tracking-wider"
+                            disabled={procesando}
+                            className="flex-1 bg-green-700 hover:bg-green-800 disabled:opacity-50 text-white font-bold py-1.5 md:py-2 rounded-lg transition-colors text-xs uppercase tracking-wider"
                         >
                             Pagar
                         </button>
                         <button
                             type="button"
-                            onClick={() => imprimir(pedido)}
-                            className="p-1.5 md:p-2 border border-gray-200 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                            onClick={handleImprimir}
+                            disabled={procesando}
+                            className="p-1.5 md:p-2 border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-50 rounded-lg transition-colors"
                             title="Imprimir comanda"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -214,7 +226,8 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                         <button
                             type="button"
                             onClick={() => setModalEditarAbierto(true)}
-                            className="p-1.5 md:p-2 border border-gray-200 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            disabled={procesando}
+                            className="p-1.5 md:p-2 border border-gray-200 text-blue-600 hover:bg-blue-50 disabled:opacity-50 rounded-lg transition-colors"
                             title="Editar pedido"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -224,7 +237,8 @@ export default function PedidoCard({ pedido, productos, onActualizado, setElimin
                         <button
                             type="button"
                             onClick={eliminarPedido}
-                            className="p-1.5 md:p-2 border border-gray-200 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            disabled={procesando}
+                            className="p-1.5 md:p-2 border border-gray-200 text-red-600 hover:bg-red-50 disabled:opacity-50 rounded-lg transition-colors"
                             title="Eliminar pedido"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

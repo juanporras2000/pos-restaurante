@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { TablaReportesPropTypes } from '../../propTypes';
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
+import { fmtCOP } from '../../utils/format';
 
 /**
  * TablaReportes
@@ -81,7 +79,7 @@ export default function TablaReportes({ rows = [], emptyMsg = 'Sin datos para es
                                             <span className="font-bold text-gray-800 text-sm truncate">{p.nombre}</span>
                                         </div>
                                         <span className="font-semibold text-green-600 text-sm tabular-nums">
-                                            {fmtQ(p.ingreso_total)}
+                                            {fmtCOP(p.ingreso_total)}
                                         </span>
                                     </div>
 
@@ -117,7 +115,7 @@ export default function TablaReportes({ rows = [], emptyMsg = 'Sin datos para es
                             </div>
                             <div className="flex justify-between text-sm text-gray-800 pt-1 border-t border-gray-200/60">
                                 <span className="font-semibold">Ingreso Total:</span>
-                                <span className="font-black text-green-600 tabular-nums">{fmtQ(total_ingreso)}</span>
+                                <span className="font-black text-green-600 tabular-nums">{fmtCOP(total_ingreso)}</span>
                             </div>
                         </div>
                     </>
@@ -160,7 +158,7 @@ export default function TablaReportes({ rows = [], emptyMsg = 'Sin datos para es
                                         {p.cantidad_vendida}
                                     </td>
                                     <td className="px-4 py-3 text-right font-semibold text-green-600 tabular-nums">
-                                        {fmtQ(p.ingreso_total)}
+                                        {fmtCOP(p.ingreso_total)}
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         <div className="flex items-center justify-end gap-2">
@@ -189,7 +187,7 @@ export default function TablaReportes({ rows = [], emptyMsg = 'Sin datos para es
                                     {total_unidades}
                                 </td>
                                 <td className="px-4 py-3 text-right font-bold text-green-600 tabular-nums">
-                                    {fmtQ(total_ingreso)}
+                                    {fmtCOP(total_ingreso)}
                                 </td>
                                 <td className="px-4 py-3 text-right text-xs text-gray-400">100%</td>
                             </tr>

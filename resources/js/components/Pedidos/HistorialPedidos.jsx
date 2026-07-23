@@ -4,6 +4,7 @@ import ResumenDia    from './ResumenDia';
 import TarjetaPedido from './TarjetaPedido';
 import SeccionGastos from './SeccionGastos';
 import CierreCaja    from './CierreCaja';
+import Spinner       from '../shared/Spinner';
 
 export default function HistorialPedidos() {
     const [pedidos, setPedidos]   = useState([]);
@@ -71,7 +72,7 @@ export default function HistorialPedidos() {
             {/* Estado de carga / error */}
             {cargando && (
                 <div className="flex items-center justify-center py-20 text-gray-500 gap-3">
-                    <ArrowPathIcon className="h-5 w-5 animate-spin text-blue-500" />
+                    <Spinner size="md" className="text-blue-500" />
                     Cargando historial...
                 </div>
             )}

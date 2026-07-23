@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import { fmt, fechaLocal } from './constants';
+import { DANGER } from '../../utils/colors';
 import TarjetaApertura from './TarjetaApertura';
 import ModalGasto from './ModalGasto';
 import ResumenTarjetas from './ResumenTarjetas';
@@ -60,7 +61,7 @@ export default function Gastos() {
             showCancelButton: true,
             confirmButtonText: 'Eliminar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#dc2626',
+            confirmButtonColor: DANGER,
             cancelButtonColor: '#6b7280',
         });
         if (!isConfirmed) return;

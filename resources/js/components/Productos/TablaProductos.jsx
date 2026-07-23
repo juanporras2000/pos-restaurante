@@ -1,6 +1,7 @@
 import React from 'react';
 import { TruckIcon } from '@heroicons/react/24/outline';
 import { fmtCOP } from '../../utils/format';
+import IconButton from '../shared/IconButton';
 
 /**
  * Retorna el color del badge según el margen de ganancia:
@@ -153,15 +154,16 @@ export default function TablaProductos({ productos, onEditar, onEliminar }) {
                             >
                                 Editar
                             </button>
-                            <button
-                                type="button"
+                            <IconButton
+                                aria-label="Eliminar producto"
+                                variant="danger"
                                 onClick={() => onEliminar(producto.id)}
-                                className="btn-danger-icon"
+                                className="border border-red-200"
                             >
                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
-                            </button>
+                            </IconButton>
                         </div>
                     </div>
                 );

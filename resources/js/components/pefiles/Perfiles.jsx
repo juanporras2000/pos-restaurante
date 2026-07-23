@@ -148,7 +148,16 @@ export const Perfiles = () => {
                         <div
                             key={p.id_perfil}
                             onClick={() => handleCardClick(p)}
-                            className="lg:hover:bg-gray-200 transition ease-in duration-300  p-4 rounded-md cursor-pointer flex justify-center items-center shadow-lg"
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleCardClick(p);
+                                }
+                            }}
+                            aria-label={p.nombre}
+                            className="group lg:hover:bg-gray-200 transition ease-in duration-300  p-4 rounded-md cursor-pointer flex justify-center items-center shadow-lg"
                         >
                             <CardPerfil {...p} />
                         </div>

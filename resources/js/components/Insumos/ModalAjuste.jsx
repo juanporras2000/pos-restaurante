@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { ModalAjustePropTypes } from '../../propTypes';
+import Modal from '../shared/Modal';
+import IconButton from '../shared/IconButton';
 
 export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     const [tipo, setTipo] = useState('entrada');
@@ -37,13 +39,12 @@ export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
+        <Modal abierto={abierto} onCerrar={onCerrar}>
                 <div className="p-5 border-b border-gray-200 flex items-center justify-between">
                     <h2 className="text-base font-semibold text-gray-900">Ajustar stock — {insumo.nombre}</h2>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+                    </IconButton>
                 </div>
                 <div className="p-5 space-y-4">
                     <div>
@@ -91,8 +92,7 @@ export default function ModalAjuste({ abierto, insumo, onCerrar, onGuardado }) {
                         {guardando ? 'Guardando...' : 'Confirmar'}
                     </button>
                 </div>
-            </div>
-        </div>
+        </Modal>
     );
 }
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useImprimir } from '../../hooks/useImprimir';
+import { fmtCOP } from '../../utils/format';
+import IconButton from '../shared/IconButton';
 import { ModalPagoPropTypes } from '../../propTypes';
 
 const MILES = 1000;
@@ -57,8 +59,6 @@ const METODO_LABEL = {
     transferencia: 'Transferencia',
 };
 
-const fmt = (n) => Number.parseFloat(n || 0).toLocaleString('es-CO');
-
 const toast = (icon, title, timer = 2000) =>
     Swal.fire({ icon, title, timer, showConfirmButton: false, toast: true, position: 'top-end' });
 
@@ -110,7 +110,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
             return;
         }
         if (splitMontoNum > restante + 0.01) {
-            toast('error', `El monto excede el restante ($${fmt(restante)})`);
+            toast('error', `El monto excede el restante (${fmtCOP(restante)})`);
             return;
         }
         if (splitMetodo === 'efectivo' && splitRecNum < splitMontoNum) {
@@ -135,7 +135,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
 
         if (modoDividido) {
             if (splits.length === 0) { toast('error', 'Agrega al menos un split'); return; }
-            if (restante > 0.01) { toast('error', `Faltan $${fmt(restante)} por cubrir`); return; }
+            if (restante > 0.01) { toast('error', `Faltan ${fmtCOP(restante)} por cubrir`); return; }
         } else if (metodoPago === 'efectivo' && recibidoNum < total) {
             toast('error', 'El dinero recibido es insuficiente');
             return;
@@ -174,7 +174,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
             const cambioTotal = parseFloat(data.cambio ?? 0);
             toast(
                 'success',
-                cambioTotal > 0 ? `Pago procesado. Cambio: $${cambioTotal.toLocaleString('es-CO')}` : 'Pago procesado exitosamente',
+                cambioTotal > 0 ? `Pago procesado. Cambio: ${fmtCOP(cambioTotal)}` : 'Pago procesado exitosamente',
                 cambioTotal > 0 ? 2500 : 1800
             );
 
@@ -224,11 +224,11 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                             </svg>
                             Cobrar Pedido #{pedido.numero_dia || pedido.id}
                         </h2>
-                        <button type="button" onClick={cerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                        <IconButton onClick={cerrar} aria-label="Cerrar" variant="default">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                        </button>
+                        </IconButton>
                     </div>
 
                     <div className="space-y-4">
@@ -237,13 +237,13 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                             <div className="flex justify-between items-center">
                                 <div>
                                     <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Total a cobrar</p>
-                                    <p className="text-3xl font-black">${fmt(total)}</p>
+                                    <p className="text-3xl font-black">{fmtCOP(total)}</p>
                                 </div>
                                 {modoDividido && totalSplits > 0 && (
                                     <div className="text-right">
                                         <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Restante</p>
                                         <p className={`text-2xl font-black ${restante <= 0 ? 'text-green-400' : 'text-yellow-400'}`}>
-                                            ${fmt(restante)}
+                                            {fmtCOP(restante)}
                                         </p>
                                     </div>
                                 )}
@@ -260,7 +260,21 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                     : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
                             }`}
                         >
-                            {modoDividido ? '✕ Cancelar pago dividido' : '⇌ Dividir pago (múltiples métodos)'}
+                            {modoDividido ? (
+                                <span className="inline-flex items-center gap-1.5">
+                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Cancelar pago dividido
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1.5">
+                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M7 16l-4-4m0 0l4-4m-4 4h18M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                    </svg>
+                                    Dividir pago (múltiples métodos)
+                                </span>
+                            )}
                         </button>
 
                         {/* MODO SIMPLE */}
@@ -301,7 +315,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                             className="form-input"
                                         />
                                         {recibido !== '' && !Number.isNaN(Number.parseFloat(recibido)) && (
-                                            <p className="mt-0.5 text-xs text-gray-400">= ${(Number.parseFloat(recibido) * MILES).toLocaleString('es-CO')}</p>
+                                            <p className="mt-0.5 text-xs text-gray-400">= {fmtCOP(Number.parseFloat(recibido) * MILES)}</p>
                                         )}
                                         {recibidoNum > 0 && (
                                             <div className={`mt-2 p-3 rounded-xl border ${cambioSimple >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
@@ -310,7 +324,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                         {cambioSimple >= 0 ? 'Cambio' : 'Falta'}
                                                     </span>
                                                     <span className={`text-xl font-black ${cambioSimple >= 0 ? 'text-green-700' : 'text-red-600'}`}>
-                                                        ${Math.abs(cambioSimple).toLocaleString('es-CO')}
+                                                        {fmtCOP(Math.abs(cambioSimple))}
                                                     </span>
                                                 </div>
                                             </div>
@@ -331,20 +345,20 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xs font-semibold text-gray-600">{METODO_LABEL[sp.metodo_pago]}</span>
                                                     {sp.metodo_pago === 'efectivo' && sp.cambio > 0 && (
-                                                        <span className="text-xs text-green-600">(cambio: ${fmt(sp.cambio)})</span>
+                                                        <span className="text-xs text-green-600">(cambio: {fmtCOP(sp.cambio)})</span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-bold text-gray-800">${fmt(sp.monto)}</span>
-                                                    <button
-                                                        type="button"
+                                                    <span className="text-sm font-bold text-gray-800">{fmtCOP(sp.monto)}</span>
+                                                    <IconButton
                                                         onClick={() => eliminarSplit(idx)}
-                                                        className="text-red-400 hover:text-red-600 transition-colors"
+                                                        aria-label="Quitar división de pago"
+                                                        variant="danger"
                                                     >
                                                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                             <path d="M6 18L18 6M6 6l12 12"></path>
                                                         </svg>
-                                                    </button>
+                                                    </IconButton>
                                                 </div>
                                             </div>
                                         ))}
@@ -396,7 +410,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                 </button>
                                             </div>
                                             {splitMontoNum > 0 && (
-                                                <p className="mt-0.5 text-xs text-gray-400">= ${fmt(splitMontoNum)}</p>
+                                                <p className="mt-0.5 text-xs text-gray-400">= {fmtCOP(splitMontoNum)}</p>
                                             )}
                                         </div>
 
@@ -414,7 +428,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                     className="form-input"
                                                 />
                                                 {splitRecNum > 0 && (
-                                                    <p className="mt-0.5 text-xs text-gray-400">= ${fmt(splitRecNum)}</p>
+                                                    <p className="mt-0.5 text-xs text-gray-400">= {fmtCOP(splitRecNum)}</p>
                                                 )}
                                                 {splitRecNum > 0 && splitCambio !== 0 && (
                                                     <div className={`mt-1.5 p-2 rounded-lg border text-sm font-semibold ${
@@ -422,7 +436,7 @@ export default function ModalPago({ abierto, pedido, onPagado, onCerrar }) {
                                                             ? 'bg-green-50 border-green-200 text-green-700'
                                                             : 'bg-red-50 border-red-200 text-red-600'
                                                     }`}>
-                                                        {splitCambio >= 0 ? 'Cambio: ' : 'Falta: '}${fmt(Math.abs(splitCambio))}
+                                                        {splitCambio >= 0 ? 'Cambio: ' : 'Falta: '}{fmtCOP(Math.abs(splitCambio))}
                                                     </div>
                                                 )}
                                             </div>

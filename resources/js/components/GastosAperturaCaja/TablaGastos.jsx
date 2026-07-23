@@ -1,5 +1,7 @@
 import React from 'react';
 import { tipoInfo, fmt } from './constants';
+import Spinner from '../shared/Spinner';
+import IconButton from '../shared/IconButton';
 
 function FilaGasto({ gasto, esHoy, onEditar, onEliminar }) {
     const tipo = tipoInfo(gasto.tipo);
@@ -18,31 +20,21 @@ function FilaGasto({ gasto, esHoy, onEditar, onEliminar }) {
             <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{hora}</td>
             <td className="px-4 py-3">
                 {esHoy && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity justify-end">
-                        <button
-                            type="button"
-                            onClick={() => onEditar(gasto)}
-                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Editar"
-                        >
+                    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity justify-end">
+                        <IconButton aria-label="Editar" title="Editar" onClick={() => onEditar(gasto)} variant="default">
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                             </svg>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => onEliminar(gasto)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Eliminar"
-                        >
+                        </IconButton>
+                        <IconButton aria-label="Eliminar" title="Eliminar" onClick={() => onEliminar(gasto)} variant="danger">
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <polyline points="3 6 5 6 21 6" />
                                 <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                                 <path d="M10 11v6M14 11v6" />
                                 <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                             </svg>
-                        </button>
+                        </IconButton>
                     </div>
                 )}
             </td>
@@ -56,10 +48,7 @@ export default function TablaGastos({ gastos, filtroTipo, cargando, esHoy, onEdi
     if (cargando) {
         return (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-center py-16">
-                <svg className="animate-spin h-6 w-6 text-blue-500" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
+                <Spinner size="md" />
             </div>
         );
     }

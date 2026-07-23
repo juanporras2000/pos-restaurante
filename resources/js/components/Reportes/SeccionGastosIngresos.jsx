@@ -1,13 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
-// ── Utilidad ──────────────────────────────────────────────────────────────────
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        maximumFractionDigits: 0,
-    }).format(n ?? 0);
+import { fmtCOP } from '../../utils/format';
+import Spinner from '../shared/Spinner';
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 
@@ -66,7 +60,7 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
-                <div className="h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <Spinner />
             </div>
         );
     }
@@ -83,17 +77,17 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
             {/* Filas principales */}
             <FilaBalance
                 label="Ingresos (ventas)"
-                valor={fmtQ(totalVentas)}
+                valor={fmtCOP(totalVentas)}
                 colorClase="text-green-600"
             />
             <FilaBalance
                 label="Gastos del período"
-                valor={`−${fmtQ(totalGastos)}`}
+                valor={`−${fmtCOP(totalGastos)}`}
                 colorClase="text-red-500"
             />
             <FilaBalance
                 label="Utilidad estimada"
-                valor={`${fmtQ(utilidad)}${margen !== null ? ` (${margen}%)` : ''}`}
+                valor={`${fmtCOP(utilidad)}${margen !== null ? ` (${margen}%)` : ''}`}
                 colorClase={utilidad >= 0 ? 'text-blue-600' : 'text-red-600'}
                 negrita
             />
@@ -119,7 +113,7 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, loading, er
                                         />
                                     </div>
                                     <span className="text-xs font-medium text-gray-700 w-20 text-right">
-                                        {fmtQ(t.total)}
+                                        {fmtCOP(t.total)}
                                     </span>
                                 </div>
                             );

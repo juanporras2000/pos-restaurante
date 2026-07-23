@@ -10,11 +10,11 @@ import { CardMetricPropTypes } from '../../propTypes';
 
 const VARIANTS = {
     blue: {
-        wrap: 'bg-white border border-blue-100',
-        icon: 'bg-blue-100 text-blue-600',
+        wrap: 'bg-white border border-primary/20',
+        icon: 'bg-primary/10 text-primary',
         label: 'text-gray-500',
         value: 'text-gray-900',
-        trend: 'text-blue-600',
+        trend: 'text-primary',
     },
     green: {
         wrap: 'bg-white border border-green-100',

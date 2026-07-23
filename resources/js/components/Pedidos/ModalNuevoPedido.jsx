@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import ListaProductos from './ListaProductos';
 import Carrito from './Carrito';
+import IconButton from '../shared/IconButton';
+import { DANGER } from '../../utils/colors';
 import { ModalNuevoPedidoPropTypes } from '../../propTypes';
 
 const PEDIDO_VACIO = {
@@ -258,7 +260,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                         title: 'Stock insuficiente',
                         html: `<ul class="text-left text-sm space-y-1 mt-2">${data.faltantes.map((f) => `<li>· ${f}</li>`).join('')}</ul>`,
                         confirmButtonText: 'Entendido',
-                        confirmButtonColor: '#dc2626',
+                        confirmButtonColor: DANGER,
                     });
                 } else {
                     Swal.fire({ icon: 'error', title: data.error || 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
@@ -288,11 +290,11 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                             </svg>
                             {esEdicion ? `Editar Pedido #${pedidoEditar.numero_dia || pedidoEditar.id}` : 'Crear Nuevo Pedido'}
                         </h2>
-                        <button type="button" onClick={cerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                        <IconButton onClick={cerrar} aria-label="Cerrar" variant="default">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                        </button>
+                        </IconButton>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

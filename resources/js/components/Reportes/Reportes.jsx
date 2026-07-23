@@ -6,19 +6,10 @@ import SelectorPeriodo from './SelectorPeriodo';
 import SeccionTipoPedido from './SeccionTipoPedido';
 import SeccionGastosIngresos from './SeccionGastosIngresos';
 import { useReporte } from '../../hooks/useReporte';
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
+import { fmtCOP } from '../../utils/format';
+import Spinner from '../shared/Spinner';
 
 // ─── Componentes UI de apoyo ──────────────────────────────────────────────────
-
-function Spinner() {
-    return (
-        <div className="flex items-center justify-center h-48">
-            <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-    );
-}
 
 function ErrorCard({ msg, onRetry }) {
     return (
@@ -144,7 +135,7 @@ export default function Reportes() {
                         <>
                             <CardMetric
                                 label="Total ventas"
-                                value={fmtQ(totalVentas)}
+                                value={fmtCOP(totalVentas)}
                                 icon="coins"
                                 variant="blue"
                                 sub="Pedidos completados"
@@ -160,7 +151,7 @@ export default function Reportes() {
                             />
                             <CardMetric
                                 label="Ticket promedio"
-                                value={fmtQ(ticketProm)}
+                                value={fmtCOP(ticketProm)}
                                 icon="chart"
                                 variant="amber"
                                 sub="Por pedido"
@@ -168,7 +159,7 @@ export default function Reportes() {
                             />
                             <CardMetric
                                 label="Ingreso neto"
-                                value={fmtQ(totalNeto)}
+                                value={fmtCOP(totalNeto)}
                                 icon="check"
                                 variant="purple"
                                 sub="Efectivo recibido"
@@ -257,8 +248,8 @@ export default function Reportes() {
                                 <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
                                     Ingreso bruto
                                 </p>
-                                <p className="text-lg sm:text-xl font-bold text-gray-800 mt-0.5 sm:mt-1 truncate" title={fmtQ(ganancias.data?.ingreso ?? 0)}>
-                                    {fmtQ(ganancias.data?.ingreso ?? 0)}
+                                <p className="text-lg sm:text-xl font-bold text-gray-800 mt-0.5 sm:mt-1 truncate" title={fmtCOP(ganancias.data?.ingreso ?? 0)}>
+                                    {fmtCOP(ganancias.data?.ingreso ?? 0)}
                                 </p>
                             </div>
 
@@ -268,8 +259,8 @@ export default function Reportes() {
                                 <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
                                     Costo insumos
                                 </p>
-                                <p className="text-lg sm:text-xl font-bold text-red-500 mt-0.5 sm:mt-1 truncate" title={fmtQ(ganancias.data?.costo_estimado ?? 0)}>
-                                    {fmtQ(ganancias.data?.costo_estimado ?? 0)}
+                                <p className="text-lg sm:text-xl font-bold text-red-500 mt-0.5 sm:mt-1 truncate" title={fmtCOP(ganancias.data?.costo_estimado ?? 0)}>
+                                    {fmtCOP(ganancias.data?.costo_estimado ?? 0)}
                                 </p>
                             </div>
 
@@ -278,8 +269,8 @@ export default function Reportes() {
                                 <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
                                     Ganancia
                                 </p>
-                                <p className={`text-lg sm:text-xl font-black mt-0.5 sm:mt-1 truncate ${(ganancias.data?.ganancia ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`} title={fmtQ(ganancias.data?.ganancia ?? 0)}>
-                                    {fmtQ(ganancias.data?.ganancia ?? 0)}
+                                <p className={`text-lg sm:text-xl font-black mt-0.5 sm:mt-1 truncate ${(ganancias.data?.ganancia ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`} title={fmtCOP(ganancias.data?.ganancia ?? 0)}>
+                                    {fmtCOP(ganancias.data?.ganancia ?? 0)}
                                 </p>
                             </div>
 

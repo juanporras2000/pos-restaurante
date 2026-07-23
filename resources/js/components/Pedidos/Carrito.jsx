@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { fmtCOP } from '../../utils/format';
+import IconButton from '../shared/IconButton';
 import { CarritoPropTypes } from '../../propTypes';
 
 export default function Carrito({ 
@@ -54,11 +55,11 @@ export default function Carrito({
 
                                 {/* Botón adiciones */}
                                 {adicionesDisponibles.length > 0 && (
-                                    <button
-                                        type="button"
-                                        title="Agregar adiciones"
+                                    <IconButton
+                                        aria-label="Agregar adiciones"
                                         onClick={() => toggleAdicion(item.id)}
-                                        className={`mx-0.5 transition-colors shrink-0 ${
+                                        variant="default"
+                                        className={`mx-0.5 shrink-0 ${
                                             (item.adiciones ?? []).length > 0
                                                 ? 'text-purple-500 hover:text-purple-700'
                                                 : 'text-gray-300 hover:text-purple-400'
@@ -68,32 +69,33 @@ export default function Carrito({
                                             <circle cx="12" cy="12" r="10"></circle>
                                             <path d="M12 8v8M8 12h8"></path>
                                         </svg>
-                                    </button>
+                                    </IconButton>
                                 )}
 
                                 {/* Botón nota */}
-                                <button
-                                    type="button"
-                                    title={item.nota ? 'Editar nota' : 'Agregar nota'}
+                                <IconButton
+                                    aria-label={item.nota ? 'Editar nota' : 'Agregar nota'}
                                     onClick={() => toggleNota(item.id)}
-                                    className={`mx-0.5 transition-colors shrink-0 ${item.nota ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-gray-500'}`}
+                                    variant="default"
+                                    className={`mx-0.5 shrink-0 ${item.nota ? 'text-amber-500 hover:text-amber-600' : 'text-gray-300 hover:text-gray-500'}`}
                                 >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"></path>
                                         <path d="M17.5 2.5a2.121 2.121 0 013 3L12 14l-4 1 1-4 7.5-7.5z"></path>
                                     </svg>
-                                </button>
+                                </IconButton>
 
                                 {/* Botón eliminar */}
-                                <button
-                                    type="button"
+                                <IconButton
+                                    aria-label="Eliminar producto del carrito"
                                     onClick={() => onEliminar(item.id)}
-                                    className="text-red-400 hover:text-red-600 transition-colors shrink-0 ml-0.5"
+                                    variant="danger"
+                                    className="shrink-0 ml-0.5"
                                 >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
-                                </button>
+                                </IconButton>
                             </div>
 
                             {/* Adiciones seleccionadas (resumen) */}
@@ -109,8 +111,12 @@ export default function Carrito({
 
                             {/* Nota visible cuando cerrada */}
                             {item.nota && notaAbierta !== item.id && (
-                                <p className="mt-0.5 ml-1 text-xs text-amber-600 italic truncate">
-                                    📝 {item.nota}
+                                <p className="mt-0.5 ml-1 text-xs text-amber-600 italic truncate flex items-center gap-1">
+                                    <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"></path>
+                                        <path d="M17.5 2.5a2.121 2.121 0 013 3L12 14l-4 1 1-4 7.5-7.5z"></path>
+                                    </svg>
+                                    <span className="truncate">{item.nota}</span>
                                 </p>
                             )}
 
@@ -135,22 +141,24 @@ export default function Carrito({
                                                         <span className="text-purple-500 ml-1">+{fmtCOP(Number.parseFloat(adicion.precio))}</span>
                                                     </span>
                                                     <div className="flex items-center gap-1 shrink-0">
-                                                        <button
-                                                            type="button"
+                                                        <IconButton
+                                                            aria-label="Quitar adición"
                                                             onClick={() => onAdicionDecrementar(item.id, adicion)}
                                                             disabled={cantidad === 0}
-                                                            className="w-6 h-6 rounded-full bg-purple-200 hover:bg-purple-300 disabled:opacity-30 flex items-center justify-center font-bold text-purple-700"
+                                                            variant="default"
+                                                            className="!rounded-full font-bold !bg-purple-200 hover:!bg-purple-300 !text-purple-700"
                                                         >
                                                             −
-                                                        </button>
+                                                        </IconButton>
                                                         <span className="w-5 text-center font-medium text-gray-800">{cantidad}</span>
-                                                        <button
-                                                            type="button"
+                                                        <IconButton
+                                                            aria-label="Aumentar cantidad de adición"
                                                             onClick={() => onAdicionIncrementar(item.id, adicion)}
-                                                            className="w-6 h-6 rounded-full bg-purple-500 hover:bg-purple-600 flex items-center justify-center font-bold text-white"
+                                                            variant="default"
+                                                            className="!rounded-full font-bold !bg-purple-500 hover:!bg-purple-600 !text-white"
                                                         >
                                                             +
-                                                        </button>
+                                                        </IconButton>
                                                     </div>
                                                 </div>
                                             );

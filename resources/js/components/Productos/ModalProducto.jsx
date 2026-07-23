@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ModalProductoPropTypes } from '../../propTypes';
 import { getUnidadesCompatibles, convertirUnidad } from '../../utils/unidades';
+import IconButton from '../shared/IconButton';
 
 const productoSchema = z.object({
     nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
@@ -28,6 +29,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
     const nombreRef = useRef(null);
     const [filaInsumo, setFilaInsumo] = useState({ insumo_id: '', cantidad: '', unidad_entrada: '' });
     const [filaInsumoDom, setFilaInsumoDom] = useState({ insumo_id: '', cantidad: '', unidad_entrada: '' });
+    const [imagenFile, setImagenFile] = useState(null);
 
     const {
         register,
@@ -44,6 +46,17 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
 
     const esDomicilio = watch('es_domicilio');
     const precioWatch = watch('precio');
+    const [imagenPreviewUrl, setImagenPreviewUrl] = useState(null);
+
+    useEffect(() => {
+        if (!imagenFile) {
+            setImagenPreviewUrl(null);
+            return;
+        }
+        const url = URL.createObjectURL(imagenFile);
+        setImagenPreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+    }, [imagenFile]);
 
     const { fields, append, remove, update } = useFieldArray({
         control,
@@ -77,6 +90,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                     cantidad: i.pivot?.cantidad || i.cantidad || 0
                 })) || []
             });
+            setImagenFile(null);
             setTimeout(() => nombreRef.current?.focus(), 100);
         }
     }, [abierto, producto, reset]);
@@ -133,7 +147,7 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
 
     const onSubmit = async (data) => {
         try {
-            await onGuardar(data);
+            await onGuardar({ ...data, imagen: imagenFile });
         } catch (err) {
             if (err.errors) {
                 Object.keys(err.errors).forEach((key) => {
@@ -154,11 +168,11 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                         </svg>
                         {producto.id ? 'Editar Producto' : 'Crear Producto'}
                     </h2>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
-                    </button>
+                    </IconButton>
                 </div>
 
                 {/* Scrollable body */}
@@ -236,10 +250,17 @@ export default function ModalProducto({ abierto, producto, categorias, insumos =
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) => {
-                                        window._tmp_img = e.target.files[0] || null;
+                                        setImagenFile(e.target.files[0] || null);
                                     }}
                                     className="form-input"
                                 />
+                                {imagenPreviewUrl && (
+                                    <img
+                                        src={imagenPreviewUrl}
+                                        alt="Previsualización"
+                                        className="mt-2 h-20 w-20 object-cover rounded-lg border border-gray-200"
+                                    />
+                                )}
                             </div>
                         </div>
 

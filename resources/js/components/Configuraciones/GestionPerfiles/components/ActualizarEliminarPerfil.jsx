@@ -1,5 +1,6 @@
 import axios from "axios";
 import Swal from "sweetalert2";
+import { DANGER } from '../../../../utils/colors';
 
 
 export const ActualizarEliminarPerfil = ({
@@ -74,7 +75,7 @@ export const ActualizarEliminarPerfil = ({
             text: `¿Deseas eliminar el perfil de ${perfilSeleccionado.nombre}? Esta acción no se puede deshacer.`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
+            confirmButtonColor: DANGER,
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar'

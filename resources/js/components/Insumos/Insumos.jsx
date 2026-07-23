@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import ModalInsumo from './ModalInsumo';
 import ModalAjuste from './ModalAjuste';
 import ModalHistorial from './ModalHistorial';
+import { DANGER, NEUTRAL } from '../../utils/colors';
 
 const INSUMO_VACIO = { id: null, nombre: '', unidad_medida: '', stock_actual: '', stock_minimo: '', costo_unitario: '' };
 
@@ -16,6 +17,7 @@ export default function Insumos() {
     const [buscar, setBuscar] = useState('');
     const [insumoAjuste, setInsumoAjuste] = useState(null);
     const [insumoHistorial, setInsumoHistorial] = useState(null);
+    const [eliminandoId, setEliminandoId] = useState(null);
 
     const cargar = useCallback(() => {
         setCargando(true);
@@ -80,13 +82,14 @@ export default function Insumos() {
             text: 'Esta acción no se puede deshacer.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
+            confirmButtonColor: DANGER,
+            cancelButtonColor: NEUTRAL,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
         });
         if (!result.isConfirmed) return;
 
+        setEliminandoId(ins.id);
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         try {
             const res = await fetch(`/api/insumos/${ins.id}`, {
@@ -99,6 +102,8 @@ export default function Insumos() {
             Swal.fire({ icon: 'success', title: 'Insumo eliminado', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
         } catch {
             Swal.fire('Error', 'No se pudo eliminar el insumo', 'error');
+        } finally {
+            setEliminandoId(null);
         }
     };
 
@@ -227,8 +232,8 @@ export default function Insumos() {
                                             <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
                                     </button>
-                                    <button type="button" onClick={() => eliminar(ins)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 bg-white" title="Eliminar">
+                                    <button type="button" onClick={() => eliminar(ins)} disabled={eliminandoId === ins.id}
+                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 bg-white disabled:opacity-40 disabled:pointer-events-none" title="Eliminar">
                                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
@@ -307,8 +312,8 @@ export default function Insumos() {
                                                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                             </svg>
                                         </button>
-                                        <button type="button" onClick={() => eliminar(ins)}
-                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Eliminar">
+                                        <button type="button" onClick={() => eliminar(ins)} disabled={eliminandoId === ins.id}
+                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-40 disabled:pointer-events-none" title="Eliminar">
                                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>

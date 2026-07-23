@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(findstr -i \"configur\")",
+      "Bash(php -r \"echo PHP_EOL; include 'vendor/laravel/framework/src/Illuminate/Routing/AbstractRouteCollection.php';\")",
+      "Bash(findstr -i \"sanctum\\\\|laravel/framework\")",
+      "Bash(python -c \"import docx; print\\('ok'\\)\")",
+      "Bash(python3 -c \"import docx; print\\('ok'\\)\")",
+      "Bash(py -c \"import docx; print\\('ok'\\)\")",
+      "Bash(php -r \"require 'vendor/autoload.php'; echo class_exists\\('PhpOffice\\\\PhpWord\\\\PhpWord'\\) ? 'ok' : 'no';\")",
+      "Bash(del \"d:\\\\Proyecto restaurante\\\\pos-restaurante\\\\resources\\\\views\\\\dashboard.blade.php\")",
+      "PowerShell(Remove-Item \"d:\\\\Proyecto restaurante\\\\pos-restaurante\\\\resources\\\\views\\\\dashboard.blade.php\" -Confirm:$false)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Proyecto restaurante\\\\pos-restaurante\\\\resources\\\\js\\\\components\" -Recurse -Name)",
+      "Bash(Select-String -Pattern \"pago\" -NotMatch)",
+      "Bash(xargs grep -l \"pago\\\\|payment\\\\|metodo\" -i)"
+    ]
+  }
+}

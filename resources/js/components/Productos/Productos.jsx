@@ -3,6 +3,8 @@ import Swal from 'sweetalert2';
 import TablaProductos from './TablaProductos';
 import ModalProducto from './ModalProducto';
 import PillsCategorias from '../shared/PillsCategorias';
+import Spinner from '../shared/Spinner';
+import { DANGER } from '../../utils/colors';
 
 const PRODUCTO_VACIO = {
     id: null,
@@ -103,9 +105,9 @@ export default function Productos() {
         formData.append('categoria_id', data.categoria_id);
         formData.append('es_domicilio', data.es_domicilio ? '1' : '0');
 
-        // Imagen desde la variable global temporal
-        if (window._tmp_img) {
-            formData.append('imagen_producto', window._tmp_img);
+        // Imagen recibida como parte del objeto de datos del formulario
+        if (data.imagen) {
+            formData.append('imagen_producto', data.imagen);
         }
 
         // Receta como JSON string para compatibilidad con FormData
@@ -142,7 +144,6 @@ export default function Productos() {
                 throw new Error(err.message ?? 'Error al guardar');
             }
 
-            delete window._tmp_img;
             cerrarModal();
             cargarProductos();
             Swal.fire({
@@ -168,7 +169,7 @@ export default function Productos() {
             text: 'Esta acción no se puede deshacer.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc2626',
+            confirmButtonColor: DANGER,
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
@@ -261,10 +262,7 @@ export default function Productos() {
             {/* Spinner */}
             {cargando && (
                 <div className="flex items-center justify-center py-16">
-                    <svg className="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
+                    <Spinner size="lg" />
                 </div>
             )}
 

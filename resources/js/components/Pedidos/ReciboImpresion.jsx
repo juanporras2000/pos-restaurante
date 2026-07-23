@@ -1,21 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { pedidoShape } from '../../propTypes';
-
-// ── Utilidades de formato ────────────────────────────────────────────────────
-
-const fmtMoneda = (n) =>
-    new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        maximumFractionDigits: 0,
-    }).format(n ?? 0);
-
-const fmtFecha = (s) =>
-    new Date(s).toLocaleString('es-CO', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-    });
+import { fmtCOP } from '../../utils/format';
+import { formatFecha } from './historialUtils';
 
 const TIPO_LABEL = {
     mesa:      'Mesa',
@@ -105,8 +92,12 @@ function InfoPedido({ pedido, fechaPago }) {
                     borderRadius: '3px',
                     backgroundColor: '#f5f5f5',
                 }}>
-                    <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        📍 Dirección de entrega
+                    <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}>
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        Dirección de entrega
                     </p>
                     <p style={{ margin: 0, fontSize: '14px', fontWeight: 'bold', wordBreak: 'break-word', lineHeight: '1.3' }}>
                         {pedido.direccion}
@@ -116,7 +107,7 @@ function InfoPedido({ pedido, fechaPago }) {
             {pedido.tipo === 'recoger' && pedido.nombre_cliente && (
                 <FilaDetalle label="Cliente" valor={pedido.nombre_cliente} />
             )}
-            <FilaDetalle label="Fecha" valor={fmtFecha(fechaPago ?? pedido.updated_at ?? pedido.created_at)} pequeno />
+            <FilaDetalle label="Fecha" valor={formatFecha(fechaPago ?? pedido.updated_at ?? pedido.created_at)} pequeno />
         </div>
     );
 }
@@ -136,7 +127,7 @@ function ItemsPedido({ detalles }) {
                         </span>
                         <span style={{ whiteSpace: 'nowrap' }}>×{d.cantidad}</span>
                         <span style={{ whiteSpace: 'nowrap', minWidth: '56px', textAlign: 'right' }}>
-                            {fmtMoneda(d.subtotal)}
+                            {fmtCOP(d.subtotal)}
                         </span>
                     </div>
 
@@ -150,7 +141,7 @@ function ItemsPedido({ detalles }) {
                             color: '#444',
                         }}>
                             <span>+ {a.nombre} ×{a.cantidad}</span>
-                            <span>{fmtMoneda(a.subtotal)}</span>
+                            <span>{fmtCOP(a.subtotal)}</span>
                         </div>
                     ))}
 
@@ -174,11 +165,11 @@ function Totales({ total, subtotalItems, tieneRecargo, recargo }) {
         <div style={{ marginBottom: '4px' }}>
             {tieneRecargo && (
                 <>
-                    <FilaDetalle label="Subtotal" valor={fmtMoneda(subtotalItems)} pequeno />
-                    <FilaDetalle label="Recargo domicilio" valor={`+${fmtMoneda(recargo)}`} pequeno />
+                    <FilaDetalle label="Subtotal" valor={fmtCOP(subtotalItems)} pequeno />
+                    <FilaDetalle label="Recargo domicilio" valor={`+${fmtCOP(recargo)}`} pequeno />
                 </>
             )}
-            <FilaDetalle label="TOTAL" valor={fmtMoneda(total)} negrita />
+            <FilaDetalle label="TOTAL" valor={fmtCOP(total)} negrita />
         </div>
     );
 }
@@ -208,11 +199,11 @@ function InfoPago({ pago }) {
                             <React.Fragment key={d.id ?? d.metodo_pago}>
                                 <FilaDetalle
                                     label={`  ${METODO_LABEL[d.metodo_pago] ?? d.metodo_pago}`}
-                                    valor={fmtMoneda(d.monto)}
+                                    valor={fmtCOP(d.monto)}
                                     pequeno
                                 />
                                 {d.metodo_pago === 'efectivo' && Number.parseFloat(d.cambio) > 0 && (
-                                    <FilaDetalle label="  Cambio" valor={fmtMoneda(d.cambio)} pequeno />
+                                    <FilaDetalle label="  Cambio" valor={fmtCOP(d.cambio)} pequeno />
                                 )}
                             </React.Fragment>
                         ))}
@@ -222,9 +213,9 @@ function InfoPago({ pago }) {
                         <FilaDetalle label="Método" valor={METODO_LABEL[pago.metodo_pago] ?? pago.metodo_pago} />
                         {pago.metodo_pago === 'efectivo' && (
                             <>
-                                <FilaDetalle label="Recibido" valor={fmtMoneda(pago.recibido)} />
+                                <FilaDetalle label="Recibido" valor={fmtCOP(pago.recibido)} />
                                 {Number.parseFloat(pago.cambio) > 0 && (
-                                    <FilaDetalle label="Cambio" valor={fmtMoneda(pago.cambio)} negrita />
+                                    <FilaDetalle label="Cambio" valor={fmtCOP(pago.cambio)} negrita />
                                 )}
                             </>
                         )}

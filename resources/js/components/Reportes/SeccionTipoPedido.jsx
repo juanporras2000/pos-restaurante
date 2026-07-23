@@ -2,15 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ShoppingBagIcon, TruckIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import { CHART_PALETTE } from '../../constants';
+import { fmtCOP } from '../../utils/format';
 
 const TIPO_CONFIG = {
     mesa:      { label: 'Mesa',      Icon: BuildingStorefrontIcon, color: CHART_PALETTE[0] },
     domicilio: { label: 'Domicilio', Icon: TruckIcon,              color: CHART_PALETTE[1] },
     recoger:   { label: 'Para llevar', Icon: ShoppingBagIcon,      color: CHART_PALETTE[2] },
 };
-
-const fmtQ = (n) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n ?? 0);
 
 /**
  * Barra de progreso simple para cada tipo de pedido.
@@ -28,7 +26,7 @@ function FilaTipo({ tipo, cantidad, total_ventas, porcentaje }) {
                     {label}
                 </span>
                 <span className="text-gray-500">
-                    <span className="font-semibold text-gray-800">{cantidad}</span> pedidos · {fmtQ(total_ventas)}
+                    <span className="font-semibold text-gray-800">{cantidad}</span> pedidos · {fmtCOP(total_ventas)}
                 </span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-2">

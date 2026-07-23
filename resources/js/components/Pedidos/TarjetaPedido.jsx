@@ -8,11 +8,21 @@ import ModalEditarPago from './ModalEditarPago';
 export default function TarjetaPedido({ pedido, onPagoActualizado }) {
     const [expandido, setExpandido]           = useState(false);
     const [modalEditarAbierto, setModalEditar] = useState(false);
+    const [imprimiendo, setImprimiendo]        = useState(false);
     const { imprimir } = useImprimir();
 
     const pago        = pedido.pago;
     const metodoLabel = METODO_ETIQUETA[pago?.metodo_pago] ?? pago?.metodo_pago ?? '—';
     const esMesa      = pedido.tipo === 'mesa';
+
+    const handleImprimir = async () => {
+        setImprimiendo(true);
+        try {
+            await imprimir(pedido);
+        } finally {
+            setImprimiendo(false);
+        }
+    };
 
     return (
         <>
@@ -126,8 +136,9 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => imprimir(pedido)}
-                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors text-sm font-medium"
+                                onClick={handleImprimir}
+                                disabled={imprimiendo}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 rounded-lg transition-colors text-sm font-medium"
                             >
                                 <PrinterIcon className="h-4 w-4" />
                                 Imprimir recibo

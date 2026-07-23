@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ModalHistorialPropTypes } from '../../propTypes';
+import Modal from '../shared/Modal';
+import IconButton from '../shared/IconButton';
 
 const TIPO_CLASE = {
     entrada: 'bg-green-100 text-green-700',
@@ -25,13 +27,12 @@ export default function ModalHistorial({ abierto, insumo, onCerrar }) {
     if (!abierto || !insumo) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <Modal abierto={abierto} onCerrar={onCerrar} size="lg" className="max-w-2xl max-h-[85vh] flex flex-col">
                 <div className="p-5 border-b border-gray-200 flex items-center justify-between shrink-0">
                     <h2 className="text-base font-semibold text-gray-900">Historial — {insumo.nombre}</h2>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+                    </IconButton>
                 </div>
                 <div className="overflow-y-auto flex-1">
                     {cargando ? (
@@ -72,8 +73,7 @@ export default function ModalHistorial({ abierto, insumo, onCerrar }) {
                 <div className="px-5 py-4 border-t border-gray-200 flex justify-end shrink-0">
                     <button type="button" onClick={onCerrar} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm">Cerrar</button>
                 </div>
-            </div>
-        </div>
+        </Modal>
     );
 }
 

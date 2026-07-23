@@ -52,7 +52,7 @@ export default function Planes() {
                             {/* Nombre y Precio */}
                             <div className="text-center space-y-2">
                                 <h3 className="text-2xl font-black text-gray-800 tracking-tight">Plan Restaurante Pro</h3>
-                                <p className="text-sm text-gray-400 font-medium">Ideal para cafeterías, restaurantes, bares y reposterías.</p>
+                                <p className="text-sm text-gray-500 font-medium">Ideal para cafeterías, restaurantes, bares y reposterías.</p>
 
                                 <div className="pt-4 flex flex-col items-center justify-center">
                                     <div className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
@@ -61,9 +61,9 @@ export default function Planes() {
                                     <div className="flex items-center justify-center gap-1">
                                         <span className="text-2xl font-bold text-gray-900 align-top">$</span>
                                         <span className="text-5xl font-black text-gray-900 tracking-tight">79.900</span>
-                                        <span className="text-sm font-semibold text-gray-400 align-bottom">/ mes</span>
+                                        <span className="text-sm font-semibold text-gray-500 align-bottom">/ mes</span>
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-2">
+                                    <p className="text-xs text-gray-500 mt-2">
                                         (Solo pagas si decides continuar después de tu mes de prueba)
                                     </p>
                                 </div>
@@ -71,7 +71,7 @@ export default function Planes() {
 
                             {/* Divisor */}
                             <div className="border-t border-gray-100 pt-6">
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 text-center sm:text-left">
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 text-center sm:text-left">
                                     ¿Qué incluye este plan?
                                 </p>
 
@@ -98,7 +98,7 @@ export default function Planes() {
                                 >
                                     Registrarme y empezar mis 30 días gratis
                                 </a>
-                                <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1.5">
+                                <p className="text-center text-xs text-gray-500 mt-3 flex items-center justify-center gap-1.5">
                                     <svg className="w-4 h-4 text-[#2CA043]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                     </svg>

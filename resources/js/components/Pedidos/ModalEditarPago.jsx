@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import { METODO_ETIQUETA } from './historialUtils';
+import IconButton from '../shared/IconButton';
 
 const METODOS = [
     { value: 'efectivo', label: 'Efectivo' },
@@ -102,11 +103,11 @@ export default function ModalEditarPago({ abierto, pedido, onActualizado, onCerr
                             </svg>
                             Editar forma de pago
                         </h2>
-                        <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600">
+                        <IconButton onClick={onCerrar} aria-label="Cerrar" variant="default">
                             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                        </button>
+                        </IconButton>
                     </div>
 
                     {/* Info del pedido */}

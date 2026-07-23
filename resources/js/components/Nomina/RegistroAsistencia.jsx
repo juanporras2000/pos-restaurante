@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
+import Spinner from '../shared/Spinner';
+import { DANGER } from '../../utils/colors';
 
 function hoy() {
     return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD en timezone local
@@ -22,6 +24,7 @@ export default function RegistroAsistencia() {
     const [asistencias, setAsistencias] = useState({}); // { trabajador_id: asistencia_id }
     const [cargando, setCargando] = useState(true);
     const [procesando, setProcesando] = useState(new Set());
+    const [marcandoTodos, setMarcandoTodos] = useState(false);
 
     const cargarTrabajadores = useCallback(() => {
         return fetch('/api/trabajadores')
@@ -57,6 +60,21 @@ export default function RegistroAsistencia() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         const yaAsistio = !!asistencias[trabajadorId];
 
+        if (yaAsistio) {
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Quitar asistencia?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Quitar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: DANGER,
+            });
+            if (!isConfirmed) {
+                setProcesando((p) => { const next = new Set(p); next.delete(trabajadorId); return next; });
+                return;
+            }
+        }
+
         try {
             if (yaAsistio) {
                 const res = await fetch(`/api/asistencias/${asistencias[trabajadorId]}`, {
@@ -86,19 +104,35 @@ export default function RegistroAsistencia() {
         const sinMarcar = trabajadores.filter((t) => !asistencias[t.id]);
         if (sinMarcar.length === 0) return;
 
+        setMarcandoTodos(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        for (const t of sinMarcar) {
-            try {
-                const res = await fetch('/api/asistencias', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                    body: JSON.stringify({ trabajador_id: t.id, fecha }),
+        let fallos = 0;
+        try {
+            for (const t of sinMarcar) {
+                try {
+                    const res = await fetch('/api/asistencias', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                        body: JSON.stringify({ trabajador_id: t.id, fecha }),
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    setAsistencias((p) => ({ ...p, [t.id]: data.id }));
+                } catch {
+                    fallos++;
+                }
+            }
+        } finally {
+            setMarcandoTodos(false);
+            if (fallos > 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: `${fallos} no se pudieron registrar`,
+                    timer: 2500,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
                 });
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                setAsistencias((p) => ({ ...p, [t.id]: data.id }));
-            } catch {
-                // Continuar con los demás si uno falla
             }
         }
     };
@@ -148,8 +182,13 @@ export default function RegistroAsistencia() {
                         <span className="font-semibold text-gray-900">{presentes}</span> de {total} presentes
                     </span>
                     {presentes < total && (
-                        <button type="button" onClick={marcarTodos} className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors">
-                            Marcar todos presentes
+                        <button
+                            type="button"
+                            onClick={marcarTodos}
+                            disabled={marcandoTodos}
+                            className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                        >
+                            {marcandoTodos ? 'Marcando...' : 'Marcar todos presentes'}
                         </button>
                     )}
                 </div>
@@ -158,10 +197,7 @@ export default function RegistroAsistencia() {
             {/* Lista */}
             {cargando ? (
                 <div className="flex items-center justify-center py-12">
-                    <svg className="animate-spin h-6 w-6 text-blue-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
+                    <Spinner size="md" />
                 </div>
             ) : trabajadores.length === 0 ? (
                 <div className="text-center py-12">
@@ -196,10 +232,7 @@ export default function RegistroAsistencia() {
 
                                 <div className="flex items-center gap-2">
                                     {cargandoEste ? (
-                                        <svg className="animate-spin h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                                        </svg>
+                                        <Spinner size="sm" />
                                     ) : presente ? (
                                         <span className="flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
                                             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

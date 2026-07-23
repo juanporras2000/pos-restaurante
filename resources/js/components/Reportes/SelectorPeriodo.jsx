@@ -64,7 +64,8 @@ export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
                     value={desde}
                     max={hasta || hoy}
                     onChange={(e) => actualizarFecha('desde', e.target.value)}
-                    className="text-sm text-gray-700 bg-transparent border-none outline-none focus:ring-0 p-0 cursor-pointer"
+                    aria-label="Fecha desde"
+                    className="text-sm text-gray-700 bg-transparent border-none outline-none p-0 cursor-pointer"
                 />
                 <span className="text-gray-300 text-xs">→</span>
                 <input
@@ -73,7 +74,8 @@ export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
                     min={desde}
                     max={hoy}
                     onChange={(e) => actualizarFecha('hasta', e.target.value)}
-                    className="text-sm text-gray-700 bg-transparent border-none outline-none focus:ring-0 p-0 cursor-pointer"
+                    aria-label="Fecha hasta"
+                    className="text-sm text-gray-700 bg-transparent border-none outline-none p-0 cursor-pointer"
                 />
             </div>
         </div>

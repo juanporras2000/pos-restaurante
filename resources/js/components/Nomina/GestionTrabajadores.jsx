@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import Spinner from '../shared/Spinner';
+import IconButton from '../shared/IconButton';
+import { fmtCOP } from '../../utils/format';
+import { DANGER } from '../../utils/colors';
 
 const PAGO_MIN = 0;
-
-function fmtCOP(pesos) {
-    return `$${Number(pesos).toLocaleString('es-CO')}`;
-}
 
 function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
     const esEdicion = !!trabajador?.id;
@@ -64,11 +64,11 @@ function ModalTrabajador({ trabajador, onGuardar, onCerrar }) {
                     <h3 className="font-semibold text-gray-900">
                         {esEdicion ? 'Editar trabajador' : 'Nuevo trabajador'}
                     </h3>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <IconButton aria-label="Cerrar" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
-                    </button>
+                    </IconButton>
                 </div>
 
                 <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
@@ -190,7 +190,7 @@ export default function GestionTrabajadores() {
             showCancelButton: true,
             confirmButtonText: 'Eliminar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#dc2626',
+            confirmButtonColor: DANGER,
             cancelButtonColor: '#6b7280',
         });
         if (!isConfirmed) return;
@@ -225,10 +225,7 @@ export default function GestionTrabajadores() {
             {/* Lista */}
             {cargando ? (
                 <div className="flex items-center justify-center py-12">
-                    <svg className="animate-spin h-6 w-6 text-blue-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
+                    <Spinner size="md" />
                 </div>
             ) : trabajadores.length === 0 ? (
                 <div className="text-center py-12">
@@ -262,6 +259,8 @@ export default function GestionTrabajadores() {
                                     type="button"
                                     onClick={() => toggleActivo(t)}
                                     title={t.activo ? 'Desactivar' : 'Activar'}
+                                    role="switch"
+                                    aria-checked={t.activo}
                                     className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${t.activo ? 'bg-blue-500' : 'bg-gray-200'}`}
                                 >
                                     <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ${t.activo ? 'translate-x-6' : 'translate-x-1'}`} />

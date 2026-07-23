@@ -27,13 +27,13 @@ export default function RegistroAsistencia() {
     const [marcandoTodos, setMarcandoTodos] = useState(false);
 
     const cargarTrabajadores = useCallback(() => {
-        return fetch('/api/trabajadores')
+        return fetch('/api/v1/trabajadores')
             .then((r) => r.json())
             .then((data) => setTrabajadores(data.filter((t) => t.activo)));
     }, []);
 
     const cargarAsistencias = useCallback((f) => {
-        return fetch(`/api/asistencias?fecha=${f}`)
+        return fetch(`/api/v1/asistencias?fecha=${f}`)
             .then((r) => r.json())
             .then((data) => {
                 const mapa = {};
@@ -77,14 +77,14 @@ export default function RegistroAsistencia() {
 
         try {
             if (yaAsistio) {
-                const res = await fetch(`/api/asistencias/${asistencias[trabajadorId]}`, {
+                const res = await fetch(`/api/v1/asistencias/${asistencias[trabajadorId]}`, {
                     method: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': csrfToken },
                 });
                 if (!res.ok) throw new Error();
                 setAsistencias((p) => { const next = { ...p }; delete next[trabajadorId]; return next; });
             } else {
-                const res = await fetch('/api/asistencias', {
+                const res = await fetch('/api/v1/asistencias', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                     body: JSON.stringify({ trabajador_id: trabajadorId, fecha }),
@@ -110,7 +110,7 @@ export default function RegistroAsistencia() {
         try {
             for (const t of sinMarcar) {
                 try {
-                    const res = await fetch('/api/asistencias', {
+                    const res = await fetch('/api/v1/asistencias', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                         body: JSON.stringify({ trabajador_id: t.id, fecha }),

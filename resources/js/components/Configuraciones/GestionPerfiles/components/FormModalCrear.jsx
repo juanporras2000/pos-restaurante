@@ -19,7 +19,7 @@ export const FormModalCrear = ({
                 <button
                     type="button"
                     onClick={() => setShowModalAvatarCrear(true)}
-                    className="relative group rounded-full overflow-hidden border-4 border-gray-100 hover:border-green-500 transition-all"
+                    className="relative group rounded-full overflow-hidden border-4 border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all"
                 >
                     {createAvatar ? (
                         <img
@@ -28,7 +28,7 @@ export const FormModalCrear = ({
                             className="w-20 h-20 object-cover"
                         />
                     ) : (
-                        <div className="w-20 h-20 bg-gray-100 flex items-center justify-center text-gray-400">
+                        <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500">
                             <span className="text-xs">Elegir</span>
                         </div>
                     )}
@@ -36,12 +36,12 @@ export const FormModalCrear = ({
                         <span className="text-[10px] text-white font-bold uppercase">Cambiar</span>
                     </div>
                 </button>
-                <span className="text-[10px] font-black text-gray-400 uppercase mt-2">Avatar del Perfil</span>
+                <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase mt-2">Avatar del Perfil</span>
             </div>
 
             {/* Input Nombre */}
             <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase">Nombre</label>
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Nombre</label>
                 <input
                     type="text"
                     required
@@ -49,13 +49,13 @@ export const FormModalCrear = ({
                     value={createNombre}
                     onChange={(e) => setCreateNombre(e.target.value)}
                     placeholder="Ej. Juan Pérez"
-                    className="w-full mt-1 p-3 bg-gray-50 rounded-xl text-sm border-none focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700"
+                    className="w-full mt-1 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm border-none focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700 dark:text-gray-200"
                 />
             </div>
 
             {/* Input PIN */}
             <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase">PIN de Seguridad (4 dígitos)</label>
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">PIN de Seguridad (4 dígitos)</label>
                 <input
                     type="password"
                     autoComplete="new-password"
@@ -65,17 +65,17 @@ export const FormModalCrear = ({
                     value={createPin}
                     onChange={(e) => setCreatePin(e.target.value.replace(/\D/g, ''))} // Solo números
                     placeholder="****"
-                    className="w-full mt-1 p-3 bg-gray-50 rounded-xl text-sm border-none focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700 tracking-widest text-center"
+                    className="w-full mt-1 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm border-none focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700 dark:text-gray-200 tracking-widest text-center"
                 />
             </div>
 
             {/* Selector de Rol */}
             <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase">Rol Asignado</label>
+                <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Rol Asignado</label>
                 <select
                     value={createRol}
                     onChange={(e) => setCreateRol(e.target.value)}
-                    className="w-full mt-1 p-3 bg-gray-50 rounded-xl text-sm border-none focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700"
+                    className="w-full mt-1 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm border-none focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700 dark:text-gray-200"
                 >
                     {roles.map(rol => (
                         <option key={rol.id_rol} value={rol.id_rol}>{rol.nombre}</option>

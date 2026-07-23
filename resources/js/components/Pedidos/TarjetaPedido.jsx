@@ -8,15 +8,25 @@ import ModalEditarPago from './ModalEditarPago';
 export default function TarjetaPedido({ pedido, onPagoActualizado }) {
     const [expandido, setExpandido]           = useState(false);
     const [modalEditarAbierto, setModalEditar] = useState(false);
+    const [imprimiendo, setImprimiendo]        = useState(false);
     const { imprimir } = useImprimir();
 
     const pago        = pedido.pago;
     const metodoLabel = METODO_ETIQUETA[pago?.metodo_pago] ?? pago?.metodo_pago ?? '—';
     const esMesa      = pedido.tipo === 'mesa';
 
+    const handleImprimir = async () => {
+        setImprimiendo(true);
+        try {
+            await imprimir(pedido);
+        } finally {
+            setImprimiendo(false);
+        }
+    };
+
     return (
         <>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
 
                 {/* ── Cabecera clicable ── */}
                 <button
@@ -26,7 +36,7 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
                 >
                     <div className="flex items-center gap-3 min-w-0">
                         <span className={`shrink-0 flex items-center justify-center w-9 h-9 rounded-full ${
-                            esMesa ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                            esMesa ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                         }`}>
                             {esMesa ? (
                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -43,22 +53,22 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
 
                         <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-semibold text-gray-900">
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">
                                     Pedido #{pedido.numero_dia || pedido.id}
                                 </span>
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    esMesa ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                                    esMesa ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                 }`}>
                                     {esMesa ? `Mesa ${pedido.numero_mesa}` : 'Domicilio'}
                                 </span>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                                     {metodoLabel}
                                 </span>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-purple-700">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-200 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
                                     Atendido por: {pedido.perfil.nombre}
                                 </span>
                             </div>
-                            <p className="text-sm text-gray-500 mt-0.5 truncate">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                                 {!esMesa && pedido.direccion && <span>{pedido.direccion} · </span>}
                                 {formatFecha(pedido.updated_at)}
                             </p>
@@ -66,21 +76,21 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-lg font-bold text-gray-900">{fmtCOP(pedido.total)}</span>
-                        <ChevronDownIcon className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandido ? 'rotate-180' : ''}`} />
+                        <span className="text-lg font-bold text-gray-900 dark:text-gray-100">{fmtCOP(pedido.total)}</span>
+                        <ChevronDownIcon className={`h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${expandido ? 'rotate-180' : ''}`} />
                     </div>
                 </button>
 
                 {/* ── Detalle expandible ── */}
                 {expandido && (
-                    <div className="border-t border-gray-100 px-4 pb-4 pt-3">
+                    <div className="border-t border-gray-100 dark:border-gray-700 px-4 pb-4 pt-3">
 
                         {/* Items */}
                         <div className="space-y-2 mb-4">
                             {pedido.detalles?.map((detalle) => (
                                 <div key={detalle.id} className="flex justify-between items-start text-sm">
                                     <div className="flex-1 min-w-0">
-                                        <span className="text-gray-700">{detalle.producto?.nombre ?? '—'}</span>
+                                        <span className="text-gray-700 dark:text-gray-300">{detalle.producto?.nombre ?? '—'}</span>
                                         {detalle.observacion && (
                                             <p className="flex items-center gap-1 text-xs text-amber-600 italic mt-0.5">
                                                 <PencilSquareIcon className="h-3 w-3 shrink-0" />
@@ -89,8 +99,8 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0 ml-3">
-                                        <span className="text-gray-400 text-xs">×{detalle.cantidad}</span>
-                                        <span className="font-medium text-gray-900">{fmtCOP(detalle.subtotal)}</span>
+                                        <span className="text-gray-400 dark:text-gray-500 text-xs">×{detalle.cantidad}</span>
+                                        <span className="font-medium text-gray-900 dark:text-gray-100">{fmtCOP(detalle.subtotal)}</span>
                                     </div>
                                 </div>
                             ))}
@@ -98,13 +108,13 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
 
                         {/* Info del pago */}
                         {pago && (parseFloat(pago.recibido) > 0 || parseFloat(pago.cambio) > 0) && (
-                            <div className="bg-gray-50 rounded-lg p-3 space-y-1.5 text-sm border border-gray-100">
-                                <div className="flex justify-between text-gray-600">
+                            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-1.5 text-sm border border-gray-100 dark:border-gray-700">
+                                <div className="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Recibido</span>
                                     <span className="font-medium">{fmtCOP(pago.recibido)}</span>
                                 </div>
                                 {parseFloat(pago.cambio) > 0 && (
-                                    <div className="flex justify-between text-gray-600">
+                                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
                                         <span>Cambio</span>
                                         <span className="font-medium text-blue-600">{fmtCOP(pago.cambio)}</span>
                                     </div>
@@ -117,7 +127,7 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
                             <button
                                 type="button"
                                 onClick={() => setModalEditar(true)}
-                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors text-sm font-medium"
                             >
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
@@ -126,8 +136,9 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => imprimir(pedido)}
-                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors text-sm font-medium"
+                                onClick={handleImprimir}
+                                disabled={imprimiendo}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 rounded-lg transition-colors text-sm font-medium"
                             >
                                 <PrinterIcon className="h-4 w-4" />
                                 Imprimir recibo

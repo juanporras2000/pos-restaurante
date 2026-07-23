@@ -6,10 +6,10 @@ export const ModalCrear = (props) => {
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-            <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
-                <div className="p-5 flex justify-between items-center border-b">
-                    <h3 className="font-bold text-gray-800 text-base">Crear Nuevo Perfil</h3>
-                    <button onClick={() => setShowModalCrear(false)} className="text-gray-400 hover:text-gray-600">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+                <div className="p-5 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="font-bold text-gray-800 dark:text-gray-100 text-base">Crear Nuevo Perfil</h3>
+                    <button onClick={() => setShowModalCrear(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                         </svg>

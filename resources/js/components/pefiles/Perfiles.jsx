@@ -3,6 +3,30 @@ import axios from "../../services/axios.js";
 import { CardPerfil } from "./components/CardPerfil";
 import { ModalPinPerfil } from "./components/ModalPinPerfil";
 import { PrimerPerfilForm } from "./components/PrimerPerfilForm";
+import { useTheme } from "../../hooks/useTheme";
+
+function ThemeToggle() {
+    const { theme, toggle } = useTheme();
+    return (
+        <button
+            type="button"
+            onClick={toggle}
+            aria-label="Cambiar tema"
+            className="absolute top-4 right-4 z-20 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-800 transition-colors"
+        >
+            {theme === 'dark' ? (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                </svg>
+            ) : (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                </svg>
+            )}
+        </button>
+    );
+}
 
 export const Perfiles = () => {
     const [perfiles, setPerfiles] = useState([]);
@@ -106,8 +130,8 @@ export const Perfiles = () => {
 
     if (cargando) {
         return (
-            <div className="w-full min-h-screen flex items-center justify-center bg-gray-50">
-                <p className="text-gray-400 text-xl">Cargando...</p>
+            <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <p className="text-gray-400 dark:text-gray-500 text-xl">Cargando...</p>
             </div>
         );
     }
@@ -136,9 +160,10 @@ export const Perfiles = () => {
     }
 
     return (
-        <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="relative w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <ThemeToggle />
 
-            <h1 className="text-gray-700 font-bold text-center text-3xl md:text-4xl lg:text-6xl my-6 md:mb-10">
+            <h1 className="text-gray-700 dark:text-gray-200 font-bold text-center text-3xl md:text-4xl lg:text-6xl my-6 md:mb-10">
                 ¿Quién usará el sistema?
             </h1>
 
@@ -148,7 +173,16 @@ export const Perfiles = () => {
                         <div
                             key={p.id_perfil}
                             onClick={() => handleCardClick(p)}
-                            className="lg:hover:bg-gray-200 transition ease-in duration-300  p-4 rounded-md cursor-pointer flex justify-center items-center shadow-lg"
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleCardClick(p);
+                                }
+                            }}
+                            aria-label={p.nombre}
+                            className="group lg:hover:bg-gray-200 transition ease-in duration-300  p-4 rounded-md cursor-pointer flex justify-center items-center shadow-lg"
                         >
                             <CardPerfil {...p} />
                         </div>

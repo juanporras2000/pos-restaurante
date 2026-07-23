@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import Spinner from "../../shared/Spinner";
 
 export const PrimerPerfilForm = () => {
     const [nombre, setNombre] = useState("");
@@ -106,10 +107,10 @@ export const PrimerPerfilForm = () => {
                 </div>
 
                 {/* Títulos */}
-                <h1 className="text-gray-700 font-bold text-center text-3xl md:text-4xl tracking-tight mb-1">
+                <h1 className="text-gray-700 dark:text-gray-300 font-bold text-center text-3xl md:text-4xl tracking-tight mb-1">
                     Bienvenido a tu restaurante
                 </h1>
-                <p className="text-gray-400 text-center text-base mb-8">
+                <p className="text-gray-400 dark:text-gray-500 text-center text-base mb-8">
                     Crea tu perfil de administrador para comenzar
                 </p>
 
@@ -117,7 +118,7 @@ export const PrimerPerfilForm = () => {
                 <form
                     onSubmit={handleSubmit}
                     noValidate
-                    className="w-full bg-white shadow-2xl rounded-3xl border border-gray-100 px-8 py-8 flex flex-col gap-6"
+                    className="w-full bg-white dark:bg-gray-800 shadow-2xl rounded-3xl border border-gray-100 dark:border-gray-800 px-8 py-8 flex flex-col gap-6"
                 >
                     {/* Nombre */}
                     <div className="flex flex-col gap-1.5">
@@ -130,7 +131,7 @@ export const PrimerPerfilForm = () => {
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <svg
-                                    className="w-5 h-5 text-gray-400"
+                                    className="w-5 h-5 text-gray-400 dark:text-gray-500"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     strokeWidth={1.5}
@@ -152,7 +153,7 @@ export const PrimerPerfilForm = () => {
                                 placeholder="Ej: Juan, Administrador..."
                                 maxLength={255}
                                 autoComplete="name"
-                                className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-200 hover:border-gray-400 text-base"
+                                className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-200 hover:border-gray-400 text-base"
                             />
                         </div>
                     </div>
@@ -167,7 +168,7 @@ export const PrimerPerfilForm = () => {
                                 type="button"
                                 onClick={() => setPinVisible((v) => !v)}
                                 aria-label={pinVisible ? "Ocultar PIN" : "Mostrar PIN"}
-                                className="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                className="flex items-center gap-1 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
                             >
                                 {pinVisible ? (
                                     <>
@@ -217,10 +218,10 @@ export const PrimerPerfilForm = () => {
                                     onPaste={index === 0 ? handlePinPaste : undefined}
                                     aria-label={`Dígito ${index + 1} del PIN`}
                                     className={`w-14 h-16 text-center text-2xl font-bold border-2 rounded-xl focus:outline-none transition-all duration-150 ${shakingPin
-                                            ? "border-red-500 bg-red-50 text-red-600"
+                                            ? "border-red-500 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400"
                                             : digit
-                                                ? "border-blue-500 bg-blue-50 text-blue-700"
-                                                : "border-gray-300 bg-gray-50 text-gray-800 focus:border-blue-500 focus:bg-white"
+                                                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                                : "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900"
                                         }`}
                                 />
                             ))}
@@ -229,9 +230,9 @@ export const PrimerPerfilForm = () => {
 
                     {/* Error */}
                     {error && (
-                        <div role="alert" className="flex items-start gap-2.5 bg-red-50 border border-red-500 rounded-xl px-4 py-3">
+                        <div role="alert" className="flex items-start gap-2.5 bg-red-50 dark:bg-red-900/30 border border-red-500 rounded-xl px-4 py-3">
                             <svg
-                                className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"
+                                className="w-5 h-5 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
@@ -240,7 +241,7 @@ export const PrimerPerfilForm = () => {
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                             </svg>
-                            <p className="text-sm text-red-600">{error}</p>
+                            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                         </div>
                     )}
 
@@ -248,19 +249,11 @@ export const PrimerPerfilForm = () => {
                     <button
                         type="submit"
                         disabled={cargando}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3.5 rounded-xl text-base shadow-lg shadow-blue-100 hover:shadow-blue-200 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:scale-100 disabled:shadow-none cursor-pointer disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3.5 rounded-xl text-base shadow-lg shadow-blue-100 dark:shadow-none hover:shadow-blue-200 dark:hover:shadow-none transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:scale-100 disabled:shadow-none cursor-pointer disabled:cursor-not-allowed"
                     >
                         {cargando ? (
                             <>
-                                <svg
-                                    className="w-5 h-5 animate-spin"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
-                                </svg>
+                                <Spinner size="sm" className="text-white" />
                                 Creando perfil...
                             </>
                         ) : (
@@ -280,7 +273,7 @@ export const PrimerPerfilForm = () => {
                         )}
                     </button>
 
-                    <p className="text-xs text-gray-400 text-center">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
                         Este perfil tendrá acceso total como administrador
                     </p>
                 </form>

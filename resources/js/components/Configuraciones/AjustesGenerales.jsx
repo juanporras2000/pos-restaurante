@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { invalidarCacheConfiguracion } from '../../hooks/useImprimir';
+import Spinner from '../shared/Spinner';
 import axios from '../../services/axios'
 
 export default function AjustesGenerales() {
@@ -81,25 +82,22 @@ export default function AjustesGenerales() {
     if (cargando) {
         return (
             <div className="flex items-center justify-center py-16">
-                <svg className="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                </svg>
+                <Spinner size="lg" />
             </div>
         );
     }
 
     return (
         <div className="card p-4 sm:p-6 w-full min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Ajustes generales</h2>
-            <p className="text-sm text-gray-500 mb-6">Configuraciones globales que aplican a todo el sistema.</p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Ajustes generales</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Configuraciones globales que aplican a todo el sistema.</p>
 
             <form onSubmit={guardar} className="space-y-5">
 
                 {/* ── Información del negocio (aparece en recibos) ─────────── */}
-                <div className="space-y-4 pb-5 border-b border-gray-100">
+                <div className="space-y-4 pb-5 border-b border-gray-100 dark:border-gray-700">
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
                             <svg className="h-4 w-4 text-blue-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M6 9V2h12v7"></path>
                                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
@@ -107,7 +105,7 @@ export default function AjustesGenerales() {
                             </svg>
                             Información del negocio
                         </h3>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
                             Estos datos aparecen en la cabecera de cada recibo impreso.
                         </p>
                     </div>
@@ -168,13 +166,13 @@ export default function AjustesGenerales() {
                     <label className="form-label">
                         Recargo fijo por domicilio
                     </label>
-                    <p className="text-xs text-gray-400 mb-2">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
                         Se suma al costo de <strong>todos</strong> los productos marcados como domicilio.
                         Úsalo para reflejar el costo del servicio de entrega.
                     </p>
                     <div className="relative rounded-lg shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500 font-medium text-sm">$</span>
+                            <span className="text-gray-500 dark:text-gray-400 font-medium text-sm">$</span>
                         </div>
                         <input
                             type="number"
@@ -188,18 +186,18 @@ export default function AjustesGenerales() {
                     </div>
                     {errores.recargoDomicilio && <p className="form-error">{errores.recargoDomicilio}</p>}
                     {!errores.recargoDomicilio && recargoDomicilio !== '' && !isNaN(parseFloat(recargoDomicilio)) && (
-                        <p className="mt-1 text-xs text-gray-400 font-mono">
+                        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 font-mono">
                             = ${(parseFloat(recargoDomicilio) * 1000).toLocaleString('es-CO')}
                         </p>
                     )}
                 </div>
 
                 {/* ── Hora de reinicio ──────────────────────────────────────── */}
-                <div className="border-t border-gray-100 pt-5">
+                <div className="border-t border-gray-100 dark:border-gray-700 pt-5">
                     <label className="form-label">
                         Hora de reinicio de pedidos
                     </label>
-                    <p className="text-xs text-gray-400 mb-2">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
                         A qué hora de la madrugada quieres que el contador de pedidos (Pedido #1) vuelva a empezar.
                     </p>
                     <select

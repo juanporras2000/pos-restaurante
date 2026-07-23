@@ -15,7 +15,7 @@ export const CardPerfil = ({ imagen, nombre, rol }) => {
                 />
             </div>
 
-            <p className="text-center mt-3 text-sm md:text-base font-medium text-gray-700 group-hover:text-white transition-colors duration-300">
+            <p className="text-center mt-3 text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-white transition-colors duration-300">
                 {nombre}
             </p>
 

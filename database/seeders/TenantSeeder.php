@@ -46,7 +46,6 @@ class TenantSeeder extends Seeder
             'caja_aperturas',
             'movimientos_inventario',
             'configuraciones',
-            'rol',
             'perfil',
         ];
 

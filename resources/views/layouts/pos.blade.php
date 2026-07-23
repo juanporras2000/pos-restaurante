@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    @include('partials.theme-init')
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Laravel') }}</title>
@@ -13,7 +14,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 min-h-screen font-sans">
 
     <div x-data="{ open: false }" class="flex h-screen overflow-hidden">
 
@@ -24,14 +25,14 @@
             class="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden" aria-hidden="true" style="display:none"></div>
 
         <aside :class="open ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed inset-y-0 left-0 lg:static lg:inset-auto lg:translate-x-0 z-30 w-64 h-full overflow-y-auto bg-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out">
+            class="fixed inset-y-0 left-0 lg:static lg:inset-auto lg:translate-x-0 z-30 w-64 h-full overflow-y-auto bg-white dark:bg-gray-800 shadow-lg flex flex-col transition-transform duration-300 ease-in-out">
 
-            <div class="border-b py-3 border-gray-200 flex items-center justify-center gap-1">
+            <div class="border-b py-3 border-gray-200 dark:border-gray-700 flex items-center justify-center gap-1">
                 <img src="/assets/logo-postaurante.webp" alt="Logo Postaurante" class="w-10 h-10">
-                <p class="font-bold text-lg text-gray-700">POSTAURANTE</p>
+                <p class="font-bold text-lg text-gray-700 dark:text-gray-200">POSTAURANTE</p>
                 <!-- Botón cerrar (solo móvil) -->
                 <button @click="open = false"
-                    class="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                    class="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     aria-label="Cerrar menú">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M6 18L18 6M6 6l12 12" />
@@ -50,8 +51,8 @@
                 {{-- ID 1: Pedidos --}}
                 @if (in_array(1, $permisosIds))
                     <a href="/pedidos"
-                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('pedidos') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
-                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('pedidos') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('pedidos') ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('pedidos') ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
                             <rect x="6" y="4" width="12" height="16" rx="2"></rect>
@@ -66,8 +67,8 @@
                 {{-- ID 2: Productos --}}
                 @if (in_array(2, $permisosIds))
                     <a href="/productos"
-                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('productos') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
-                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('productos') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('productos') ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('productos') ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
                             <path d="M4 3v7a2 2 0 0 0 2 2h1v8"></path>
@@ -83,8 +84,8 @@
                 {{-- ID 3: Reportes --}}
                 @if (in_array(3, $permisosIds))
                     <a href="/reportes"
-                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('reportes') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
-                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('reportes') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('reportes') ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('reportes') ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
                             <path d="M5 19V9"></path>
@@ -99,8 +100,8 @@
                 {{-- ID 4: Gastos y apertura de caja --}}
                 @if (in_array(4, $permisosIds))
                     <a href="/gastos"
-                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('gastos') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
-                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('gastos') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('gastos') ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('gastos') ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
                             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path>
@@ -112,8 +113,8 @@
                 {{-- ID 5: Insumos --}}
                 @if (in_array(5, $permisosIds))
                     <a href="/insumos"
-                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('insumos') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
-                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('insumos') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('insumos') ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('insumos') ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
                             <path d="M4 3v7a2 2 0 0 0 2 2h1v8"></path>
@@ -129,8 +130,8 @@
                 {{-- ID 6: Configuración --}}
                 @if (in_array(6, $permisosIds))
                     <a href="/configuraciones"
-                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('configuraciones') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
-                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('configuraciones') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('configuraciones') ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('configuraciones') ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
                             <path
@@ -145,8 +146,8 @@
                 {{-- ID 8: Nómina --}}
                 @if (in_array(8, $permisosIds))
                     <a href="/nomina"
-                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('nomina') ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
-                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('nomina') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600' }}"
+                        class="flex items-center px-4 py-3 rounded-lg transition-colors duration-200 group {{ request()->is('nomina') ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary' }}">
+                        <svg class="mr-3 h-5 w-5 transition-colors duration-200 {{ request()->is('nomina') ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary' }}"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
                             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
@@ -163,7 +164,7 @@
             @if (in_array(5, $permisosIds))
                 <div id="stock-alertas" class="mx-3 mb-3 hidden">
                     <a href="/insumos"
-                        class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700 hover:bg-red-100 transition-colors">
+                        class="flex items-start gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2 text-xs text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
                         <svg class="h-4 w-4 text-red-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
                             <path
@@ -175,12 +176,27 @@
                 </div>
             @endif
 
-            <div class="p-4 border-t border-gray-200">
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <button type="button" @click="window.toggleTheme()"
+                    class="w-full flex items-center px-2 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group mb-1">
+                    <svg class="mr-3 h-5 w-5 text-gray-500 dark:hidden" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                    </svg>
+                    <svg class="mr-3 h-5 w-5 text-gray-500 hidden dark:block" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+                    <span class="dark:hidden">Modo oscuro</span>
+                    <span class="hidden dark:inline">Modo claro</span>
+                </button>
+
                 @if (session()->has('id_perfil'))
                     <form id="form-logout-perfil" method="POST" action="/logout-perfil">
                         @csrf
                         <button type="button" onclick="cerrarPerfilFronend()"
-                            class="w-full flex items-center px-2 py-3 text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors duration-200 group">
+                            class="w-full flex items-center px-2 py-3 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-400 rounded-lg transition-colors duration-200 group">
                             <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-orange-600"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                                 aria-hidden="true">
@@ -196,7 +212,7 @@
                 <form method="POST" action="/logout">
                     @csrf
                     <button
-                        class="w-full flex items-center px-2 py-3 text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors duration-200 group">
+                        class="w-full flex items-center px-2 py-3 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-400 rounded-lg transition-colors duration-200 group">
                         <svg class="mr-3 h-5 w-5 text-gray-500 transition-colors duration-200 group-hover:text-red-600"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                             aria-hidden="true">
@@ -215,10 +231,10 @@
         <div class="flex-1 flex flex-col">
 
             <!-- TOPBAR -->
-            <header class="bg-white shadow-sm px-4 py-3 flex items-center gap-3 border-b border-gray-200">
+            <header class="bg-white dark:bg-gray-800 shadow-sm px-4 py-3 flex items-center gap-3 border-b border-gray-200 dark:border-gray-700">
                 <!-- Botón hamburguesa (solo móvil) -->
                 <button @click="open = true"
-                    class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
+                    class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
                     aria-label="Abrir menú">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         aria-hidden="true">
@@ -226,26 +242,26 @@
                     </svg>
                 </button>
                 <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                        <svg class="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                        <svg class="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.8" aria-hidden="true">
                             <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
                             <path d="M5 20a7 7 0 0 1 14 0"></path>
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name ?? 'Usuario' }}
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ auth()->user()->name ?? 'Usuario' }}
                         </p>
-                        <p class="text-xs text-gray-500">Bienvenido al sistema</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Bienvenido al sistema</p>
                     </div>
                 </div>
-                <div class="text-sm text-gray-500 shrink-0 hidden sm:block">
+                <div class="text-sm text-gray-500 dark:text-gray-400 shrink-0 hidden sm:block">
                     {{ now()->format('d/m/Y H:i') }}
                 </div>
             </header>
 
             <!-- CONTENT -->
-            <main class="flex-1 p-6 overflow-auto bg-gray-50">
+            <main class="flex-1 p-6 overflow-auto bg-gray-50 dark:bg-gray-900">
                 @yield('content')
             </main>
 

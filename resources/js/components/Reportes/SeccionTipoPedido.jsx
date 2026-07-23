@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ShoppingBagIcon, TruckIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import { CHART_PALETTE } from '../../constants';
-import { fmtCOP as fmtQ } from '../../utils/format';
+import { fmtCOP } from '../../utils/format';
 import { ErrorCard } from './EstadoCarga';
 
 const TIPO_CONFIG = {
@@ -22,12 +22,12 @@ function FilaTipo({ tipo, cantidad, total_ventas, porcentaje }) {
     return (
         <div className="space-y-1">
             <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2 font-medium text-gray-700">
+                <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">
                     <Icon className="h-4 w-4" style={{ color }} />
                     {label}
                 </span>
-                <span className="text-gray-500">
-                    <span className="font-semibold text-gray-800">{cantidad}</span> pedidos · {fmtQ(total_ventas)}
+                <span className="text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold text-gray-800">{cantidad}</span> pedidos · {fmtCOP(total_ventas)}
                 </span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-2">
@@ -36,7 +36,7 @@ function FilaTipo({ tipo, cantidad, total_ventas, porcentaje }) {
                     style={{ width: `${porcentaje}%`, backgroundColor: color }}
                 />
             </div>
-            <p className="text-xs text-gray-400 text-right">{porcentaje}% del total</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 text-right">{porcentaje}% del total</p>
         </div>
     );
 }
@@ -66,12 +66,12 @@ export default function SeccionTipoPedido({ tipos = [], totalPedidos = 0, loadin
     if (error) return <ErrorCard msg={error} onRetry={onRetry} />;
 
     if (!tipos.length) {
-        return <p className="text-center py-8 text-sm text-gray-400">Sin pedidos en este período</p>;
+        return <p className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">Sin pedidos en este período</p>;
     }
 
     return (
         <div className="space-y-5">
-            <p className="text-xs text-gray-400 font-medium">{totalPedidos} pedidos en total</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{totalPedidos} pedidos en total</p>
             {tipos.map((t) => (
                 <FilaTipo key={t.tipo} {...t} />
             ))}

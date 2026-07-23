@@ -23,14 +23,15 @@ export default function PillsCategorias({ categorias = [], activa = null, onChan
 
     const pill = (activo) =>
         activo
-            ? `bg-blue-600 text-white shadow-sm`
-            : `bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200`;
+            ? `bg-primary text-white shadow-sm`
+            : `bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600`;
 
     return (
         <div className="flex justify-center flex-wrap lg:justify-normal gap-2 lg:pb-1 ">
             <button
                 type="button"
                 onClick={() => onChange(null)}
+                aria-pressed={esActiva(null)}
                 className={`flex-shrink-0 ${cls} rounded-full font-medium transition-colors ${pill(esActiva(null))}`}
             >
                 Todos
@@ -40,6 +41,7 @@ export default function PillsCategorias({ categorias = [], activa = null, onChan
                     key={cat.id}
                     type="button"
                     onClick={() => onChange(esActiva(cat.id) ? null : cat.id)}
+                    aria-pressed={esActiva(cat.id)}
                     className={`flex-shrink-0 ${cls} rounded-full font-medium transition-colors ${pill(esActiva(cat.id))}`}
                 >
                     {cat.nombre}

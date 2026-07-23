@@ -3,6 +3,8 @@ import Swal from 'sweetalert2';
 import TablaProductos from './TablaProductos';
 import ModalProducto from './ModalProducto';
 import PillsCategorias from '../shared/PillsCategorias';
+import Spinner from '../shared/Spinner';
+import { DANGER } from '../../utils/colors';
 
 const PRODUCTO_VACIO = {
     id: null,
@@ -104,9 +106,9 @@ export default function Productos() {
         formData.append('categoria_id', data.categoria_id);
         formData.append('es_domicilio', data.es_domicilio ? '1' : '0');
 
-        // Imagen desde la variable global temporal
-        if (window._tmp_img) {
-            formData.append('imagen_producto', window._tmp_img);
+        // Imagen recibida como parte del objeto de datos del formulario
+        if (data.imagen) {
+            formData.append('imagen_producto', data.imagen);
         }
 
         // Receta como JSON string para compatibilidad con FormData
@@ -133,7 +135,6 @@ export default function Productos() {
                 headers: { 'X-CSRF-TOKEN': csrfToken },
             });
 
-            delete window._tmp_img;
             cerrarModal();
             cargarProductos();
             Swal.fire({
@@ -166,7 +167,7 @@ export default function Productos() {
             text: 'Esta acción no se puede deshacer.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc2626',
+            confirmButtonColor: DANGER,
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
@@ -206,12 +207,12 @@ export default function Productos() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 lg:p-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:p-6">
             {/* Header */}
             <div className="mb-6">
                 <div className="flex flex-col lg:flex-row items-center justify-between">
                     <div>
-                        <h1 className="text-lg sm:xl md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                        <h1 className="text-lg sm:xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center lg:justify-normal gap-3">
                             <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                             </svg>
@@ -221,7 +222,7 @@ export default function Productos() {
                     </div>
                     <div className="flex items-center justify-center flex-col-reverse gap-2 md:flex-row md:gap-4 mt-4 lg:mt-0">
                         <div className="relative w-full md:w-auto">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                             </svg>
                             <input
@@ -259,10 +260,7 @@ export default function Productos() {
             {/* Spinner */}
             {cargando && (
                 <div className="flex items-center justify-center py-16">
-                    <svg className="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
+                    <Spinner size="lg" />
                 </div>
             )}
 
@@ -270,7 +268,7 @@ export default function Productos() {
             {!cargando && (
                 <>
                     {paginacion && paginacion.total > 0 && (
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {paginacion.total} producto{paginacion.total !== 1 ? 's' : ''}
                         </p>
                     )}
@@ -288,7 +286,7 @@ export default function Productos() {
                     <button
                         onClick={() => irAPagina(paginacion.prev_page_url)}
                         disabled={!paginacion.prev_page_url}
-                        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 dark:text-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium transition-colors"
                     >
                         &laquo; Anterior
                     </button>
@@ -300,10 +298,11 @@ export default function Productos() {
                                 key={i}
                                 onClick={() => irAPagina(link.url)}
                                 disabled={!link.url || link.active}
-                                className={`w-9 h-9 rounded-lg border text-sm font-medium transition-colors ${link.active
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                    : 'border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-40'
-                                    }`}
+                                className={`w-9 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                                    link.active
+                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                        : 'border-gray-300 text-gray-700 dark:text-gray-300 hover:bg-gray-100 disabled:opacity-40'
+                                }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
                         ))}
@@ -311,7 +310,7 @@ export default function Productos() {
                     <button
                         onClick={() => irAPagina(paginacion.next_page_url)}
                         disabled={!paginacion.next_page_url}
-                        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 dark:text-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium transition-colors"
                     >
                         Siguiente &raquo;
                     </button>

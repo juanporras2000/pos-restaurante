@@ -87,11 +87,11 @@ export default function Pedidos() {
     }, [tab]);
 
     return (
-        <div className="min-h-screen bg-gray-50 lg:p-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:p-6">
             <div className="mb-6">
                 <div className="flex flex-col lg:flex-row items-center justify-between">
                     <div>
-                        <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                        <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center lg:justify-normal gap-3">
                             <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M9 12l2 2 4-4"></path>
                                 <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
@@ -120,8 +120,8 @@ export default function Pedidos() {
                             type="button"
                             onClick={() => setTab('pedidos')}
                             className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${tab === 'pedidos'
-                                ? 'bg-white text-blue-700 shadow-sm border border-gray-200'
-                                : 'text-gray-600 hover:text-gray-900'
+                                ? 'bg-white dark:bg-gray-800 text-blue-700 shadow-sm border border-gray-200 dark:border-gray-700'
+                                : 'text-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                                 }`}
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -130,8 +130,9 @@ export default function Pedidos() {
                             </svg>
                             Pendientes
                             {pedidosPendientes.length > 0 && (
-                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${tab === 'pedidos' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'
-                                    }`}>
+                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                                    tab === 'pedidos' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                }`}>
                                     {pedidosPendientes.length}
                                 </span>
                             )}
@@ -140,8 +141,8 @@ export default function Pedidos() {
                             type="button"
                             onClick={() => setTab('historial')}
                             className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${tab === 'historial'
-                                ? 'bg-white text-blue-700 shadow-sm border border-gray-200'
-                                : 'text-gray-600 hover:text-gray-900'
+                                ? 'bg-white dark:bg-gray-800 text-blue-700 shadow-sm border border-gray-200 dark:border-gray-700'
+                                : 'text-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                                 }`}
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -153,13 +154,13 @@ export default function Pedidos() {
                     </div>
 
                     {tab === 'pedidos' && (
-                        <div className="inline-flex rounded-xl border border-gray-200 bg-gray-100 p-1 shadow-sm w-full sm:w-auto justify-between">
+                        <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-1 shadow-sm w-full sm:w-auto justify-between">
                             <button
                                 type="button"
                                 onClick={() => setFiltroTipo('todos')}
                                 className={`flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg transition-all ${filtroTipo === 'todos'
-                                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm border border-gray-200 dark:border-gray-700'
+                                    : 'text-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                                     }`}
                             >
                                 Todos
@@ -169,7 +170,7 @@ export default function Pedidos() {
                                 onClick={() => setFiltroTipo('mesa')}
                                 className={`flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg transition-all ${filtroTipo === 'mesa'
                                     ? 'bg-blue-600 text-white shadow-sm font-semibold'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                    : 'text-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                                     }`}
                             >
                                 Mesas
@@ -179,7 +180,7 @@ export default function Pedidos() {
                                 onClick={() => setFiltroTipo('domicilio')}
                                 className={`flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg transition-all ${filtroTipo === 'domicilio'
                                     ? 'bg-green-600 text-white shadow-sm font-semibold'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                    : 'text-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                                     }`}
                             >
                                 Domicilios
@@ -189,7 +190,7 @@ export default function Pedidos() {
                                 onClick={() => setFiltroTipo('recoger')}
                                 className={`flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg transition-all ${filtroTipo === 'recoger'
                                     ? 'bg-orange-600 text-white shadow-sm font-semibold'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                    : 'text-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                                     }`}
                             >
                                 Recoger
@@ -212,8 +213,8 @@ export default function Pedidos() {
                         <circle cx="20" cy="21" r="1"></circle>
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No hay pedidos pendientes</h3>
-                    <p className="text-gray-500">Crea un nuevo pedido para comenzar</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No hay pedidos pendientes</h3>
+                    <p className="text-gray-500 dark:text-gray-400">Crea un nuevo pedido para comenzar</p>
                 </div>
             )}
 
@@ -266,8 +267,8 @@ export default function Pedidos() {
                 )}
 
             {tab === 'pedidos' && filtroTipo !== 'todos' && !pedidosPendientes.some((p) => p.tipo === filtroTipo) && pedidosPendientes.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center mb-8">
-                    <p className="text-gray-500 font-medium">No hay pedidos pendientes el filtro seleccionado.</p>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center mb-8">
+                    <p className="text-gray-500 dark:text-gray-400 font-medium">No hay pedidos pendientes el filtro seleccionado.</p>
                 </div>
             )}
 

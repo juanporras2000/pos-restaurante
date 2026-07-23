@@ -10,39 +10,39 @@ import { CardMetricPropTypes } from '../../propTypes';
 
 const VARIANTS = {
     blue: {
-        wrap: 'bg-white border border-blue-100',
-        icon: 'bg-blue-100 text-blue-600',
-        label: 'text-gray-500',
-        value: 'text-gray-900',
-        trend: 'text-blue-600',
+        wrap: 'bg-white dark:bg-gray-800 border border-primary/20',
+        icon: 'bg-primary/10 text-primary',
+        label: 'text-gray-500 dark:text-gray-400',
+        value: 'text-gray-900 dark:text-gray-100',
+        trend: 'text-primary',
     },
     green: {
-        wrap: 'bg-white border border-green-100',
-        icon: 'bg-green-100 text-green-600',
-        label: 'text-gray-500',
-        value: 'text-gray-900',
-        trend: 'text-green-600',
+        wrap: 'bg-white dark:bg-gray-800 border border-green-100 dark:border-green-900',
+        icon: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+        label: 'text-gray-500 dark:text-gray-400',
+        value: 'text-gray-900 dark:text-gray-100',
+        trend: 'text-green-600 dark:text-green-400',
     },
     amber: {
-        wrap: 'bg-white border border-amber-100',
-        icon: 'bg-amber-100 text-amber-600',
-        label: 'text-gray-500',
-        value: 'text-gray-900',
-        trend: 'text-amber-600',
+        wrap: 'bg-white dark:bg-gray-800 border border-amber-100 dark:border-amber-900',
+        icon: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
+        label: 'text-gray-500 dark:text-gray-400',
+        value: 'text-gray-900 dark:text-gray-100',
+        trend: 'text-amber-600 dark:text-amber-400',
     },
     red: {
-        wrap: 'bg-white border border-red-100',
-        icon: 'bg-red-100 text-red-600',
-        label: 'text-gray-500',
-        value: 'text-gray-900',
-        trend: 'text-red-600',
+        wrap: 'bg-white dark:bg-gray-800 border border-red-100 dark:border-red-900',
+        icon: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+        label: 'text-gray-500 dark:text-gray-400',
+        value: 'text-gray-900 dark:text-gray-100',
+        trend: 'text-red-600 dark:text-red-400',
     },
     purple: {
-        wrap: 'bg-white border border-purple-100',
-        icon: 'bg-purple-100 text-purple-600',
-        label: 'text-gray-500',
-        value: 'text-gray-900',
-        trend: 'text-purple-600',
+        wrap: 'bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-900',
+        icon: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+        label: 'text-gray-500 dark:text-gray-400',
+        value: 'text-gray-900 dark:text-gray-100',
+        trend: 'text-purple-600 dark:text-purple-400',
     },
 };
 
@@ -90,7 +90,7 @@ export default function CardMetric({ label, value, sub, icon = 'default', varian
                 {/* Contenedor inferior adaptativo: flex-wrap por si la tendencia y el sub no caben en una sola línea en pantallas muy angostas */}
                 <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1.5 md:mt-1">
                     {trend !== undefined && (
-                        <span className={`text-[11px] md:text-xs font-bold md:font-semibold flex-shrink-0 ${trendPositive ? 'text-green-600' : 'text-red-500'}`}>
+                        <span className={`text-[11px] md:text-xs font-bold md:font-semibold flex-shrink-0 ${trendPositive ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
                             {trendPositive ? '▲' : '▼'} {Math.abs(trend)}%
                         </span>
                     )}

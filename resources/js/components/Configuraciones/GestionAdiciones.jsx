@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { fmtCOP } from '../../utils/format';
+import { DANGER, NEUTRAL } from '../../utils/colors';
+import Spinner from '../shared/Spinner';
+import Modal from '../shared/Modal';
+import IconButton from '../shared/IconButton';
 import axios from '../../services/axios';
 
 function ModalAdicion({ adicion, onGuardar, onCerrar }) {
@@ -36,17 +40,16 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900">
+        <Modal abierto onCerrar={onCerrar}>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                         {esEdicion ? 'Editar adición' : 'Nueva adición'}
                     </h3>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
-                    </button>
+                    </IconButton>
                 </div>
 
                 <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
@@ -65,7 +68,7 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
                     <div>
                         <label className="form-label">Precio</label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm">$</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium text-sm">$</span>
                             <input
                                 type="number"
                                 min="0"
@@ -73,12 +76,12 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
                                 value={precio}
                                 onChange={(e) => setPrecio(e.target.value)}
                                 placeholder="Ej: 2"
-                                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                className="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                 required
                             />
                         </div>
                         {precio !== '' && !isNaN(parseFloat(precio)) && (
-                            <p className="mt-0.5 text-xs text-gray-400">= ${(parseFloat(precio) * 1000).toLocaleString('es-CO')}</p>
+                            <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">= ${(parseFloat(precio) * 1000).toLocaleString('es-CO')}</p>
                         )}
                     </div>
 
@@ -95,8 +98,7 @@ function ModalAdicion({ adicion, onGuardar, onCerrar }) {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -105,6 +107,7 @@ export default function GestionAdiciones() {
     const [cargando, setCargando] = useState(true);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [adicionEditar, setAdicionEditar] = useState(null);
+    const [eliminandoId, setEliminandoId] = useState(null);
 
 
 
@@ -160,11 +163,12 @@ export default function GestionAdiciones() {
             showCancelButton: true,
             confirmButtonText: 'Eliminar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
+            confirmButtonColor: DANGER,
+            cancelButtonColor: NEUTRAL,
         });
         if (!isConfirmed) return;
 
+        setEliminandoId(adicion.id);
         try {
             // Axios usa .delete y maneja la baseURL y los headers automáticamente
             await axios.delete(`/adiciones/${adicion.id}`);
@@ -173,6 +177,8 @@ export default function GestionAdiciones() {
             setAdiciones((prev) => prev.filter((a) => a.id !== adicion.id));
         } catch (error) {
             Swal.fire({ icon: 'error', title: 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+        } finally {
+            setEliminandoId(null);
         }
     };
 
@@ -181,13 +187,13 @@ export default function GestionAdiciones() {
             {/* Cabecera Adaptativa */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <svg className="h-5 w-5 text-purple-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
                         Adiciones
                     </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">Extras y complementos disponibles al crear pedidos.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Extras y complementos disponibles al crear pedidos.</p>
                 </div>
                 <button
                     type="button"
@@ -204,20 +210,17 @@ export default function GestionAdiciones() {
             {/* Lista de Adiciones */}
             {cargando ? (
                 <div className="flex items-center justify-center py-12">
-                    <svg className="animate-spin h-6 w-6 text-purple-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
+                    <Spinner size="md" className="text-purple-500 dark:text-purple-400" />
                 </div>
             ) : adiciones.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                    <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <svg className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
                     <p className="text-sm">Aún no hay adiciones creadas.</p>
                 </div>
             ) : (
-                <div className="divide-y divide-gray-100 border-t border-gray-50">
+                <div className="divide-y divide-gray-100 dark:divide-gray-700 border-t border-gray-50 dark:border-gray-800">
                     {adiciones.map((adicion) => (
                         <div key={adicion.id} className="flex items-center justify-between py-3.5 px-1 gap-2">
 
@@ -228,7 +231,7 @@ export default function GestionAdiciones() {
                                     type="button"
                                     onClick={() => toggleActivo(adicion)}
                                     title={adicion.activo ? 'Desactivar' : 'Activar'}
-                                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 touch-manipulation ${adicion.activo ? 'bg-purple-500' : 'bg-gray-200'
+                                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 touch-manipulation ${adicion.activo ? 'bg-purple-500' : 'bg-gray-200 dark:bg-gray-600'
                                         }`}
                                 >
                                     <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ${adicion.activo ? 'translate-x-6' : 'translate-x-1'
@@ -236,7 +239,7 @@ export default function GestionAdiciones() {
                                 </button>
 
                                 <div className="min-w-0">
-                                    <p className={`text-sm font-medium truncate transition-all ${adicion.activo ? 'text-gray-900' : 'text-gray-400 line-through'
+                                    <p className={`text-sm font-medium truncate transition-all ${adicion.activo ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500 line-through'
                                         }`}>
                                         {adicion.nombre}
                                     </p>
@@ -245,32 +248,32 @@ export default function GestionAdiciones() {
 
                             {/* Sección Derecha: Precio + Acciones */}
                             <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
-                                <span className={`text-sm font-semibold ${adicion.activo ? 'text-gray-700' : 'text-gray-400'}`}>
+                                <span className={`text-sm font-semibold ${adicion.activo ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'}`}>
                                     {fmtCOP(adicion.precio)}
                                 </span>
 
                                 <div className="flex items-center gap-0.5">
-                                    <button
-                                        type="button"
+                                    <IconButton
                                         onClick={() => abrirEditar(adicion)}
-                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors touch-manipulation"
-                                        title="Editar"
+                                        variant="primary"
+                                        aria-label="Editar adición"
+                                        className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                                     >
                                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                             <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                         </svg>
-                                    </button>
-                                    <button
-                                        type="button"
+                                    </IconButton>
+                                    <IconButton
                                         onClick={() => eliminar(adicion)}
-                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-manipulation"
-                                        title="Eliminar"
+                                        variant="danger"
+                                        aria-label="Eliminar adición"
+                                        disabled={eliminandoId === adicion.id}
                                     >
                                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                    </button>
+                                    </IconButton>
                                 </div>
                             </div>
 

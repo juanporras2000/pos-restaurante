@@ -35,7 +35,7 @@ export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
     return (
         <div className="flex flex-col items-center 2xl:flex-row justify-center lg:justify-between lg:items-end 2xl:items-center gap-2 flex-1 w-fit">
             {/* Botones de período rápido */}
-            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+            <div className="flex items-center gap-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1 shadow-sm">
                 {PERIODOS.map((p) => (
                     <button
                         key={p.value}
@@ -55,16 +55,17 @@ export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
             <span className="text-gray-300 select-none hidden 2xl:block">|</span>
 
             {/* Rango personalizado */}
-            <div className={`flex items-center gap-1.5 bg-white border rounded-xl px-1 lg:px-3 py-1.5 shadow-sm transition-colors ${
-                periodo === 'custom' ? 'border-blue-400 ring-1 ring-blue-200' : 'border-gray-200'
+            <div className={`flex items-center gap-1.5 bg-white dark:bg-gray-800 border rounded-xl px-1 lg:px-3 py-1.5 shadow-sm transition-colors ${
+                periodo === 'custom' ? 'border-blue-400 ring-1 ring-blue-200' : 'border-gray-200 dark:border-gray-700'
             }`}>
-                <CalendarDaysIcon className={`h-4 w-4 flex-shrink-0 ${periodo === 'custom' ? 'text-blue-500' : 'text-gray-400'}`} />
+                <CalendarDaysIcon className={`h-4 w-4 flex-shrink-0 ${periodo === 'custom' ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`} />
                 <input
                     type="date"
                     value={desde}
                     max={hasta || hoy}
                     onChange={(e) => actualizarFecha('desde', e.target.value)}
-                    className="text-sm text-gray-700 bg-transparent border-none outline-none focus:ring-0 p-0 cursor-pointer"
+                    aria-label="Fecha desde"
+                    className="text-sm text-gray-700 dark:text-gray-300 bg-transparent border-none outline-none p-0 cursor-pointer"
                 />
                 <span className="text-gray-300 text-xs">→</span>
                 <input
@@ -73,7 +74,8 @@ export default function SelectorPeriodo({ periodo, desde, hasta, onChange }) {
                     min={desde}
                     max={hoy}
                     onChange={(e) => actualizarFecha('hasta', e.target.value)}
-                    className="text-sm text-gray-700 bg-transparent border-none outline-none focus:ring-0 p-0 cursor-pointer"
+                    aria-label="Fecha hasta"
+                    className="text-sm text-gray-700 dark:text-gray-300 bg-transparent border-none outline-none p-0 cursor-pointer"
                 />
             </div>
         </div>

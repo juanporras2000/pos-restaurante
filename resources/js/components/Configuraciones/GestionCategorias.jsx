@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { DANGER, NEUTRAL } from '../../utils/colors';
+import Spinner from '../shared/Spinner';
+import Modal from '../shared/Modal';
+import IconButton from '../shared/IconButton';
 import axios from '../../services/axios'
 
 function ModalCategoria({ categoria, onGuardar, onCerrar }) {
@@ -40,17 +44,16 @@ function ModalCategoria({ categoria, onGuardar, onCerrar }) {
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900">
+        <Modal abierto onCerrar={onCerrar}>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                         {esEdicion ? 'Editar categoría' : 'Nueva categoría'}
                     </h3>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
-                    </button>
+                    </IconButton>
                 </div>
 
                 <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
@@ -82,8 +85,7 @@ function ModalCategoria({ categoria, onGuardar, onCerrar }) {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -92,6 +94,7 @@ export default function GestionCategorias() {
     const [cargando, setCargando] = useState(true);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [categoriaEditar, setCategoriaEditar] = useState(null);
+    const [eliminandoId, setEliminandoId] = useState(null);
 
     const cargar = () => {
         setCargando(true);
@@ -131,12 +134,13 @@ export default function GestionCategorias() {
             showCancelButton: cat.productos_count === 0,
             confirmButtonText: cat.productos_count > 0 ? 'Entendido' : 'Eliminar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: cat.productos_count > 0 ? '#6b7280' : '#dc2626',
-            cancelButtonColor: '#6b7280',
+            confirmButtonColor: cat.productos_count > 0 ? NEUTRAL : DANGER,
+            cancelButtonColor: NEUTRAL,
         });
 
         if (!isConfirmed || cat.productos_count > 0) return;
 
+        setEliminandoId(cat.id);
         try {
             // Pasamos a usar la instancia de axios con la URL limpia
             await axios.delete(`/categorias/${cat.id}`);
@@ -147,11 +151,13 @@ export default function GestionCategorias() {
             // Capturamos el error 409 de conflicto enviado por Laravel
             if (error.response && error.response.status === 409) {
                 const data = error.response.data;
-                Swal.fire({ icon: 'warning', title: 'No se puede eliminar', text: data.error, confirmButtonColor: '#6b7280' });
+                Swal.fire({ icon: 'warning', title: 'No se puede eliminar', text: data.error, confirmButtonColor: NEUTRAL });
                 return;
             }
 
             Swal.fire({ icon: 'error', title: 'Error al eliminar', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+        } finally {
+            setEliminandoId(null);
         }
     };
 
@@ -160,13 +166,13 @@ export default function GestionCategorias() {
             {/* Cabecera Adaptativa */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <svg className="h-5 w-5 text-orange-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M4 6h16M4 10h16M4 14h8M4 18h8" />
                         </svg>
                         Categorías
                     </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">Organiza los productos por categorías.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Organiza los productos por categorías.</p>
                 </div>
                 <button
                     type="button"
@@ -183,13 +189,10 @@ export default function GestionCategorias() {
             {/* Lista */}
             {cargando ? (
                 <div className="flex items-center justify-center py-12">
-                    <svg className="animate-spin h-6 w-6 text-orange-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
+                    <Spinner size="md" className="text-orange-500" />
                 </div>
             ) : categorias.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                     <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M4 6h16M4 10h16M4 14h8M4 18h8" />
                     </svg>
@@ -204,8 +207,8 @@ export default function GestionCategorias() {
                                     {cat.nombre ? cat.nombre.charAt(0) : '?'}
                                 </span>
                                 <div className="min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{cat.nombre}</p>
-                                    <p className="text-xs text-gray-400">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{cat.nombre}</p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500">
                                         {cat.productos_count === 0
                                             ? 'Sin productos'
                                             : `${cat.productos_count} producto${cat.productos_count !== 1 ? 's' : ''}`}
@@ -217,22 +220,22 @@ export default function GestionCategorias() {
                         - Siempre visibles en smartphones para permitir el toque directo.
                         - Ocultos por defecto (`md:opacity-0`) y visibles en hover (`md:group-hover:opacity-100`) solo en pantallas grandes con mouse. */}
                             <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                                <button
-                                    type="button"
+                                <IconButton
                                     onClick={() => abrirEditar(cat)}
-                                    className="p-2 w-8 h-8 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors touch-manipulation"
-                                    title="Editar"
+                                    variant="primary"
+                                    aria-label="Editar categoría"
+                                    className="text-blue-600 hover:text-blue-900 hover:bg-blue-50"
                                 >
                                     <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                         <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
-                                </button>
-                                <button
-                                    type="button"
+                                </IconButton>
+                                <IconButton
                                     onClick={() => eliminar(cat)}
-                                    className="p-2 w-8 h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors touch-manipulation"
-                                    title="Eliminar"
+                                    variant="danger"
+                                    aria-label="Eliminar categoría"
+                                    disabled={eliminandoId === cat.id}
                                 >
                                     <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <polyline points="3 6 5 6 21 6" />
@@ -240,7 +243,7 @@ export default function GestionCategorias() {
                                         <path d="M10 11v6M14 11v6" />
                                         <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                                     </svg>
-                                </button>
+                                </IconButton>
                             </div>
                         </li>
                     ))}

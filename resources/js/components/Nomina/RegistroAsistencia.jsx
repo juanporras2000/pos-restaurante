@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
+import Spinner from '../shared/Spinner';
+import { DANGER } from '../../utils/colors';
 
 function hoy() {
     return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD en timezone local
@@ -22,6 +24,7 @@ export default function RegistroAsistencia() {
     const [asistencias, setAsistencias] = useState({}); // { trabajador_id: asistencia_id }
     const [cargando, setCargando] = useState(true);
     const [procesando, setProcesando] = useState(new Set());
+    const [marcandoTodos, setMarcandoTodos] = useState(false);
 
     const cargarTrabajadores = useCallback(() => {
         return fetch('/api/trabajadores')
@@ -57,6 +60,21 @@ export default function RegistroAsistencia() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
         const yaAsistio = !!asistencias[trabajadorId];
 
+        if (yaAsistio) {
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Quitar asistencia?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Quitar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: DANGER,
+            });
+            if (!isConfirmed) {
+                setProcesando((p) => { const next = new Set(p); next.delete(trabajadorId); return next; });
+                return;
+            }
+        }
+
         try {
             if (yaAsistio) {
                 const res = await fetch(`/api/asistencias/${asistencias[trabajadorId]}`, {
@@ -86,19 +104,35 @@ export default function RegistroAsistencia() {
         const sinMarcar = trabajadores.filter((t) => !asistencias[t.id]);
         if (sinMarcar.length === 0) return;
 
+        setMarcandoTodos(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        for (const t of sinMarcar) {
-            try {
-                const res = await fetch('/api/asistencias', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                    body: JSON.stringify({ trabajador_id: t.id, fecha }),
+        let fallos = 0;
+        try {
+            for (const t of sinMarcar) {
+                try {
+                    const res = await fetch('/api/asistencias', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                        body: JSON.stringify({ trabajador_id: t.id, fecha }),
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    setAsistencias((p) => ({ ...p, [t.id]: data.id }));
+                } catch {
+                    fallos++;
+                }
+            }
+        } finally {
+            setMarcandoTodos(false);
+            if (fallos > 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: `${fallos} no se pudieron registrar`,
+                    timer: 2500,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
                 });
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                setAsistencias((p) => ({ ...p, [t.id]: data.id }));
-            } catch {
-                // Continuar con los demás si uno falla
             }
         }
     };
@@ -108,12 +142,12 @@ export default function RegistroAsistencia() {
     const esHoy = fecha === hoy();
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 w-full">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 w-full">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Registro de asistencia</h2>
-                    <p className="text-sm text-gray-500 mt-0.5 capitalize">{formatearFechaLabel(fecha)}</p>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Registro de asistencia</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 capitalize">{formatearFechaLabel(fecha)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     {/* Navegación de fecha */}
@@ -144,12 +178,17 @@ export default function RegistroAsistencia() {
             {/* Contador + Marcar todos */}
             {!cargando && total > 0 && (
                 <div className="flex items-center justify-between mb-4 px-1">
-                    <span className="text-sm text-gray-500">
-                        <span className="font-semibold text-gray-900">{presentes}</span> de {total} presentes
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">{presentes}</span> de {total} presentes
                     </span>
                     {presentes < total && (
-                        <button type="button" onClick={marcarTodos} className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors">
-                            Marcar todos presentes
+                        <button
+                            type="button"
+                            onClick={marcarTodos}
+                            disabled={marcandoTodos}
+                            className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                        >
+                            {marcandoTodos ? 'Marcando...' : 'Marcar todos presentes'}
                         </button>
                     )}
                 </div>
@@ -158,10 +197,7 @@ export default function RegistroAsistencia() {
             {/* Lista */}
             {cargando ? (
                 <div className="flex items-center justify-center py-12">
-                    <svg className="animate-spin h-6 w-6 text-blue-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
+                    <Spinner size="md" />
                 </div>
             ) : trabajadores.length === 0 ? (
                 <div className="text-center py-12">
@@ -169,8 +205,8 @@ export default function RegistroAsistencia() {
                         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                     </svg>
-                    <p className="text-sm text-gray-500">No hay trabajadores activos.</p>
-                    <p className="text-xs text-gray-400 mt-1">Agrega trabajadores en la pestaña "Trabajadores".</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay trabajadores activos.</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Agrega trabajadores en la pestaña "Trabajadores".</p>
                 </div>
             ) : (
                 <ul className="divide-y divide-gray-100">
@@ -182,33 +218,30 @@ export default function RegistroAsistencia() {
                             <li
                                 key={t.id}
                                 onClick={() => !cargandoEste && toggleAsistencia(t.id)}
-                                className={`flex items-center justify-between py-4 px-3 rounded-lg cursor-pointer transition-all select-none ${presente ? 'bg-green-50 border border-green-200' : 'hover:bg-gray-50 border border-transparent'}`}
+                                className={`flex items-center justify-between py-4 px-3 rounded-lg cursor-pointer transition-all select-none ${presente ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800' : 'hover:bg-gray-50 dark:hover:bg-gray-900 border border-transparent'}`}
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold uppercase flex-shrink-0 transition-colors ${presente ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold uppercase flex-shrink-0 transition-colors ${presente ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:text-gray-400'}`}>
                                         {t.nombre.charAt(0)}
                                     </span>
                                     <div>
-                                        <p className={`text-sm font-medium ${presente ? 'text-green-800' : 'text-gray-900'}`}>{t.nombre}</p>
-                                        <p className="text-xs text-gray-400">{t.cargo || 'Sin cargo'}</p>
+                                        <p className={`text-sm font-medium ${presente ? 'text-green-800 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'}`}>{t.nombre}</p>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500">{t.cargo || 'Sin cargo'}</p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
                                     {cargandoEste ? (
-                                        <svg className="animate-spin h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                                        </svg>
+                                        <Spinner size="sm" />
                                     ) : presente ? (
-                                        <span className="flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
+                                        <span className="flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-2.5 py-1 rounded-full">
                                             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                 <path d="M5 13l4 4L19 7" />
                                             </svg>
                                             Presente
                                         </span>
                                     ) : (
-                                        <span className="text-xs font-medium text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">Ausente</span>
+                                        <span className="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">Ausente</span>
                                     )}
                                 </div>
                             </li>

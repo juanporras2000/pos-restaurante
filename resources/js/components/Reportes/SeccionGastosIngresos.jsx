@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { fmtCOP as fmtQ } from '../../utils/format';
-import { ErrorCard } from './EstadoCarga';
+import { fmtCOP } from '../../utils/format';
+import { Spinner, ErrorCard } from './EstadoCarga';
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 
 function FilaBalance({ label, valor, colorClase, negrita = false }) {
     return (
-        <div className={`flex justify-between items-center py-2 ${negrita ? 'border-t border-gray-200 mt-1 pt-3' : ''}`}>
-            <span className={`text-sm ${negrita ? 'font-bold text-gray-800' : 'text-gray-500'}`}>{label}</span>
+        <div className={`flex justify-between items-center py-2 ${negrita ? 'border-t border-gray-200 dark:border-gray-700 mt-1 pt-3' : ''}`}>
+            <span className={`text-sm ${negrita ? 'font-bold text-gray-800' : 'text-gray-500 dark:text-gray-400'}`}>{label}</span>
             <span className={`text-sm font-semibold ${colorClase}`}>{valor}</span>
         </div>
     );
@@ -38,7 +38,7 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, nominaNeto,
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
-                <div className="h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <Spinner />
             </div>
         );
     }
@@ -55,30 +55,30 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, nominaNeto,
             {/* Filas principales */}
             <FilaBalance
                 label="Ingresos (ventas)"
-                valor={fmtQ(totalVentas)}
+                valor={fmtCOP(totalVentas)}
                 colorClase="text-green-600"
             />
             <FilaBalance
                 label="Gastos del período"
-                valor={`−${fmtQ(totalGastos)}`}
+                valor={`−${fmtCOP(totalGastos)}`}
                 colorClase="text-red-500"
             />
             <FilaBalance
                 label="Nómina (neto)"
-                valor={`−${fmtQ(nominaNeto)}`}
+                valor={`−${fmtCOP(nominaNeto)}`}
                 colorClase="text-red-500"
             />
             <FilaBalance
                 label="Utilidad estimada"
-                valor={`${fmtQ(utilidad)}${margen !== null ? ` (${margen}%)` : ''}`}
+                valor={`${fmtCOP(utilidad)}${margen !== null ? ` (${margen}%)` : ''}`}
                 colorClase={utilidad >= 0 ? 'text-blue-600' : 'text-red-600'}
                 negrita
             />
 
             {/* Desglose por tipo de gasto */}
             {tipos.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-gray-100">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">
                         Desglose de gastos
                     </p>
                     <div className="space-y-1.5">
@@ -88,15 +88,15 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, nominaNeto,
                                 : 0;
                             return (
                                 <div key={t.tipo} className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500 w-24 truncate capitalize">{t.tipo}</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 w-24 truncate capitalize">{t.tipo}</span>
                                     <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
                                         <div
                                             className="bg-red-400 h-full rounded-full transition-all duration-500"
                                             style={{ width: `${pct}%` }}
                                         />
                                     </div>
-                                    <span className="text-xs font-medium text-gray-700 w-20 text-right">
-                                        {fmtQ(t.total)}
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-20 text-right">
+                                        {fmtCOP(t.total)}
                                     </span>
                                 </div>
                             );
@@ -106,7 +106,7 @@ export default function SeccionGastosIngresos({ totalVentas, gastos, nominaNeto,
             )}
 
             {tipos.length === 0 && totalGastos === 0 && (
-                <p className="text-xs text-gray-400 text-center pt-4">
+                <p className="text-xs text-gray-400 dark:text-gray-500 text-center pt-4">
                     Sin gastos registrados en este período
                 </p>
             )}

@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import Modal from "../../shared/Modal";
 
 export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error, setShowModal, mensajeError, tiempoEspera }) => {
 
@@ -19,10 +20,25 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center w-80">
-                <h2 className="text-2xl font-bold mb-2">Ingresar PIN</h2>
-                <p className="text-gray-500 mb-6 italic">
+        <div className="pin-modal-scope">
+            {/* Ajusta el overlay genérico de .modal-overlay para conservar el
+                fondo oscuro con blur que tenía este modal antes de migrar
+                al componente Modal compartido. */}
+            <style>{`
+                .pin-modal-scope .modal-overlay {
+                    background-color: rgb(0 0 0 / 0.8);
+                    -webkit-backdrop-filter: blur(4px);
+                    backdrop-filter: blur(4px);
+                    padding: 0;
+                }
+            `}</style>
+            <Modal
+                abierto={true}
+                onCerrar={() => setShowModal(false)}
+                className="!bg-white dark:!bg-gray-800 !p-8 !rounded-2xl !shadow-2xl !flex !flex-col !items-center !w-80 !max-w-none"
+            >
+                <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Ingresar PIN</h2>
+                <p className="text-gray-500 dark:text-gray-400 mb-6 italic">
                     {perfilSeleccionado?.nombre}
                 </p>
 
@@ -40,7 +56,7 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
                             disabled={tiempoEspera > 0}
                             onChange={(e) => handleChange(e.target.value, index)}
                             onKeyDown={(e) => handleKeyDown(e, index)}
-                            className={`w-12 h-16 text-center text-3xl font-bold border-2 rounded-lg focus:border-blue-500 focus:outline-none transition-all ${error ? "border-red-500 animate-shake" : "border-gray-300"}`}
+                            className={`w-12 h-16 text-center text-3xl font-bold border-2 rounded-lg text-gray-900 dark:text-gray-100 dark:bg-gray-900 focus:border-primary focus:outline-none transition-all ${error ? "border-red-500 animate-shake" : "border-gray-300 dark:border-gray-600"}`}
                         />
                     ))}
                 </div>
@@ -53,11 +69,11 @@ export const ModalPinPerfil = ({ perfilSeleccionado, pin, handlePinChange, error
 
                 <button
                     onClick={() => setShowModal(false)}
-                    className="text-gray-400 hover:text-gray-600 font-medium transition-colors"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 font-medium transition-colors"
                 >
                     Cancelar
                 </button>
-            </div>
+            </Modal>
         </div>
     );
 };

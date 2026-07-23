@@ -7,12 +7,12 @@
 
     /* Buttons */
     .btn-primary {
-        @apply px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400
+        @apply px-4 py-2 bg-primary hover:bg-primary-hover disabled:bg-gray-400
                text-white font-medium rounded-lg text-sm transition-colors;
     }
     .btn-secondary {
-        @apply px-4 py-2 border border-gray-300 text-gray-700
-               rounded-lg hover:bg-gray-50 text-sm transition-colors;
+        @apply px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200
+               rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm transition-colors;
     }
     .btn-danger {
         @apply px-4 py-2 border border-red-200 text-red-600
@@ -29,30 +29,30 @@
                flex items-center justify-center p-4 z-50;
     }
     .modal-panel {
-        @apply bg-white rounded-xl shadow-xl w-full max-w-md;
+        @apply bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md;
     }
     .modal-panel-lg {
-        @apply bg-white rounded-xl shadow-xl w-full max-w-xl;
+        @apply bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl;
     }
     .modal-header {
-        @apply p-6 border-b border-gray-200 flex items-center justify-between;
+        @apply p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between;
     }
     .modal-footer {
-        @apply p-6 border-t border-gray-200 flex justify-end gap-3;
+        @apply p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3;
     }
 
     /* Card */
     .card {
-        @apply bg-white rounded-xl shadow-sm border border-gray-200;
+        @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700;
     }
 
     /* Form */
     .form-label {
-        @apply block text-sm font-medium text-gray-700 mb-1;
+        @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
     }
     .form-input {
-        @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
-               focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+        @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg text-sm
+               focus:ring-2 focus:ring-primary focus:border-primary;
     }
     .form-error {
         @apply mt-1 text-xs text-red-500;
@@ -60,7 +60,7 @@
 
     /* Page header */
     .page-title {
-        @apply font-bold text-gray-900;
+        @apply font-bold text-gray-900 dark:text-gray-100;
     }
 }
 

@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import { fmt, fechaLocal } from './constants';
+import { DANGER } from '../../utils/colors';
 import TarjetaApertura from './TarjetaApertura';
 import ModalGasto from './ModalGasto';
 import ResumenTarjetas from './ResumenTarjetas';
@@ -61,7 +62,7 @@ export default function Gastos() {
             showCancelButton: true,
             confirmButtonText: 'Eliminar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#dc2626',
+            confirmButtonColor: DANGER,
             cancelButtonColor: '#6b7280',
         });
         if (!isConfirmed) return;
@@ -84,12 +85,12 @@ export default function Gastos() {
         : gastos.filter((g) => g.tipo === filtroTipo);
 
     return (
-        <div className="min-h-screen bg-gray-50 lg:p-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:p-6">
             {/* Header */}
             <div className="mb-6">
                 <div className="flex flex-col lg:flex-row items-center justify-between">
                     <div>
-                        <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center lg:justify-normal gap-3">
+                        <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center lg:justify-normal gap-3">
                             <svg className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                             </svg>
@@ -122,8 +123,8 @@ export default function Gastos() {
 
             {/* Banner solo lectura */}
             {!esHoy && (
-                <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 text-sm text-amber-800">
-                    <svg className="h-5 w-5 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-6 text-sm text-amber-800 dark:text-amber-400">
+                    <svg className="h-5 w-5 text-amber-500 dark:text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="8" x2="12" y2="12" />
                         <line x1="12" y1="16" x2="12.01" y2="16" />

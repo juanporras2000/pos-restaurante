@@ -5,11 +5,16 @@ import * as z from 'zod';
 import { ModalInsumosPropTypes } from '../../propTypes';
 import Modal from '../shared/Modal';
 import IconButton from '../shared/IconButton';
+import StepWizard from '../shared/StepWizard/StepWizard';
 
 const INSUMO_VACIO = {
-    id: null, nombre: '', unidad_medida: '',
-    stock_actual: '', stock_minimo: '',
-    costo_unitario: '', valor_producto: ''
+    id: null,
+    nombre: '',
+    unidad_medida: '',
+    stock_actual: '',
+    stock_minimo: '',
+    costo_unitario: '',
+    valor_producto: ''
 };
 const UNIDADES = ['gr', 'kg', 'ml', 'lt', 'unidad', 'porción', 'oz', 'lb'];
 
@@ -34,26 +39,35 @@ const insumoSchema = z.object({
     )
 });
 
-
 export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guardando }) {
-    const { register, handleSubmit, reset, setError, setValue, control,formState: { errors } } = useForm({
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setError,
+        setValue,
+        control,
+        formState: { errors }
+    } = useForm({
         resolver: zodResolver(insumoSchema),
         defaultValues: INSUMO_VACIO,
     });
 
     const [valorLoteDisplay, setValorLoteDisplay] = useState('');
 
-    const stockActual    = useWatch({ control, name: 'stock_actual' });
-    const valorProducto  = useWatch({ control, name: 'valor_producto' });
+    const nombreWatch = useWatch({ control, name: 'nombre' });
+    const unidadWatch = useWatch({ control, name: 'unidad_medida' });
+    const stockActual = useWatch({ control, name: 'stock_actual' });
+    const valorProducto = useWatch({ control, name: 'valor_producto' });
+    const costoUnitarioWatch = useWatch({ control, name: 'costo_unitario' });
 
     useEffect(() => {
         if (valorProducto === '' || valorProducto === null || valorProducto === undefined) return;
-        const stock = Number.parseFloat(stockActual)  || 0;
+        const stock = Number.parseFloat(stockActual) || 0;
         const valor = Number.parseFloat(valorProducto) || 0;
         const costo = stock > 0 ? Number.parseFloat((valor / stock).toFixed(4)) : 0;
         setValue('costo_unitario', costo);
     }, [stockActual, valorProducto, setValue]);
-
 
     useEffect(() => {
         if (abierto) {
@@ -86,74 +100,83 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
         }
     };
 
-    return (
-        <Modal abierto={abierto} onCerrar={onCerrar}>
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-                            <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
-                        </svg>
-                        {insumo.id ? 'Editar Insumo' : 'Nuevo Insumo'}
-                    </h2>
-                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
-                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </IconButton>
-                </div>
-
-                <form id="form-insumo" onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+    const wizardSteps = [
+        {
+            title: 'Nombre y unidad de medida',
+            subtitle: 'Ingresa el nombre del ingrediente/material y su unidad.',
+            isValid: Boolean(nombreWatch?.trim() && unidadWatch),
+            content: (
+                <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Nombre <span className="text-red-500">*</span>
+                        </label>
                         <input
                             {...register('nombre')}
-                            autoFocus type="text" placeholder="Ej: Papa criolla"
-                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            autoFocus
+                            type="text"
+                            placeholder="Ej: Papa criolla, Queso Mozzarella..."
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-300 dark:border-gray-700'}`}
                         />
                         {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unidad de medida <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Unidad de medida <span className="text-red-500">*</span>
+                        </label>
                         <select
                             {...register('unidad_medida')}
-                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.unidad_medida ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white ${errors.unidad_medida ? 'border-red-500 bg-red-50' : 'border-gray-300 dark:border-gray-700'}`}
                         >
                             <option value="">Seleccionar unidad</option>
                             {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                         </select>
                         {errors.unidad_medida && <p className="mt-1 text-xs text-red-500">{errors.unidad_medida.message}</p>}
                     </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock actual</label>
-                            <input
-                                {...register('stock_actual')}
-                                type="number" step="0.01" placeholder="0"
-                                readOnly={!!insumo.id}
-                                className={`w-full px-3 py-2 border rounded-lg text-sm ${
-                                    insumo.id
-                                        ? 'border-gray-200 dark:border-gray-700 bg-gray-100 text-gray-600 cursor-not-allowed'
-                                        : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                                }`}
-                            />
-                            {errors.stock_actual && <p className="mt-1 text-xs text-red-500">{errors.stock_actual.message}</p>}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock mínimo</label>
-                            <input
-                                {...register('stock_minimo')}
-                                type="number" step="0.01" placeholder="0"
-                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.stock_minimo ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
-                            />
-                            {errors.stock_minimo && <p className="mt-1 text-xs text-red-500">{errors.stock_minimo.message}</p>}
-                        </div>
+                </div>
+            )
+        },
+        {
+            title: 'Cantidades y Alertas',
+            subtitle: 'Define el inventario actual y el monto mínimo para alertarte sobre posible falta de insumos.',
+            content: (
+                <div className="grid grid-cols-2 gap-3 h-full">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock actual</label>
+                        <input
+                            {...register('stock_actual')}
+                            type="number"
+                            step="0.01"
+                            placeholder="0"
+                            readOnly={!!insumo.id}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-800 dark:text-white ${
+                                insumo.id
+                                    ? 'border-gray-200 dark:border-gray-700 bg-gray-100 text-gray-600 cursor-not-allowed'
+                                    : 'border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                        />
+                        {errors.stock_actual && <p className="mt-1 text-xs text-red-500">{errors.stock_actual.message}</p>}
                     </div>
-
-                                    {/* Valor total del lote */}
-                <div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock mínimo</label>
+                        <input
+                            {...register('stock_minimo')}
+                            type="number"
+                            step="0.01"
+                            placeholder="0"
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white ${errors.stock_minimo ? 'border-red-500 bg-red-50' : 'border-gray-300 dark:border-gray-700'}`}
+                        />
+                        {errors.stock_minimo && <p className="mt-1 text-xs text-red-500">{errors.stock_minimo.message}</p>}
+                    </div>
+                </div>
+            )
+        },
+        {
+            title: 'Valor Total Comprado',
+            subtitle: 'Ingresa el valor total que pagaste por el lote.',
+            content: (
+                <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Valor del lote <span className="text-red-500">*</span>
                     </label>
@@ -171,50 +194,73 @@ export default function ModalInsumo({ abierto, insumo, onGuardar, onCerrar, guar
                             }}
                             type="text"
                             inputMode="decimal"
-                            placeholder="Ej: 3.1"
-                            className={`w-full pl-7 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.valor_producto ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            placeholder="Ej: 3.1 (para $3.100)"
+                            className={`w-full pl-7 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white ${errors.valor_producto ? 'border-red-500 bg-red-50' : 'border-gray-300 dark:border-gray-700'}`}
                         />
                     </div>
+                    {valorProducto !== '' && !isNaN(Number(valorProducto)) && Number(valorProducto) > 0 && (
+                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                            = ${(Number(valorProducto)).toLocaleString('es-CO')} COP
+                        </p>
+                    )}
                     {errors.valor_producto && <p className="mt-1 text-xs text-red-500">{errors.valor_producto.message}</p>}
-                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Lo que pagaste por todo el stock actual.</p>
                 </div>
-
-                {/* Costo unitario — bloqueado, calculado automáticamente */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
-                        Costo unitario
-                        <svg className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                        <span className="text-gray-400 dark:text-gray-500 font-normal text-xs">(calculado automáticamente)</span>
-                    </label>
-                    <div className="relative">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400 text-sm">$</span>
-                        <input
-                            {...register('costo_unitario')}
-                            type="number" step="0.0001"
-                            readOnly
-                            className="w-full pl-7 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-gray-100 text-gray-600 cursor-not-allowed"
-                        />
+            )
+        },
+        {
+            title: 'Resumen y Costo Calculado',
+            subtitle: 'Confirmación final.',
+            content: (
+                <div className="space-y-3">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-2 text-sm border border-gray-100 dark:border-gray-700">
+                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>Insumo:</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{nombreWatch || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>Cantidad inicial:</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{stockActual || 0} {unidadWatch}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>Costo por unidad ({unidadWatch}):</span>
+                            <span className="font-bold text-green-600 dark:text-green-400 text-base">
+                                ${costoUnitarioWatch ? Number(costoUnitarioWatch).toLocaleString('es-CO') : '0'} COP
+                            </span>
+                        </div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                        valor_lote ÷ stock_actual = costo por unidad
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+                        El costo unitario se calcula automáticamente: <br />
+                        <strong>Valor Lote ÷ Stock Actual</strong>
                     </p>
                 </div>
-                </form>
+            )
+        }
+    ];
 
-                <div className="px-6 pb-6 flex justify-end gap-3">
-                    <button type="button" onClick={onCerrar} className="px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" form="form-insumo" disabled={guardando} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-sm transition-colors">
-                        {guardando ? 'Guardando...' : (insumo.id ? 'Actualizar' : 'Crear')}
-                    </button>
+    return (
+        <Modal abierto={abierto} onCerrar={onCerrar}>
+            <div className="p-6 max-w-lg w-full h-[480px] flex flex-col relative">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        {insumo.id ? 'Editar Insumo' : 'Nuevo Insumo'}
+                    </h2>
+                    <IconButton aria-label="Cerrar" variant="default" onClick={onCerrar}>
+                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </IconButton>
                 </div>
+
+                <StepWizard
+                    steps={wizardSteps}
+                    onFinish={handleSubmit(onSubmit)}
+                    isSubmitting={guardando}
+                    finishLabel={insumo.id ? 'Actualizar Insumo' : 'Crear Insumo'}
+                    onClose={onCerrar}
+                />
+            </div>
         </Modal>
     );
 }
 
 ModalInsumo.propTypes = ModalInsumosPropTypes;
-

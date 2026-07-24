@@ -3,9 +3,10 @@ import Swal from 'sweetalert2';
 import ListaProductos from './ListaProductos';
 import Carrito from './Carrito';
 import IconButton from '../shared/IconButton';
+import StepWizard from '../shared/StepWizard/StepWizard';
 import { DANGER } from '../../utils/colors';
 import { ModalNuevoPedidoPropTypes } from '../../propTypes';
-import axios from '../../services/axios'
+import axios from '../../services/axios';
 
 const PEDIDO_VACIO = {
     tipo: 'mesa',
@@ -158,13 +159,17 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
         );
     };
 
-    const puedeCrear = () => {
-        if (carrito.length === 0) return false;
+    // Validaciones por pasos
+    const esPasoTipoValido = () => Boolean(pedido.tipo);
+
+    const esPasoDetalleValido = () => {
         if (pedido.tipo === 'mesa') return String(pedido.numero_mesa).trim() !== '' && parseInt(pedido.numero_mesa) > 0;
         if (pedido.tipo === 'domicilio') return pedido.direccion.trim().length >= 5;
         if (pedido.tipo === 'recoger') return true;
         return false;
     };
+
+    const esPasoProductosValido = () => carrito.length > 0;
 
     const cerrar = () => {
         setPedido(PEDIDO_VACIO);
@@ -174,7 +179,7 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
     };
 
     const guardar = async () => {
-        if (!puedeCrear()) {
+        if (!esPasoDetalleValido() || !esPasoProductosValido()) {
             Swal.fire({ icon: 'warning', title: 'Completa todos los campos requeridos', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
             return;
         }
@@ -252,7 +257,6 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
             if (error.response) {
                 const data = error.response.data;
 
-                // Stock insuficiente — mostrar detalle de insumos faltantes
                 if (error.response.status === 422 && data.faltantes?.length) {
                     Swal.fire({
                         icon: 'error',
@@ -264,12 +268,10 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
                     return;
                 }
 
-                // Otro tipo de error controlado devuelto por el servidor
                 Swal.fire({ icon: 'error', title: data.error || 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
                 return;
             }
 
-            // Error de red o conexión sin respuesta
             Swal.fire({ icon: 'error', title: 'Error al guardar el pedido', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         } finally {
             setEnviando(false);
@@ -278,215 +280,232 @@ export default function ModalNuevoPedido({ abierto, productos, onCreado, onCerra
 
     if (!abierto) return null;
 
+    const wizardSteps = [
+        {
+            title: 'Tipo de Pedido',
+            subtitle: 'Selecciona la modalidad de venta',
+            isValid: esPasoTipoValido(),
+            content: (
+                <div className="space-y-3">
+                    {/* MESA */}
+                    <button
+                        type="button"
+                        onClick={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                            pedido.tipo === 'mesa'
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            pedido.tipo === 'mesa' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                        }`}>
+                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="3" y="8" width="18" height="4" rx="1"></rect>
+                                <path d="M6 12v4m12-4v4M4 19h16"></path>
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <p className={`text-sm font-semibold ${pedido.tipo === 'mesa' ? 'text-blue-700 dark:text-blue-400' : 'text-gray-800 dark:text-gray-200'}`}>Mesa</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Consumo en el local</p>
+                        </div>
+                        {pedido.tipo === 'mesa' && (
+                            <svg className="h-5 w-5 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <path d="M20 6L9 17l-5-5"></path>
+                            </svg>
+                        )}
+                    </button>
+
+                    {/* DOMICILIO */}
+                    <button
+                        type="button"
+                        onClick={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                            pedido.tipo === 'domicilio'
+                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            pedido.tipo === 'domicilio' ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                        }`}>
+                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <p className={`text-sm font-semibold ${pedido.tipo === 'domicilio' ? 'text-green-700 dark:text-green-400' : 'text-gray-800 dark:text-gray-200'}`}>Domicilio</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Entrega a dirección</p>
+                        </div>
+                        {pedido.tipo === 'domicilio' && (
+                            <svg className="h-5 w-5 text-green-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <path d="M20 6L9 17l-5-5"></path>
+                            </svg>
+                        )}
+                    </button>
+
+                    {/* RECOGER */}
+                    <button
+                        type="button"
+                        onClick={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                            pedido.tipo === 'recoger'
+                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            pedido.tipo === 'recoger' ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                        }`}>
+                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 01-8 0"></path>
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <p className={`text-sm font-semibold ${pedido.tipo === 'recoger' ? 'text-orange-600 dark:text-orange-400' : 'text-gray-800 dark:text-gray-200'}`}>Recoger</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">El cliente pasa a buscar</p>
+                        </div>
+                        {pedido.tipo === 'recoger' && (
+                            <svg className="h-5 w-5 text-orange-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <path d="M20 6L9 17l-5-5"></path>
+                            </svg>
+                        )}
+                    </button>
+                </div>
+            )
+        },
+        {
+            title: 'Detalles del Pedido',
+            subtitle: pedido.tipo === 'mesa' ? 'Ingresa la información de la mesa' : pedido.tipo === 'domicilio' ? 'Ingresa la dirección de entrega' : 'Ingresa los datos del cliente',
+            isValid: esPasoDetalleValido(),
+            content: (
+                <div className="py-2">
+                    {pedido.tipo === 'mesa' && (
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Número de mesa <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={pedido.numero_mesa}
+                                onChange={(e) => setPedido((p) => ({ ...p, numero_mesa: e.target.value }))}
+                                placeholder="Ej: 5"
+                                min="1"
+                                autoFocus
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            />
+                        </div>
+                    )}
+
+                    {pedido.tipo === 'domicilio' && (
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Dirección de entrega <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                value={pedido.direccion}
+                                onChange={(e) => {
+                                    setPedido((p) => ({ ...p, direccion: e.target.value }));
+                                    validarDireccion(e.target.value);
+                                }}
+                                placeholder="Ej: calle 23 #11-21 apto 101"
+                                rows="3"
+                                autoFocus
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none dark:bg-gray-800 dark:text-white"
+                            />
+                            {direccionError && <p className="text-xs text-red-500 mt-1">{direccionError}</p>}
+                        </div>
+                    )}
+
+                    {pedido.tipo === 'recoger' && (
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Nombre del cliente <span className="text-gray-400 dark:text-gray-500 font-normal">(opcional)</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={pedido.nombre_cliente}
+                                onChange={(e) => setPedido((p) => ({ ...p, nombre_cliente: e.target.value }))}
+                                placeholder="Ej: Juan Pérez"
+                                autoFocus
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            />
+                        </div>
+                    )}
+                </div>
+            )
+        },
+        {
+            title: '',
+            subtitle: '',
+            isValid: esPasoProductosValido(),
+            content: (
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                    <ListaProductos
+                        productos={productos}
+                        carrito={carrito}
+                        onIncrementar={incrementar}
+                        onDecrementar={decrementar}
+                    />
+                </div>
+            )
+        },
+        {
+            title: '',
+            subtitle: '',
+            content: (
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                    <Carrito
+                        carrito={carrito}
+                        adicionesDisponibles={adicionesDisponibles}
+                        onEliminar={eliminarDelCarrito}
+                        onNotaChange={cambiarNota}
+                        onAdicionIncrementar={adicionIncrementar}
+                        onAdicionDecrementar={adicionDecrementar}
+                        tipoPedido={pedido.tipo}
+                        recargoDomicilio={recargoDomicilio}
+                    />
+                </div>
+            )
+        }
+    ];
+
     return (
         <div
             className="modal-overlay"
             onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}
         >
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            {esEdicion ? `Editar Pedido #${pedidoEditar.numero_dia || pedidoEditar.id}` : 'Crear Nuevo Pedido'}
-                        </h2>
-                        <IconButton onClick={cerrar} aria-label="Cerrar" variant="default">
-                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </IconButton>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Tipo de Pedido — card selectors */}
-                        <div className="lg:col-span-1">
-                            <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                                <h3 className="font-semibold text-gray-500 dark:text-gray-400 mb-3 text-sm uppercase tracking-wide">Tipo de Pedido</h3>
-                                <div className="space-y-2">
-
-                                    {/* MESA */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setPedido((p) => ({ ...p, tipo: 'mesa', direccion: '', nombre_cliente: '' }))}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                            pedido.tipo === 'mesa'
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                        }`}
-                                    >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'mesa' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                                        }`}>
-                                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <rect x="3" y="8" width="18" height="4" rx="1"></rect>
-                                                <path d="M6 12v4m12-4v4M4 19h16"></path>
-                                            </svg>
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className={`text-sm font-semibold ${pedido.tipo === 'mesa' ? 'text-blue-700 dark:text-blue-400' : 'text-gray-800 dark:text-gray-200'}`}>Mesa</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Consumo en el local</p>
-                                        </div>
-                                        {pedido.tipo === 'mesa' && (
-                                            <svg className="h-5 w-5 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <path d="M20 6L9 17l-5-5"></path>
-                                            </svg>
-                                        )}
-                                    </button>
-
-                                    {pedido.tipo === 'mesa' && (
-                                        <div className="px-1 pt-1">
-                                            <label className="form-label">Número de mesa</label>
-                                            <input
-                                                type="number"
-                                                value={pedido.numero_mesa}
-                                                onChange={(e) => setPedido((p) => ({ ...p, numero_mesa: e.target.value }))}
-                                                placeholder="Ej: 5"
-                                                min="1"
-                                                autoFocus
-                                                className="form-input"
-                                            />
-                                        </div>
-                                    )}
-
-                                    {/* DOMICILIO */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setPedido((p) => ({ ...p, tipo: 'domicilio', numero_mesa: '', nombre_cliente: '' }))}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                            pedido.tipo === 'domicilio'
-                                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                        }`}
-                                    >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'domicilio' ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                                        }`}>
-                                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                                            </svg>
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className={`text-sm font-semibold ${pedido.tipo === 'domicilio' ? 'text-green-700 dark:text-green-400' : 'text-gray-800 dark:text-gray-200'}`}>Domicilio</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Entrega a dirección</p>
-                                        </div>
-                                        {pedido.tipo === 'domicilio' && (
-                                            <svg className="h-5 w-5 text-green-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <path d="M20 6L9 17l-5-5"></path>
-                                            </svg>
-                                        )}
-                                    </button>
-
-                                    {pedido.tipo === 'domicilio' && (
-                                        <div className="px-1 pt-1">
-                                            <label className="form-label">Dirección de entrega</label>
-                                            <textarea
-                                                value={pedido.direccion}
-                                                onChange={(e) => {
-                                                    setPedido((p) => ({ ...p, direccion: e.target.value }));
-                                                    validarDireccion(e.target.value);
-                                                }}
-                                                placeholder="Ej: calle 23 #11-21 apto 101"
-                                                rows="3"
-                                                autoFocus
-                                                className="form-input resize-none"
-                                            />
-                                            {direccionError && <p className="form-error">{direccionError}</p>}
-                                        </div>
-                                    )}
-
-                                    {/* RECOGER */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setPedido((p) => ({ ...p, tipo: 'recoger', numero_mesa: '', direccion: '' }))}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                                            pedido.tipo === 'recoger'
-                                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                        }`}
-                                    >
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                            pedido.tipo === 'recoger' ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                                        }`}>
-                                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
-                                                <line x1="3" y1="6" x2="21" y2="6"></line>
-                                                <path d="M16 10a4 4 0 01-8 0"></path>
-                                            </svg>
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className={`text-sm font-semibold ${pedido.tipo === 'recoger' ? 'text-orange-600 dark:text-orange-400' : 'text-gray-800 dark:text-gray-200'}`}>Recoger</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">El cliente pasa a buscar</p>
-                                        </div>
-                                        {pedido.tipo === 'recoger' && (
-                                            <svg className="h-5 w-5 text-orange-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <path d="M20 6L9 17l-5-5"></path>
-                                            </svg>
-                                        )}
-                                    </button>
-
-                                    {pedido.tipo === 'recoger' && (
-                                        <div className="px-1 pt-1">
-                                            <label className="form-label">
-                                                Nombre del cliente <span className="text-gray-400 dark:text-gray-500 font-normal">(opcional)</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={pedido.nombre_cliente}
-                                                onChange={(e) => setPedido((p) => ({ ...p, nombre_cliente: e.target.value }))}
-                                                placeholder="Ej: Juan Pérez"
-                                                autoFocus
-                                                className="form-input"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Productos + Carrito */}
-                        <div className="lg:col-span-2">
-                            <ListaProductos
-                                productos={productos}
-                                carrito={carrito}
-                                onIncrementar={incrementar}
-                                onDecrementar={decrementar}
-                            />
-                            <Carrito
-                                carrito={carrito}
-                                adicionesDisponibles={adicionesDisponibles}
-                                onEliminar={eliminarDelCarrito}
-                                onNotaChange={cambiarNota}
-                                onAdicionIncrementar={adicionIncrementar}
-                                onAdicionDecrementar={adicionDecrementar}
-                                tipoPedido={pedido.tipo}
-                                recargoDomicilio={recargoDomicilio}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Acciones */}
-                    <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" onClick={cerrar} className="btn-secondary">
-                            Cancelar
-                        </button>
-                        <button
-                            type="button"
-                            onClick={guardar}
-                            disabled={!puedeCrear() || enviando}
-                            className="btn-primary px-6"
-                        >
-                            {enviando ? 'Guardando...' : (esEdicion ? 'Guardar Cambios' : 'Crear Pedido')}
-                        </button>
-                    </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full h-full max-h-[60vh] flex flex-col p-6 overflow-y-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        {esEdicion ? `Editar Pedido #${pedidoEditar.numero_dia || pedidoEditar.id}` : 'Crear Nuevo Pedido'}
+                    </h2>
+                    <IconButton onClick={cerrar} aria-label="Cerrar" variant="default">
+                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </IconButton>
                 </div>
+
+                <StepWizard
+                    steps={wizardSteps}
+                    onFinish={guardar}
+                    isSubmitting={enviando}
+                    finishLabel={esEdicion ? 'Guardar Cambios' : 'Crear Pedido'}
+                    onClose={cerrar}
+                />
             </div>
         </div>
     );
 }
 
 ModalNuevoPedido.propTypes = ModalNuevoPedidoPropTypes;
+
 

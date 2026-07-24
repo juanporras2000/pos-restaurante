@@ -62,7 +62,7 @@ export default function ListaProductos({ productos, carrito, onIncrementar, onDe
             </div>
 
             {/* Grid de productos */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+            <div className="grid grid-cols-1 gap-3 max-h-40 overflow-y-scroll">
                 {productosFiltrados.map((producto) => {
                     const cantidad = getCantidad(producto.id);
                     const enCarrito = cantidad > 0;

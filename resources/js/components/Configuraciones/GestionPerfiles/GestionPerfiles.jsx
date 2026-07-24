@@ -194,7 +194,7 @@ export const GestionPerfiles = () => {
             <div className='bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm'>
                 <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row items-center justify-between mb-6 sm:mb-2">
-                        <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Perfiles Registrados</h3>
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Perfiles Registrados</h3>
                         <button
                             onClick={() => {
                                 setCreateNombre("");

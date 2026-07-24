@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 import { TIPOS } from './constants';
+import StepWizard from '../shared/StepWizard/StepWizard'; // Ajusta la ruta según la estructura de carpetas
 
 export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
     const [form, setForm] = useState({
@@ -13,15 +15,28 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
     const [errores, setErrores] = useState({});
     const esEdicion = !!gasto?.id;
 
-    const set = (campo, valor) => setForm((f) => ({ ...f, [campo]: valor }));
+    const set = (campo, valor) => {
+        setForm((f) => ({ ...f, [campo]: valor }));
+        if (errores[campo]) {
+            setErrores((e) => ({ ...e, [campo]: null }));
+        }
+    };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const montoNum = parseFloat(form.monto);
+    const esMontoValido = !isNaN(montoNum) && montoNum > 0;
+    const esConceptoValido = form.concepto.trim().length > 0;
+
+    const handleSubmit = async () => {
         setErrores({});
 
-        const montoNum = parseFloat(form.monto);
-        if (!form.concepto.trim()) { setErrores({ concepto: 'El concepto es obligatorio.' }); return; }
-        if (isNaN(montoNum) || montoNum <= 0) { setErrores({ monto: 'Ingresa un monto válido mayor a 0.' }); return; }
+        if (!esConceptoValido) {
+            setErrores({ concepto: 'El concepto es obligatorio.' });
+            return;
+        }
+        if (!esMontoValido) {
+            setErrores({ monto: 'Ingresa un monto válido mayor a 0.' });
+            return;
+        }
 
         setGuardando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -56,24 +71,13 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <svg className="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-                        </svg>
-                        {esEdicion ? 'Editar gasto' : 'Registrar gasto'}
-                    </h3>
-                    <button type="button" onClick={onCerrar} className="text-gray-400 dark:text-gray-500 hover:text-gray-600">
-                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M18 6L6 18M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
+    const wizardSteps = [
+        {
+            title: '¿Cuál fué la Inversión?',
+            subtitle: 'Especifica la razón y categoría del gasto.',
+            isValid: esConceptoValido,
+            content: (
+                <div className="space-y-4">
                     {/* Concepto */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -86,7 +90,7 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
                             placeholder="Ej: Compra de papas, Gasolina moto..."
                             maxLength={255}
                             autoFocus
-                            className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errores.concepto ? 'border-red-400' : 'border-gray-300'}`}
+                            className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white ${errores.concepto ? 'border-red-400' : 'border-gray-300 dark:border-gray-700'}`}
                         />
                         {errores.concepto && <p className="mt-1 text-xs text-red-600">{errores.concepto}</p>}
                     </div>
@@ -101,8 +105,8 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
                                     type="button"
                                     onClick={() => set('tipo', t.value)}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${form.tipo === t.value
-                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 hover:border-gray-300'
+                                            ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300'
                                         }`}
                                 >
                                     {t.label}
@@ -110,8 +114,15 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
                             ))}
                         </div>
                     </div>
-
-                    {/* Monto */}
+                </div>
+            )
+        },
+        {
+            title: 'Monto del Gasto',
+            subtitle: 'Ingresa la cantidad pagada por este gasto.',
+            isValid: esMontoValido,
+            content: (
+                <div className="space-y-3">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Monto <span className="text-red-500">*</span>
@@ -124,14 +135,43 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
                                 step="0.001"
                                 value={form.monto}
                                 onChange={(e) => set('monto', e.target.value)}
-                                placeholder="Ej: 15"
-                                className={`w-full pl-7 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 ${errores.monto ? 'border-red-400' : 'border-gray-300'}`}
+                                placeholder="Ej: 15 (para $15.000)"
+                                className={`w-full pl-7 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white ${errores.monto ? 'border-red-400' : 'border-gray-300 dark:border-gray-700'}`}
                             />
                         </div>
-                        {form.monto !== '' && !isNaN(parseFloat(form.monto)) && (
-                            <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">= ${(parseFloat(form.monto) * 1000).toLocaleString('es-CO')}</p>
+                        {form.monto !== '' && !isNaN(parseFloat(form.monto)) && parseFloat(form.monto) > 0 && (
+                            <p className="mt-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                = ${(parseFloat(form.monto) * 1000).toLocaleString('es-CO')} COP
+                            </p>
                         )}
                         {errores.monto && <p className="mt-1 text-xs text-red-600">{errores.monto}</p>}
+                    </div>
+                </div>
+            )
+        },
+        {
+            title: 'Notas y Confirmación',
+            subtitle: 'Revisa los datos del gasto e incluye notas si es necesario.',
+            content: (
+                <div className="space-y-4">
+                    {/* Resumen */}
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-2 text-sm border border-gray-100 dark:border-gray-700">
+                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>Concepto:</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{form.concepto || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>Tipo:</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200 capitalize">
+                                {TIPOS.find((t) => t.value === form.tipo)?.label || form.tipo}
+                            </span>
+                        </div>
+                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>Monto total:</span>
+                            <span className="font-bold text-red-600 dark:text-red-400 text-base">
+                                ${esMontoValido ? (montoNum * 1000).toLocaleString('es-CO') : '0'} COP
+                            </span>
+                        </div>
                     </div>
 
                     {/* Nota */}
@@ -145,27 +185,40 @@ export default function ModalGasto({ gasto, onGuardar, onCerrar }) {
                             placeholder="Detalles adicionales..."
                             rows={2}
                             maxLength={500}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                            className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                         />
                     </div>
+                </div>
+            )
+        }
+    ];
 
-                    <div className="flex gap-2 pt-1">
-                        <button
-                            type="button"
-                            onClick={onCerrar}
-                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-900"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={guardando}
-                            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
-                        >
-                            {guardando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Registrar gasto'}
-                        </button>
-                    </div>
-                </form>
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg p-6 h-[480px] flex flex-col relative">
+                {/* Header del Modal */}
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <svg className="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                        </svg>
+                        {esEdicion ? 'Editar gasto' : 'Registrar gasto'}
+                    </h3>
+                    <button type="button" onClick={onCerrar} className="text-gray-400 dark:text-gray-500 hover:text-gray-600">
+                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Paso a paso */}
+                <StepWizard
+                    steps={wizardSteps}
+                    onFinish={handleSubmit}
+                    isSubmitting={guardando}
+                    finishLabel={esEdicion ? 'Guardar cambios' : 'Registrar gasto'}
+                    onClose={onCerrar}
+                />
             </div>
         </div>
     );

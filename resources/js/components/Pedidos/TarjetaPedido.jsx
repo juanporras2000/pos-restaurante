@@ -65,7 +65,7 @@ export default function TarjetaPedido({ pedido, onPagoActualizado }) {
                                     {metodoLabel}
                                 </span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-200 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
-                                    Atendido por: {pedido.perfil.nombre}
+                                    Atendido por: {pedido.perfil?.nombre ?? 'Perfil eliminado'}
                                 </span>
                             </div>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">

@@ -3,12 +3,12 @@ import { fmtCOP } from '../../utils/format';
 import IconButton from '../shared/IconButton';
 import { CarritoPropTypes } from '../../propTypes';
 
-export default function Carrito({ 
-    carrito, 
-    adicionesDisponibles = [], 
-    onEliminar, 
-    onNotaChange, 
-    onAdicionIncrementar, 
+export default function Carrito({
+    carrito,
+    adicionesDisponibles = [],
+    onEliminar,
+    onNotaChange,
+    onAdicionIncrementar,
     onAdicionDecrementar,
     tipoPedido,
     recargoDomicilio = 0
@@ -38,9 +38,9 @@ export default function Carrito({
     };
 
     return (
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Resumen del Pedido</h4>
-            <div className="space-y-3 mb-4 max-h-72 overflow-y-auto pr-1">
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
+            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 text-center">Resumen del Pedido</h4>
+            <div className="space-y-3 mb-2 max-h-[210px] overflow-y-auto pr-1">
                 {carrito.map((item) => {
                     const adicionesSubtotal = (item.adiciones ?? []).reduce((s, a) => s + a.subtotal, 0);
                     const totalItem = item.subtotal + adicionesSubtotal;
@@ -51,7 +51,7 @@ export default function Carrito({
                             <div className="flex justify-between items-center">
                                 <span className="flex-1 text-gray-700 dark:text-gray-300 font-medium truncate pr-1">{item.nombre}</span>
                                 <span className="mx-1 text-gray-500 dark:text-gray-400 shrink-0">x{item.cantidad}</span>
-                                <span className="font-medium text-gray-900 dark:text-gray-100 mr-1 shrink-0">{fmtCOP(totalItem)}</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100 mr-8 shrink-0">{fmtCOP(totalItem)}</span>
 
                                 {/* Botón adiciones */}
                                 {adicionesDisponibles.length > 0 && (

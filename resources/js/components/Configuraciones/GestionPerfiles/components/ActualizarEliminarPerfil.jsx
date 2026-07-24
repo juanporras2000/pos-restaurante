@@ -1,6 +1,7 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 import { DANGER } from '../../../../utils/colors';
+import { useMemo } from "react";
 
 
 export const ActualizarEliminarPerfil = ({
@@ -20,7 +21,20 @@ export const ActualizarEliminarPerfil = ({
     setPerfilSeleccionado
 }) => {
 
+    const hayCambios = useMemo(() => {
+        if (!perfilSeleccionado) return false;
+
+        const nombreCambiado = editNombre?.trim() !== (perfilSeleccionado.nombre || '');
+        // Si editPin está vacío o no ha cambiado con respecto al PIN original
+        const pinCambiado = editPin !== '' && editPin !== perfilSeleccionado.pin;
+        const rolCambiado = String(editRol) !== String(perfilSeleccionado.id_rol);
+        const avatarCambiado = editAvatar !== null && editAvatar.id_imagen !== perfilSeleccionado.id_imagen;
+
+        return nombreCambiado || pinCambiado || rolCambiado || avatarCambiado;
+    }, [editNombre, editPin, editRol, editAvatar, perfilSeleccionado]);
+
     const handleGuardar = async () => {
+
         try {
             const data = {
                 nombre: editNombre,
@@ -109,7 +123,7 @@ export const ActualizarEliminarPerfil = ({
             {/* Fila 1: Nombre y PIN */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">
+                    <label className="text-[15px] font-semibold text-gray-400 dark:text-gray-500 block mb-1">
                         Nombre Perfil
                     </label>
                     <input
@@ -122,7 +136,7 @@ export const ActualizarEliminarPerfil = ({
                     />
                 </div>
                 <div>
-                    <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">
+                    <label className="text-[15px] font-semibold text-gray-400 dark:text-gray-500 block mb-1">
                         PIN (4 dígitos)
                     </label>
                     <input
@@ -141,11 +155,12 @@ export const ActualizarEliminarPerfil = ({
             {/* Fila 2: Rol y Cambio de Avatar */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">
+                    <label className="text-[15px] font-semibold text-gray-400 dark:text-gray-500 block mb-1">
                         Rol del Perfil
                     </label>
                     <select
                         value={editRol}
+                        disabled={perfilSeleccionado.nombre_rol == 'Administrador'}
                         onChange={(e) => setEditRol(e.target.value)}
                         className="w-full h-11 px-3.5 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm border border-transparent focus:border-transparent focus:ring-2 focus:ring-green-500 outline-none font-semibold text-gray-700 dark:text-gray-300"
                     >
@@ -175,8 +190,13 @@ export const ActualizarEliminarPerfil = ({
             <div className="mt-5 flex items-center gap-3">
                 <button
                     type="button"
+                    disabled={!hayCambios}
                     onClick={handleGuardar}
-                    className="flex-grow h-12 bg-gray-800 dark:bg-gray-600 text-white rounded-xl text-sm font-bold hover:bg-black dark:hover:bg-gray-500 active:bg-gray-900 dark:active:bg-gray-700 transition-all flex items-center justify-center gap-2 touch-manipulation shadow-sm"
+                    className={`flex-grow h-12 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 touch-manipulation shadow-sm ${
+                        hayCambios
+                            ? 'bg-gray-800 dark:bg-gray-600 text-white hover:bg-black dark:hover:bg-gray-500 active:bg-gray-900 dark:active:bg-gray-700 cursor-pointer'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                    }`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4 flex-shrink-0">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
